@@ -678,27 +678,29 @@
           <p class="text-silver-400">Tell us about your project. We'll respond within 24 hours.</p>
         </div>
         
-        <form class="space-y-6">
+        <form id="contact-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST" class="space-y-6">
           <div class="grid md:grid-cols-2 gap-6">
-            <input type="text" placeholder="Name" class="w-full px-4 py-4 bg-white/5 border border-white/10 rounded-xl focus:border-azure-500 focus:outline-none transition-colors placeholder:text-silver-600">
-            <input type="email" placeholder="Email" class="w-full px-4 py-4 bg-white/5 border border-white/10 rounded-xl focus:border-azure-500 focus:outline-none transition-colors placeholder:text-silver-600">
+            <input type="text" name="name" placeholder="Name" required class="w-full px-4 py-4 bg-white/5 border border-white/10 rounded-xl focus:border-azure-500 focus:outline-none transition-colors placeholder:text-silver-600">
+            <input type="email" name="email" placeholder="Email" required class="w-full px-4 py-4 bg-white/5 border border-white/10 rounded-xl focus:border-azure-500 focus:outline-none transition-colors placeholder:text-silver-600">
           </div>
           
-          <input type="text" placeholder="Company" class="w-full px-4 py-4 bg-white/5 border border-white/10 rounded-xl focus:border-azure-500 focus:outline-none transition-colors placeholder:text-silver-600">
+          <input type="text" name="company" placeholder="Company" class="w-full px-4 py-4 bg-white/5 border border-white/10 rounded-xl focus:border-azure-500 focus:outline-none transition-colors placeholder:text-silver-600">
           
-          <select class="w-full px-4 py-4 bg-white/5 border border-white/10 rounded-xl focus:border-azure-500 focus:outline-none transition-colors text-silver-600">
+          <select name="budget" class="w-full px-4 py-4 bg-white/5 border border-white/10 rounded-xl focus:border-azure-500 focus:outline-none transition-colors text-silver-600">
             <option value="">Budget Range</option>
             <option value="5k-15k">$5,000 - $15,000</option>
             <option value="15k-30k">$15,000 - $30,000</option>
             <option value="30k+">$30,000+</option>
           </select>
           
-          <textarea rows="4" placeholder="Tell us about your project..." class="w-full px-4 py-4 bg-white/5 border border-white/10 rounded-xl focus:border-azure-500 focus:outline-none transition-colors resize-none placeholder:text-silver-600"></textarea>
+          <textarea name="message" rows="4" placeholder="Tell us about your project..." required class="w-full px-4 py-4 bg-white/5 border border-white/10 rounded-xl focus:border-azure-500 focus:outline-none transition-colors resize-none placeholder:text-silver-600"></textarea>
           
-          <button type="submit" class="w-full py-4 bg-azure-500 hover:bg-azure-400 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2">
-            Send Message
-            <i data-lucide="send" class="w-5 h-5"></i>
+          <button type="submit" id="submit-btn" class="w-full py-4 bg-azure-500 hover:bg-azure-400 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2">
+            <span id="btn-text">Send Message</span>
+            <i data-lucide="send" class="w-5 h-5" id="btn-icon"></i>
           </button>
+          
+          <p id="form-status" class="text-center text-sm hidden"></p>
         </form>
       </div>
     </div>
@@ -711,10 +713,10 @@
         <span class="text-2xl font-black">Ventusys</span>
         
         <div class="flex items-center gap-6">
-          <a href="#" class="text-silver-400 hover:text-white transition-colors"><i data-lucide="twitter" class="w-5 h-5"></i></a>
-          <a href="#" class="text-silver-400 hover:text-white transition-colors"><i data-lucide="linkedin" class="w-5 h-5"></i></a>
-          <a href="#" class="text-silver-400 hover:text-white transition-colors"><i data-lucide="instagram" class="w-5 h-5"></i></a>
-          <a href="#" class="text-silver-400 hover:text-white transition-colors"><i data-lucide="dribbble" class="w-5 h-5"></i></a>
+          <a href="https://twitter.com/ventusys" target="_blank" rel="noopener" class="text-silver-400 hover:text-white transition-colors"><i data-lucide="twitter" class="w-5 h-5"></i></a>
+          <a href="https://linkedin.com/company/ventusys" target="_blank" rel="noopener" class="text-silver-400 hover:text-white transition-colors"><i data-lucide="linkedin" class="w-5 h-5"></i></a>
+          <a href="https://instagram.com/ventusys" target="_blank" rel="noopener" class="text-silver-400 hover:text-white transition-colors"><i data-lucide="instagram" class="w-5 h-5"></i></a>
+          <a href="https://dribbble.com/ventusys" target="_blank" rel="noopener" class="text-silver-400 hover:text-white transition-colors"><i data-lucide="dribbble" class="w-5 h-5"></i></a>
         </div>
         
         <p class="text-silver-500 text-sm">© 2026 Ventusys. All rights reserved.</p>
@@ -955,6 +957,60 @@
         }
       });
     });
+    
+    // Contact Form Handling
+    const form = document.getElementById('contact-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const btnText = document.getElementById('btn-text');
+    const btnIcon = document.getElementById('btn-icon');
+    const formStatus = document.getElementById('form-status');
+    
+    if (form) {
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Show loading state
+        submitBtn.disabled = true;
+        btnText.textContent = 'Sending...';
+        btnIcon.style.display = 'none';
+        formStatus.className = 'text-center text-sm text-silver-400';
+        formStatus.textContent = 'Sending your message...';
+        formStatus.classList.remove('hidden');
+        
+        try {
+          const response = await fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+          
+          if (response.ok) {
+            // Success
+            form.reset();
+            btnText.textContent = 'Message Sent!';
+            formStatus.className = 'text-center text-sm text-green-400';
+            formStatus.textContent = 'Thanks! We\'ll get back to you within 24 hours.';
+            
+            setTimeout(() => {
+              btnText.textContent = 'Send Message';
+              btnIcon.style.display = 'inline-block';
+              submitBtn.disabled = false;
+              formStatus.classList.add('hidden');
+            }, 5000);
+          } else {
+            throw new Error('Failed to send');
+          }
+        } catch (error) {
+          // Error
+          btnText.textContent = 'Try Again';
+          formStatus.className = 'text-center text-sm text-red-400';
+          formStatus.textContent = 'Something went wrong. Please try again or email us directly.';
+          submitBtn.disabled = false;
+        }
+      });
+    }
   </script>
 </body>
 </html>
