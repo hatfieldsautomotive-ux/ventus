@@ -604,7 +604,37 @@
         // Set hidden fields
         document.getElementById('design-day-concept').value = selectedConcept;
         document.getElementById('design-day-business').value = selectedBusiness;
+        
+        // Build concept details for your reference
+        const template = conceptTemplates.find(t => t.name === selectedConcept);
+        const conceptDetails = `
+CONCEPT SELECTED: ${selectedConcept}
+BUSINESS TYPE: ${selectedBusiness}
+
+DESIGN DETAILS:
+- Style: ${template?.description || 'N/A'}
+- Features: ${template?.features?.join(', ') || 'N/A'}
+- Color Scheme: ${template?.color || 'N/A'}
+
+MOCKUP ELEMENTS:
+${getMockupDescription(selectedConcept)}
+
+REFERENCE LINKS:
+- Design Explorer: https://ventusys.com/explore.html
+- Selected Concept: ${selectedConcept}
+        `.trim();
+        document.getElementById('design-day-concept-details').value = conceptDetails;
       }
+    }
+    
+    function getMockupDescription(conceptName) {
+      const descriptions = {
+        "Bold & Modern": "Dark theme (#0f172a), gradient accents (orange to red), glassmorphism cards, floating animation, large hero typography",
+        "Clean & Professional": "White background, blue accents, two-column layout, rounded buttons, professional spacing, subtle shadows",
+        "Warm & Inviting": "Amber/orange gradients, rounded elements, circular hero, social proof avatars, friendly typography",
+        "Premium & Elegant": "Dark luxury (#020617), purple/pink accents, radial gradients, thin tracking, elegant hover states"
+      };
+      return descriptions[conceptName] || "Custom design based on selected concept";
     }
 
     function submitConsultation(e) {
@@ -613,6 +643,26 @@
       const formData = new FormData(e.target);
       formData.append('concept', selectedConcept);
       formData.append('business', selectedBusiness);
+      
+      // Add concept details for your reference
+      const template = conceptTemplates.find(t => t.name === selectedConcept);
+      const conceptDetails = `
+CONCEPT SELECTED: ${selectedConcept}
+BUSINESS TYPE: ${selectedBusiness}
+
+DESIGN DETAILS:
+- Style: ${template?.description || 'N/A'}
+- Features: ${template?.features?.join(', ') || 'N/A'}
+- Color Scheme: ${template?.color || 'N/A'}
+
+MOCKUP ELEMENTS:
+${getMockupDescription(selectedConcept)}
+
+REFERENCE LINKS:
+- Design Explorer: https://ventusys.com/explore.html
+- Selected Concept: ${selectedConcept}
+      `.trim();
+      formData.append('concept_details', conceptDetails);
       
       // Submit to Formspree
       fetch('https://formspree.io/f/mlgwyodd', {
@@ -759,6 +809,7 @@
               
               <input type="hidden" name="concept" id="design-day-concept">
               <input type="hidden" name="business" id="design-day-business">
+              <input type="hidden" name="concept_details" id="design-day-concept-details">
               <input type="hidden" name="_subject" value="New Design Day Booking Request">
               
               <button type="submit" class="w-full py-3 bg-purple-500 hover:bg-purple-400 text-white rounded-xl font-semibold transition-colors">
