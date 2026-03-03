@@ -588,18 +588,22 @@
     }
 
     function selectBookingOption(option) {
-      // Hide both options, show selected
+      // Reset
       document.getElementById('option-consultation').classList.remove('ring-2', 'ring-azure-500');
-      document.getElementById('option-design-day').classList.remove('ring-2', 'ring-azure-500');
+      document.getElementById('option-design-day').classList.remove('ring-2', 'ring-purple-500');
       
       if (option === 'consultation') {
         document.getElementById('option-consultation').classList.add('ring-2', 'ring-azure-500');
         document.getElementById('booking-form').classList.remove('hidden');
-        document.getElementById('stripe-checkout').classList.add('hidden');
+        document.getElementById('design-day-flow').classList.add('hidden');
       } else {
-        document.getElementById('option-design-day').classList.add('ring-2', 'ring-azure-500');
+        document.getElementById('option-design-day').classList.add('ring-2', 'ring-purple-500');
         document.getElementById('booking-form').classList.add('hidden');
-        document.getElementById('stripe-checkout').classList.remove('hidden');
+        document.getElementById('design-day-flow').classList.remove('hidden');
+        
+        // Set hidden fields
+        document.getElementById('design-day-concept').value = selectedConcept;
+        document.getElementById('design-day-business').value = selectedBusiness;
       }
     }
 
@@ -632,23 +636,29 @@
       });
     }
 
-    function bookDesignDay() {
-      // Redirect to Stripe Checkout
-      const stripeLink = `https://buy.stripe.com/4gMcN433Tcej0Pe39hffy00?prefilled_email=${encodeURIComponent(document.getElementById('email-design-day').value)}`;
-      window.open(stripeLink, '_blank');
+    function submitDesignDayInfo(e) {
+      e.preventDefault();
       
-      // Show confirmation
-      document.getElementById('booking-content').innerHTML = `
-        <div class="text-center py-8">
-          <div class="w-16 h-16 bg-azure-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg class="w-8 h-8 text-azure-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-            </svg>
-          </div>
-          <h3 class="text-xl font-bold mb-2">Complete Your Booking</h3>
-          <p class="text-silver-400">Stripe checkout opened in a new tab. We'll email you within 2 hours to schedule your Design Day.</p>
-        </div>
-      `;
+      const formData = new FormData(e.target);
+      
+      // Submit to Formspree
+      fetch('https://formspree.io/f/mlgwyodd', {
+        method: 'POST',
+        body: formData,
+        headers: { 'Accept': 'application/json' }
+      }).then(response => {
+        if (response.ok) {
+          // Hide form, show scheduling
+          document.getElementById('design-day-info').classList.add('hidden');
+          document.getElementById('design-day-schedule').classList.remove('hidden');
+        }
+      });
+    }
+
+    function bookDesignDay() {
+      // Legacy function - kept for reference
+      const stripeLink = `https://buy.stripe.com/4gMcN433Tcej0Pe39hffy00`;
+      window.open(stripeLink, '_blank');
     }
   </script>
 
@@ -719,31 +729,75 @@
             </button>
           </form>
 
-          <!-- Design Day Checkout -->
-          <div id="stripe-checkout" class="hidden space-y-4">
-            <div class="p-4 bg-purple-500/10 border border-purple-500/30 rounded-xl">
-              <div class="flex items-center gap-3 mb-2">
-                <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <span class="font-semibold text-purple-400">What's Included</span>
+          <!-- Design Day Flow -->
+          <div id="design-day-flow" class="hidden">
+            <!-- Step 1: Collect Info -->
+            <form id="design-day-info" class="space-y-4" onsubmit="submitDesignDayInfo(event)">
+              <div class="p-4 bg-purple-500/10 border border-purple-500/30 rounded-xl mb-4">
+                <div class="flex items-center gap-3 mb-2">
+                  <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <span class="font-semibold text-purple-400">What's Included ($500)</span>
+                </div>
+                <ul class="text-sm text-silver-400 space-y-1 ml-8">
+                  <li>8 hours of dedicated design work</li>
+                  <li>3 refined concept directions</li>
+                  <li>Interactive prototypes</li>
+                  <li>1 revision round</li>
+                </ul>
               </div>
-              <ul class="text-sm text-silver-400 space-y-1 ml-8">
-                <li>8 hours of dedicated design work</li>
-                <li>3 refined concept directions</li>
-                <li>Interactive prototypes</li>
-                <li>1 revision round</li>
-              </ul>
+
+              <input type="text" name="name" placeholder="Your name" required
+                     class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:border-purple-500 focus:outline-none transition-colors placeholder:text-silver-600">
+              <input type="email" name="email" placeholder="Your email" required
+                     class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:border-purple-500 focus:outline-none transition-colors placeholder:text-silver-600">
+              <input type="tel" name="phone" placeholder="Phone number (optional)"
+                     class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:border-purple-500 focus:outline-none transition-colors placeholder:text-silver-600">
+              <textarea name="notes" rows="2" placeholder="Any specific requirements or timeline..."
+                        class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:border-purple-500 focus:outline-none transition-colors resize-none placeholder:text-silver-600"></textarea>
+              
+              <input type="hidden" name="concept" id="design-day-concept">
+              <input type="hidden" name="business" id="design-day-business">
+              <input type="hidden" name="_subject" value="New Design Day Booking Request">
+              
+              <button type="submit" class="w-full py-3 bg-purple-500 hover:bg-purple-400 text-white rounded-xl font-semibold transition-colors">
+                Continue to Scheduling
+              </button>
+            </form>
+
+            <!-- Step 2: Schedule (hidden initially) -->
+            <div id="design-day-schedule" class="hidden space-y-4">
+              <div class="text-center mb-4">
+                <h3 class="text-lg font-bold mb-2">Schedule Your Design Day</h3>
+                <p class="text-silver-400 text-sm">Pick a date that works for you. We'll confirm within 2 hours.</p>
+              </div>
+              
+              <!-- Calendly Inline Embed -->
+              <div class="bg-white/5 rounded-xl overflow-hidden" style="height: 400px;">
+                <iframe 
+                  src="https://calendly.com/ventus-design/design-day?hide_event_type_details=1&hide_gdpr_banner=1" 
+                  width="100%" 
+                  height="100%" 
+                  frameborder="0"
+                  title="Schedule Design Day"
+                ></iframe>
+              </div>
+
+              <div class="p-4 bg-azure-500/10 border border-azure-500/30 rounded-xl">
+                <p class="text-sm text-silver-300">
+                  <strong class="text-azure-400">Next Steps:</strong><br>
+                  1. Select a time above<br>
+                  2. We'll send a confirmation email with payment link<br>
+                  3. Pay $500 to lock in your date<br>
+                  4. We start designing!
+                </p>
+              </div>
+
+              <button onclick="closeBookingModal()" class="w-full py-3 border border-white/20 hover:border-white/40 text-white rounded-xl font-semibold transition-colors">
+                Done - Check Your Email
+              </button>
             </div>
-
-            <input type="email" id="email-design-day" placeholder="Your email for receipt" required
-                   class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:border-purple-500 focus:outline-none transition-colors placeholder:text-silver-600">
-
-            <button onclick="bookDesignDay()" class="w-full py-3 bg-purple-500 hover:bg-purple-400 text-white rounded-xl font-semibold transition-colors">
-              Pay $500 & Book Design Day
-            </button>
-
-            <p class="text-xs text-silver-500 text-center">Secure payment via Stripe. 100% refundable if not satisfied.</p>
           </div>
 
           <p class="text-center text-silver-500 text-sm mt-6">Questions? Email us at <a href="mailto:hello@ventusys.com" class="text-azure-400 hover:underline">hello@ventusys.com</a></p>
