@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Case Study: Hatfield's Automotive | Ventus</title>  <meta name="description" content="How we increased Hatfield's Automotive appointments by 40% with a premium website featuring online booking and service estimator.">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            silver: { 100: '#f5f5f5', 200: '#e5e5e5', 300: '#d4d4d4', 400: '#a3a3a3', 500: '#737373', 600: '#525252', 700: '#404040', 800: '#262626', 900: '#171717' },
+            azure: { 300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb' }
+          },
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { font-family: 'Inter', system-ui, sans-serif; background: #000; color: #fff; }
+    .gradient-text { background: linear-gradient(135deg, #fff 0%, #60a5fa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .glass-card { background: rgba(255,255,255,0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); }
+  </style>
+</head>
+<body class="antialiased">
+  <!-- Navigation -->
+  <nav class="fixed top-0 left-0 right-0 z-50 px-6 py-4">
+    <div class="max-w-7xl mx-auto">
+      <div class="glass-card rounded-2xl px-6 py-4 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-3">
+          <span class="text-2xl font-black">Ventus</span>
+        </a>
+        <a href="/" class="text-silver-400 hover:text-white transition-colors">← Back to Home</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="pt-32 pb-20">
+    <div class="max-w-5xl mx-auto px-6">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="px-4 py-1.5 bg-blue-500/20 text-blue-300 rounded-full text-sm font-medium">Automotive</span>
+        <span class="text-silver-500">2026</span>
+      </div>
+      
+      <h1 class="text-5xl md:text-7xl font-black mb-6">
+        Hatfield's Automotive
+        <span class="gradient-text block">40% More Appointments</span>
+      </h1>
+      
+      <p class="text-xl text-silver-400 max-w-2xl">
+        A family-owned automotive repair shop that needed a modern web presence 
+        to compete with national chains and attract younger customers.
+      </p>
+    </div>
+  </section>
+
+  <!-- Results Bar -->
+  <section class="py-12 border-y border-white/10">
+    <div class="max-w-5xl mx-auto px-6">
+      <div class="grid md:grid-cols-4 gap-8">
+        <div>
+          <p class="text-4xl font-black text-azure-400">+40%</p>
+          <p class="text-silver-500">More Appointments</p>
+        </div>
+        <div>
+          <p class="text-4xl font-black text-azure-400">2.3x</p>
+          <p class="text-silver-500">Time on Site</p>
+        </div>
+        <div>
+          <p class="text-4xl font-black text-azure-400">65%</p>
+          <p class="text-silver-500">Mobile Traffic</p>
+        </div>
+        <div>
+          <p class="text-4xl font-black text-azure-400">14 Days</p>
+          <p class="text-silver-500">From Kickoff to Launch</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- The Challenge -->
+  <section class="py-24">
+    <div class="max-w-5xl mx-auto px-6">
+      <div class="grid lg:grid-cols-2 gap-16">
+        <div>
+          <span class="text-azure-400 text-sm font-semibold uppercase tracking-[0.2em] mb-4 block">The Challenge</span>
+          
+          <h2 class="text-4xl font-black mb-6">Competing With National Chains</h2>
+          
+          <p class="text-silver-400 text-lg leading-relaxed mb-6">
+            Hatfield's Automotive had been serving the Chicago area for 15 years with 
+            exceptional service, but their outdated website was costing them customers.
+          </p>
+          
+          <ul class="space-y-4 text-silver-400">
+            <li class="flex items-start gap-3">
+              <span class="text-red-400">✗</span>
+              <span>No online booking — customers had to call during business hours</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="text-red-400">✗</span>
+              <span>Not mobile-friendly — 65% of visitors bounced immediately</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="text-red-400">✗</span>
+              <span>No pricing transparency — customers couldn't estimate costs</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="text-red-400">✗</span>
+              <span>Poor Google ranking — invisible to new customers</span>
+            </li>
+          </ul>
+        </div>
+        
+        <div class="glass-card rounded-3xl p-8">
+          <blockquote class="text-2xl font-medium mb-6">
+            "We were losing customers to the big chains because they couldn't book online 
+            or see our prices. Our website looked like it was from 2005."
+          </blockquote>
+          
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center text-blue-400 font-bold">JH</div>
+            <div>
+              <p class="font-semibold">James Hatfield</p>
+              <p class="text-silver-500 text-sm">Owner, Hatfield's Automotive</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- The Solution -->
+  <section class="py-24 bg-gradient-to-b from-azure-950/30 to-transparent">
+    <div class="max-w-5xl mx-auto px-6">
+      <span class="text-azure-400 text-sm font-semibold uppercase tracking-[0.2em] mb-4 block">The Solution</span>
+      
+      <h2 class="text-4xl font-black mb-12">A Complete Digital Transformation</h2>
+      
+      <div class="space-y-12">
+        <!-- Feature 1 -->
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <h3 class="text-2xl font-bold mb-4">Custom Online Booking System</h3>
+            <p class="text-silver-400 leading-relaxed">
+              We built a custom booking flow that lets customers schedule service appointments 
+              24/7. The system integrates with Hatfield's existing calendar and sends automatic 
+              confirmations and reminders, reducing no-shows by 25%.
+            </p>
+          </div>
+          <div class="glass-card rounded-2xl overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=800&q=80" 
+                 alt="Online booking interface" 
+                 class="w-full aspect-video object-cover"
+            >
+          </div>
+        </div>
+        
+        <!-- Feature 2 -->
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+          <div class="order-2">
+            <h3 class="text-2xl font-bold mb-4">Service Cost Estimator</h3>
+            <p class="text-silver-400 leading-relaxed">
+              Transparency builds trust. We created an interactive estimator that lets 
+              customers get instant price ranges for common services. This feature alone 
+              increased qualified leads by 35%.
+            </p>
+          </div>
+          <div class="glass-card rounded-2xl overflow-hidden order-1">
+            <img src="https://images.unsplash.com/photo-1487754180451-c456f719a1fc?w=800&q=80" 
+                 alt="Service estimator tool" 
+                 class="w-full aspect-video object-cover"
+            >
+          </div>
+        </div>
+        
+        <!-- Feature 3 -->
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <h3 class="text-2xl font-bold mb-4">Local SEO Domination</h3>
+            <p class="text-silver-400 leading-relaxed">
+              We optimized every page for local search terms. Hatfield's now ranks #1 
+              for "auto repair Chicago" and appears in the Google Local Pack — driving 
+              60% more organic traffic.
+            </p>
+          </div>
+          <div class="glass-card rounded-2xl overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80" 
+                 alt="Google search results" 
+                 class="w-full aspect-video object-cover"
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tech Stack -->
+  <section class="py-24">
+    <div class="max-w-5xl mx-auto px-6">
+      <span class="text-azure-400 text-sm font-semibold uppercase tracking-[0.2em] mb-4 block">Tech Stack</span>
+      
+      <h2 class="text-4xl font-black mb-8">Built for Speed & Scale</h2>
+      
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="glass-card rounded-2xl p-6">
+          <h3 class="font-bold mb-2">Frontend</h3>
+          <p class="text-silver-400">React + Tailwind CSS for blazing-fast performance</p>
+        </div>
+        
+        <div class="glass-card rounded-2xl p-6">
+          <h3 class="font-bold mb-2">Backend</h3>
+          <p class="text-silver-400">Firebase for real-time booking and authentication</p>
+        </div>
+        
+        <div class="glass-card rounded-2xl p-6">
+          <h3 class="font-bold mb-2">Integrations</h3>
+          <p class="text-silver-400">Google Calendar API, Stripe payments, Twilio SMS</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Results -->
+  <section class="py-24 bg-gradient-to-b from-azure-950/30 to-transparent">
+    <div class="max-w-5xl mx-auto px-6">
+      <span class="text-azure-400 text-sm font-semibold uppercase tracking-[0.2em] mb-4 block">Results</span>
+      
+      <h2 class="text-4xl font-black mb-12">The Impact</h2>
+      
+      <div class="glass-card rounded-3xl p-8 md:p-12">
+        <blockquote class="text-2xl md:text-3xl font-medium mb-8">
+          "The new website paid for itself in the first month. We're now booked 2 weeks 
+          out and had to hire another mechanic. Best investment we've made."
+        </blockquote>
+        
+        <div class="flex items-center gap-4 mb-12">
+          <div class="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center text-blue-400 font-bold">JH</div>
+          <div>
+            <p class="font-semibold">James Hatfield</p>
+            <p class="text-silver-500">Owner, Hatfield's Automotive</p>
+          </div>
+        </div>
+        
+        <div class="grid md:grid-cols-2 gap-8 pt-8 border-t border-white/10">
+          <div>
+            <h3 class="font-bold mb-4">Before</h3>
+            <ul class="space-y-2 text-silver-400">
+              <li>• 12 appointments/week average</li>
+              <li>• 65% mobile bounce rate</li>
+              <li>• Page 3 Google ranking</li>
+              <li>• $0 online revenue</li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 class="font-bold mb-4 text-azure-400">After</h3>
+            <ul class="space-y-2 text-silver-400">
+              <li>• 17+ appointments/week average (+40%)</li>
+              <li>• 28% mobile bounce rate</li>
+              <li>• #1 Google ranking</li>
+              <li>• $3,200/month online deposits</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-24">
+    <div class="max-w-4xl mx-auto px-6 text-center">
+      <h2 class="text-4xl md:text-5xl font-black mb-6">
+        Ready to Transform
+        <span class="gradient-text">Your Business?</span>
+      </h2>
+      
+      <p class="text-xl text-silver-400 mb-8">
+        Let's build a website that turns visitors into customers.
+      </p>
+      
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="https://hatfields-auto-chicago.web.app" target="_blank" rel="noopener" 
+           class="inline-flex items-center justify-center gap-2 border border-white/20 hover:border-white/40 px-8 py-4 rounded-full font-semibold transition-colors">
+          View Live Site
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+        </a>
+        
+        <a href="/#contact" class="inline-flex items-center justify-center gap-2 bg-azure-500 hover:bg-azure-400 text-white px-8 py-4 rounded-full font-semibold transition-colors">
+          Start Your Project
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-12 border-t border-white/10">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+        <span class="text-xl font-black">Ventus</span>
+        <p class="text-silver-500 text-sm">© 2026 Ventus. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

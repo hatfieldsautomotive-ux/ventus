@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Case Study: GhostWatch | Ventus</title>  <meta name="description" content="How we built GhostWatch — a competitor intelligence platform with Stripe billing, automated monitoring, and real-time alerts.">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            silver: { 100: '#f5f5f5', 200: '#e5e5e5', 300: '#d4d4d4', 400: '#a3a3a3', 500: '#737373', 600: '#525252', 700: '#404040', 800: '#262626', 900: '#171717' },
+            azure: { 300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb' },
+            purple: { 400: '#a78bfa', 500: '#8b5cf6', 600: '#7c3aed' }
+          },
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { font-family: 'Inter', system-ui, sans-serif; background: #000; color: #fff; }
+    .gradient-text { background: linear-gradient(135deg, #fff 0%, #a78bfa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .glass-card { background: rgba(255,255,255,0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); }
+  </style>
+</head>
+<body class="antialiased">
+  <!-- Navigation -->
+  <nav class="fixed top-0 left-0 right-0 z-50 px-6 py-4">
+    <div class="max-w-7xl mx-auto">
+      <div class="glass-card rounded-2xl px-6 py-4 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-3">
+          <span class="text-2xl font-black">Ventus</span>
+        </a>
+        <a href="/" class="text-silver-400 hover:text-white transition-colors">← Back to Home</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="pt-32 pb-20">
+    <div class="max-w-5xl mx-auto px-6">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="px-4 py-1.5 bg-purple-500/20 text-purple-300 rounded-full text-sm font-medium">SaaS Platform</span>
+        <span class="text-silver-500">2026</span>
+      </div>
+      
+      <h1 class="text-5xl md:text-7xl font-black mb-6">
+        GhostWatch
+        <span class="gradient-text block">Know Before They Know</span>
+      </h1>
+      
+      <p class="text-xl text-silver-400 max-w-2xl">
+        A competitor intelligence platform that monitors pricing changes, new features, 
+        and strategy shifts — delivering real-time alerts to keep businesses ahead.
+      </p>
+    </div>
+  </section>
+
+  <!-- Results Bar -->
+  <section class="py-12 border-y border-white/10">
+    <div class="max-w-5xl mx-auto px-6">
+      <div class="grid md:grid-cols-4 gap-8">
+        <div>
+          <p class="text-4xl font-black text-purple-400">4</p>
+          <p class="text-silver-500">Pricing Tiers</p>
+        </div>
+        <div>
+          <p class="text-4xl font-black text-purple-400">Stripe</p>
+          <p class="text-silver-500">Live Billing</p>
+        </div>
+        <div>
+          <p class="text-4xl font-black text-purple-400">100%</p>
+          <p class="text-silver-500">Custom Code</p>
+        </div>
+        <div>
+          <p class="text-4xl font-black text-purple-400">18 Days</p>
+          <p class="text-silver-500">MVP to Launch</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- The Challenge -->
+  <section class="py-24">
+    <div class="max-w-5xl mx-auto px-6">
+      <div class="grid lg:grid-cols-2 gap-16">
+        <div>
+          <span class="text-purple-400 text-sm font-semibold uppercase tracking-[0.2em] mb-4 block">The Challenge</span>
+          
+          <h2 class="text-4xl font-black mb-6">Building a Subscription SaaS from Scratch</h2>
+          
+          <p class="text-silver-400 text-lg leading-relaxed mb-6">
+            The founder needed a complete competitor monitoring platform with zero technical 
+            debt. Every feature had to work flawlessly from day one.
+          </p>
+          
+          <ul class="space-y-4 text-silver-400">
+            <li class="flex items-start gap-3">
+              <span class="text-red-400">✗</span>
+              <span>Complex multi-tier billing with Stripe</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="text-red-400">✗</span>
+              <span>Real-time competitor scanning engine</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="text-red-400">✗</span>
+              <span>User authentication and persistent sessions</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="text-red-400">✗</span>
+              <span>Professional landing page that converts</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="text-red-400">✗</span>
+              <span>Automated email reports and alerts</span>
+            </li>
+          </ul>
+        </div>
+        
+        <div class="glass-card rounded-3xl p-8">
+          <blockquote class="text-2xl font-medium mb-6">
+            "I needed a platform that looked like it came from a team of 20, built by a 
+            team of... well, Ventus. They delivered beyond expectations."
+          </blockquote>
+          
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center text-purple-400 font-bold">PB</div>
+            <div>
+              <p class="font-semibold">Paul Brown</p>
+              <p class="text-silver-500 text-sm">Founder, GhostWatch</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- The Solution -->
+  <section class="py-24 bg-gradient-to-b from-purple-950/20 to-transparent">
+    <div class="max-w-5xl mx-auto px-6">
+      <span class="text-purple-400 text-sm font-semibold uppercase tracking-[0.2em] mb-4 block">The Solution</span>
+      
+      <h2 class="text-4xl font-black mb-12">Full-Stack SaaS Platform</h2>
+      
+      <div class="space-y-12">
+        <!-- Feature 1 -->
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <h3 class="text-2xl font-bold mb-4">Stripe Billing Integration</h3>
+            <p class="text-silver-400 leading-relaxed">
+              Complete subscription management with 4 pricing tiers (Specter, Phantom, 
+              Poltergeist, Apparition). Monthly/yearly billing toggle, proration handling, 
+              and automatic invoice generation. Customers can upgrade/downgrade seamlessly.
+            </p>
+          </div>
+          <div class="glass-card rounded-2xl overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80" 
+                 alt="Stripe billing dashboard" 
+                 class="w-full aspect-video object-cover"
+            >
+          </div>
+        </div>
+        
+        <!-- Feature 2 -->
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+          <div class="order-2">
+            <h3 class="text-2xl font-bold mb-4">Competitor Monitoring Engine</h3>
+            <p class="text-silver-400 leading-relaxed">
+              Automated scanning system that detects pricing changes, new features, messaging 
+              shifts, and team updates. Real-time alerts via email when competitors make moves. 
+              Persistent storage on Render Disk ensures data survives deployments.
+            </p>
+          </div>
+          <div class="glass-card rounded-2xl overflow-hidden order-1">
+            <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80" 
+                 alt="Monitoring dashboard" 
+                 class="w-full aspect-video object-cover"
+            >
+          </div>
+        </div>
+        
+        <!-- Feature 3 -->
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <h3 class="text-2xl font-bold mb-4">Storybrand Landing Page</h3>
+            <p class="text-silver-400 leading-relaxed">
+              High-converting landing page using Donald Miller's Storybrand framework. 
+              Clear villain (competitor blindsides), hero (the founder), guide (GhostWatch), 
+              and plan (3-step process). Purple/indigo glassmorphism aesthetic with floating 
+              navigation and gradient accents.
+            </p>
+          </div>
+          <div class="glass-card rounded-2xl overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=800&q=80" 
+                 alt="GhostWatch landing page" 
+                 class="w-full aspect-video object-cover"
+            >
+          </div>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+          <div class="order-2">
+            <h3 class="text-2xl font-bold mb-4">Authentication & Security</h3>
+            <p class="text-silver-400 leading-relaxed">
+              Secure user authentication with bcrypt password hashing, session persistence 
+              across deployments, and protected routes. Users can manage multiple competitors, 
+              view scan history, and download detailed reports.
+            </p>
+          </div>
+          <div class="glass-card rounded-2xl overflow-hidden order-1">
+            <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&q=80" 
+                 alt="Secure login" 
+                 class="w-full aspect-video object-cover"
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tech Stack -->
+  <section class="py-24">
+    <div class="max-w-5xl mx-auto px-6">
+      <span class="text-purple-400 text-sm font-semibold uppercase tracking-[0.2em] mb-4 block">Tech Stack</span>
+      
+      <h2 class="text-4xl font-black mb-8">Built for Scale</h2>
+      
+      <div class="grid md:grid-cols-4 gap-6">
+        <div class="glass-card rounded-2xl p-6">
+          <h3 class="font-bold mb-2">Frontend</h3>
+          <p class="text-silver-400">Vanilla JS + Tailwind for zero dependencies</p>
+        </div>
+        
+        <div class="glass-card rounded-2xl p-6">
+          <h3 class="font-bold mb-2">Backend</h3>
+          <p class="text-silver-400">Node.js + Express REST API</p>
+        </div>
+        
+        <div class="glass-card rounded-2xl p-6">
+          <h3 class="font-bold mb-2">Database</h3>
+          <p class="text-silver-400">SQLite with Render Disk persistence</p>
+        </div>
+        
+        <div class="glass-card rounded-2xl p-6">
+          <h3 class="font-bold mb-2">Billing</h3>
+          <p class="text-silver-400">Stripe Checkout + Customer Portal</p>
+        </div>
+      </div>
+      
+      <div class="grid md:grid-cols-3 gap-6 mt-6">
+        <div class="glass-card rounded-2xl p-6">
+          <h3 class="font-bold mb-2">Hosting</h3>
+          <p class="text-silver-400">Render Web Services with custom domain</p>
+        </div>
+        
+        <div class="glass-card rounded-2xl p-6">
+          <h3 class="font-bold mb-2">Monitoring</h3>
+          <p class="text-silver-400">Cheerio + Puppeteer for site scraping</p>
+        </div>
+        
+        <div class="glass-card rounded-2xl p-6">
+          <h3 class="font-bold mb-2">Email</h3>
+          <p class="text-silver-400">Nodemailer with HTML templates</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Architecture -->
+  <section class="py-24 bg-gradient-to-b from-purple-950/20 to-transparent">
+    <div class="max-w-5xl mx-auto px-6">
+      <span class="text-purple-400 text-sm font-semibold uppercase tracking-[0.2em] mb-4 block">Architecture</span>
+      
+      <h2 class="text-4xl font-black mb-8">How It Works</h2>
+      
+      <div class="glass-card rounded-3xl p-8">
+        <div class="grid md:grid-cols-4 gap-8">
+          <div class="text-center">
+            <div class="w-16 h-16 bg-purple-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <span class="text-2xl font-black text-purple-400">1</span>
+            </div>
+            <h3 class="font-bold mb-2">Add Competitor</h3>
+            <p class="text-silver-400 text-sm">User enters competitor URL</p>
+          </div>
+          
+          <div class="text-center">
+            <div class="w-16 h-16 bg-purple-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <span class="text-2xl font-black text-purple-400">2</span>
+            </div>
+            <h3 class="font-bold mb-2">Scan</h3>
+            <p class="text-silver-400 text-sm">Engine crawls and extracts data</p>
+          </div>
+          
+          <div class="text-center">
+            <div class="w-16 h-16 bg-purple-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <span class="text-2xl font-black text-purple-400">3</span>
+            </div>
+            <h3 class="font-bold mb-2">Analyze</h3>
+            <p class="text-silver-400 text-sm">AI compares with previous scans</p>
+          </div>
+          
+          <div class="text-center">
+            <div class="w-16 h-16 bg-purple-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <span class="text-2xl font-black text-purple-400">4</span>
+            </div>
+            <h3 class="font-bold mb-2">Alert</h3>
+            <p class="text-silver-400 text-sm">Email sent if changes detected</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Results -->
+  <section class="py-24">
+    <div class="max-w-5xl mx-auto px-6">
+      <span class="text-purple-400 text-sm font-semibold uppercase tracking-[0.2em] mb-4 block">Results</span>
+      
+      <h2 class="text-4xl font-black mb-12">Live and Selling</h2>
+      
+      <div class="glass-card rounded-3xl p-8 md:p-12">
+        <blockquote class="text-2xl md:text-3xl font-medium mb-8">
+          "Ventus didn't just build me a product — they built me a business. From zero to 
+          first paying customer in under 3 weeks."
+        </blockquote>
+        
+        <div class="flex items-center gap-4 mb-12">
+          <div class="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center text-purple-400 font-bold">PB</div>
+          <div>
+            <p class="font-semibold">Paul Brown</p>
+            <p class="text-silver-500">Founder, GhostWatch</p>
+          </div>
+        </div>
+        
+        <div class="grid md:grid-cols-3 gap-8 pt-8 border-t border-white/10">
+          <div>
+            <p class="text-3xl font-black text-purple-400 mb-2">Live</p>
+            <p class="text-silver-400">Deployed at ghostwatch.co with custom domain</p>
+          </div>
+          
+          <div>
+            <p class="text-3xl font-black text-purple-400 mb-2">4 Tiers</p>
+            <p class="text-silver-400">From free (Specter) to enterprise (Apparition)</p>
+          </div>
+          
+          <div>
+            <p class="text-3xl font-black text-purple-400 mb-2">$0→$199</p>
+            <p class="text-silver-400">Pricing range with yearly discount option</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-24">
+    <div class="max-w-4xl mx-auto px-6 text-center">
+      <h2 class="text-4xl md:text-5xl font-black mb-6">
+        Ready to Build Your
+        <span class="gradient-text">SaaS?</span>
+      </h2>
+      
+      <p class="text-xl text-silver-400 mb-8">
+        From idea to revenue in weeks, not months.
+      </p>
+      
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="https://ghostwatch.co" target="_blank" rel="noopener" 
+           class="inline-flex items-center justify-center gap-2 border border-white/20 hover:border-white/40 px-8 py-4 rounded-full font-semibold transition-colors">
+          View Live Site
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+        </a>
+        
+        <a href="/#contact" class="inline-flex items-center justify-center gap-2 bg-azure-500 hover:bg-azure-400 text-white px-8 py-4 rounded-full font-semibold transition-colors">
+          Start Your Project
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-12 border-t border-white/10">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+        <span class="text-xl font-black">Ventus</span>
+        <p class="text-silver-500 text-sm">© 2026 Ventus. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
