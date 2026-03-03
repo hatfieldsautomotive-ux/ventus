@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design Explorer | Ventus</title>
+  <meta name="description" content="Explore AI-generated design concepts for your project. See possibilities, then build reality.">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            silver: { 100: '#f5f5f5', 200: '#e5e5e5', 300: '#d4d4d4', 400: '#a3a3a3', 500: '#737373', 600: '#525252', 700: '#404040', 800: '#262626', 900: '#171717' },
+            azure: { 300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb' }
+          },
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { font-family: 'Inter', system-ui, sans-serif; background: #000; color: #fff; }
+    .gradient-text { background: linear-gradient(135deg, #fff 0%, #60a5fa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .glass-card { background: rgba(255,255,255,0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); }
+    
+    @keyframes conceptFloat {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(1deg); }
+    }
+    
+    .concept-card {
+      animation: conceptFloat 6s ease-in-out infinite;
+      transition: all 0.5s ease;
+    }
+    
+    .concept-card:nth-child(2) { animation-delay: -1.5s; }
+    .concept-card:nth-child(3) { animation-delay: -3s; }
+    .concept-card:nth-child(4) { animation-delay: -4.5s; }
+    
+    .concept-card:hover {
+      transform: scale(1.03);
+      z-index: 10;
+    }
+    
+    .generating {
+      background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.6s ease forwards;
+      opacity: 0;
+    }
+    
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body class="antialiased min-h-screen">
+  <!-- Navigation -->
+  <nav class="fixed top-0 left-0 right-0 z-50 px-6 py-4">
+    <div class="max-w-7xl mx-auto">
+      <div class="glass-card rounded-2xl px-6 py-4 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-3">
+          <span class="text-2xl font-black">Ventus</span>
+        </a>
+        <div class="flex items-center gap-6">
+          <a href="/" class="text-silver-400 hover:text-white transition-colors">Home</a>
+          <a href="/#contact" class="bg-azure-500 hover:bg-azure-400 text-white px-5 py-2 rounded-full font-medium transition-colors">Contact</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Input Section -->
+  <section class="pt-32 pb-12">
+    <div class="max-w-4xl mx-auto px-6 text-center">
+      <div class="inline-flex items-center gap-2 bg-azure-500/10 border border-azure-500/30 rounded-full px-4 py-2 mb-6">
+        <span class="w-2 h-2 bg-azure-400 rounded-full animate-pulse"></span>
+        <span class="text-azure-400 text-sm font-medium">AI-Powered Concept Exploration</span>
+      </div>
+      
+      <h1 class="text-5xl md:text-7xl font-black mb-6">
+        See Your Website
+        <span class="gradient-text block">Before It Exists</span>
+      </h1>
+      
+      <p class="text-xl text-silver-400 mb-8 max-w-2xl mx-auto">
+        Enter your business type and get 4 distinct design directions in seconds. 
+        Explore possibilities. Then let's build the real thing.
+      </p>
+      
+      <div class="max-w-2xl mx-auto">
+        <div class="glass-card rounded-2xl p-2 flex gap-2">
+          <input 
+            type="text" 
+            id="business-input" 
+            placeholder="e.g., Electrician in Chicago, Yoga Studio, SaaS Dashboard..."
+            class="flex-1 px-6 py-4 bg-transparent border-none outline-none text-lg placeholder:text-silver-600"
+          >
+          <button 
+            onclick="generateConcepts()"
+            id="generate-btn"
+            class="bg-azure-500 hover:bg-azure-400 text-white px-8 py-4 rounded-xl font-semibold transition-colors flex items-center gap-2"
+          >
+            <span>Generate</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </button>
+        </div>
+        
+        <p class="text-silver-500 text-sm mt-4">
+          Try: "Coffee shop", "Law firm", "Fitness app", "Real estate"
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Loading State (Hidden by default) -->
+  <section id="loading-section" class="py-24 hidden">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-12">
+        <h2 class="text-2xl font-bold mb-2">Exploring Design Possibilities</h2>
+        <p class="text-silver-400">Analyzing your business type and generating concepts...</p>
+      </div>
+      
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="generating rounded-2xl aspect-[4/3]"></div>
+        <div class="generating rounded-2xl aspect-[4/3]" style="animation-delay: 0.2s"></div>
+        <div class="generating rounded-2xl aspect-[4/3]" style="animation-delay: 0.4s"></div>
+        <div class="generating rounded-2xl aspect-[4/3]" style="animation-delay: 0.6s"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Results Section (Hidden by default) -->
+  <section id="results-section" class="py-12 hidden">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-black mb-4">
+          Concepts for <span id="business-name" class="gradient-text"></span>
+        </h2>
+        <p class="text-silver-400">4 distinct directions. Each can be refined into a working website.</p>
+      </div>
+      
+      <div class="grid md:grid-cols-2 gap-8" id="concepts-grid">
+        <!-- Concepts will be injected here -->
+      </div>
+      
+      <div class="mt-16 text-center">
+        <div class="glass-card rounded-2xl p-8 max-w-2xl mx-auto">
+          <h3 class="text-2xl font-bold mb-4">Like What You See?</h3>
+          <p class="text-silver-400 mb-6">
+            These are starting points. We'll refine your favorite into a fully functional 
+            website with real features, integrations, and conversions.
+          </p>
+          <a href="/#contact" class="inline-flex items-center gap-2 bg-azure-500 hover:bg-azure-400 text-white px-8 py-4 rounded-full font-semibold transition-colors">
+            Start Your Project
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="py-24 border-t border-white/10">
+    <div class="max-w-5xl mx-auto px-6">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-black mb-4">From Concept to Reality</h2>
+        <p class="text-silver-400">What makes Ventus different from AI-only tools</p>
+      </div>
+      
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="glass-card rounded-2xl p-8 text-center">
+          <div class="w-16 h-16 bg-azure-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <span class="text-2xl font-bold text-azure-400">1</span>
+          </div>
+          <h3 class="text-xl font-bold mb-3">AI Exploration</h3>
+          <p class="text-silver-400">Generate 50+ design directions in minutes. Explore styles you never considered.</p>
+        </div>
+        
+        <div class="glass-card rounded-2xl p-8 text-center">
+          <div class="w-16 h-16 bg-azure-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <span class="text-2xl font-bold text-azure-400">2</span>
+          </div>
+          <h3 class="text-xl font-bold mb-3">Human Curation</h3>
+          <p class="text-silver-400">We refine the best concepts. Typography, spacing, color theory—adjusted by experts.</p>
+        </div>
+        
+        <div class="glass-card rounded-2xl p-8 text-center">
+          <div class="w-16 h-16 bg-azure-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <span class="text-2xl font-bold text-azure-400">3</span>
+          </div>
+          <h3 class="text-xl font-bold mb-3">Functional Build</h3>
+          <p class="text-silver-400">Real code. Real features. Booking systems, payments, SEO—actually works.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-12 border-t border-white/10">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+        <span class="text-xl font-black">Ventus</span>
+        <p class="text-silver-500 text-sm">© 2026 Ventus. AI concepts, human craft.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Design concept templates that adapt to business type
+    const conceptTemplates = [
+      {
+        name: "Bold & Modern",
+        description: "High contrast, impactful typography, dynamic layouts",
+        color: "from-orange-500 to-red-600",
+        accent: "orange",
+        features: ["Dark mode default", "Large hero text", "Geometric accents"],
+        bestFor: ["tech", "saas", "startup", "app"]
+      },
+      {
+        name: "Clean & Professional",
+        description: "Trust-focused, spacious, authoritative design",
+        color: "from-blue-500 to-cyan-400",
+        accent: "blue",
+        features: ["White space emphasis", "Subtle gradients", "Professional imagery"],
+        bestFor: ["law", "finance", "consulting", "medical", "professional"]
+      },
+      {
+        name: "Warm & Inviting",
+        description: "Friendly, approachable, community-focused",
+        color: "from-amber-400 to-orange-500",
+        accent: "amber",
+        features: ["Warm color palette", "Rounded elements", "Human photography"],
+        bestFor: ["cafe", "restaurant", "yoga", "fitness", "local", "shop"]
+      },
+      {
+        name: "Premium & Elegant",
+        description: "Sophisticated, refined, luxury positioning",
+        color: "from-purple-500 to-pink-500",
+        accent: "purple",
+        features: ["Subtle animations", "Elegant typography", "Premium feel"],
+        bestFor: ["real estate", "luxury", "wedding", "high-end", "premium"]
+      }
+    ];
+
+    function generateConcepts() {
+      const input = document.getElementById('business-input').value.trim();
+      if (!input) {
+        alert('Please enter your business type');
+        return;
+      }
+      
+      // Show loading
+      document.getElementById('loading-section').classList.remove('hidden');
+      document.getElementById('results-section').classList.add('hidden');
+      
+      // Simulate AI processing
+      setTimeout(() => {
+        document.getElementById('loading-section').classList.add('hidden');
+        document.getElementById('results-section').classList.remove('hidden');
+        document.getElementById('business-name').textContent = input;
+        
+        renderConcepts(input);
+        
+        // Scroll to results
+        document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
+      }, 2000);
+    }
+
+    function renderConcepts(businessType) {
+      const grid = document.getElementById('concepts-grid');
+      grid.innerHTML = '';
+      
+      const lowerInput = businessType.toLowerCase();
+      
+      conceptTemplates.forEach((template, index) => {
+        // Determine match score (for demo, just rotate through)
+        const isMatch = template.bestFor.some(keyword => lowerInput.includes(keyword));
+        const matchBadge = isMatch ? 
+          `<span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-medium">Best Match</span>` : '';
+        
+        const card = document.createElement('div');
+        card.className = 'concept-card glass-card rounded-3xl overflow-hidden fade-in';
+        card.style.animationDelay = `${index * 0.1}s`;
+        
+        card.innerHTML = `
+          <div class="aspect-[4/3] bg-gradient-to-br ${template.color} relative overflow-hidden">
+            <div class="absolute inset-0 bg-black/20"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <div class="text-center text-white p-8">
+                <div class="text-6xl mb-4 opacity-80">${getIconForConcept(template.accent)}</div>
+                <div class="text-2xl font-bold">${businessType}</div>
+              </div>
+            </div>
+            <div class="absolute top-4 left-4 flex gap-2">
+              ${matchBadge}
+              <span class="px-3 py-1 bg-black/30 backdrop-blur rounded-full text-xs">${template.name}</span>
+            </div>
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-bold mb-2">${template.name}</h3>
+            <p class="text-silver-400 text-sm mb-4">${template.description}</p>
+            <div class="flex flex-wrap gap-2 mb-6">
+              ${template.features.map(f => `<span class="px-2 py-1 bg-white/5 rounded text-xs text-silver-400">${f}</span>`).join('')}
+            </div>
+            <a href="/#contact?concept=${encodeURIComponent(template.name)}&business=${encodeURIComponent(businessType)}" 
+               class="block w-full py-3 bg-azure-500 hover:bg-azure-400 text-white text-center rounded-xl font-medium transition-colors">
+              Build This Design
+            </a>
+          </div>
+        `;
+        
+        grid.appendChild(card);
+      });
+    }
+
+    function getIconForConcept(accent) {
+      const icons = {
+        orange: '⚡',
+        blue: '◆',
+        amber: '●',
+        purple: '✦'
+      };
+      return icons[accent] || '◆';
+    }
+
+    // Allow Enter key to submit
+    document.getElementById('business-input').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        generateConcepts();
+      }
+    });
+  </script>
+</body>
+</html>
