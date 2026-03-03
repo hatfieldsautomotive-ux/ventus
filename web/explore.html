@@ -311,7 +311,7 @@
             <div class="flex flex-wrap gap-2 mb-6">
               ${template.features.map(f => `<span class="px-2 py-1 bg-white/5 rounded text-xs text-silver-400">${f}</span>`).join('')}
             </div>
-            <a href="/#contact?concept=${encodeURIComponent(template.name)}&business=${encodeURIComponent(businessType)}" 
+            <a href="javascript:void(0)" onclick="openBookingModal('${template.name}', '${businessType}')" 
                class="block w-full py-3 bg-azure-500 hover:bg-azure-400 text-white text-center rounded-xl font-medium transition-colors">
               Build This Design
             </a>
@@ -333,30 +333,63 @@
     }
 
     function generateMockup(template, businessType) {
-      const shortName = businessType.split(' ').slice(0, 3).join(' ');
+      const shortName = businessType.split(' ').slice(0, 2).join(' ');
+      const tagline = getTaglineForType(businessType);
       
       if (template.name === "Bold & Modern") {
         return `
-          <div class="w-full h-full bg-slate-900 p-4 flex flex-col">
-            <div class="flex items-center justify-between mb-6">
-              <div class="w-8 h-8 bg-gradient-to-br ${template.color} rounded-lg"></div>
-              <div class="flex gap-2">
-                <div class="w-12 h-3 bg-white/20 rounded"></div>
-                <div class="w-12 h-3 bg-white/20 rounded"></div>
-                <div class="w-12 h-3 bg-white/20 rounded"></div>
+          <div class="w-full h-full bg-slate-950 p-5 flex flex-col relative overflow-hidden">
+            <!-- Abstract background shapes -->
+            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${template.color} opacity-20 blur-3xl rounded-full"></div>
+            <div class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr ${template.color} opacity-10 blur-2xl rounded-full"></div>
+            
+            <!-- Nav -->
+            <div class="flex items-center justify-between mb-8 relative z-10">
+              <div class="w-10 h-10 bg-gradient-to-br ${template.color} rounded-xl shadow-lg shadow-orange-500/20"></div>
+              <div class="flex gap-3">
+                <div class="w-14 h-2.5 bg-white/10 rounded-full"></div>
+                <div class="w-14 h-2.5 bg-white/10 rounded-full"></div>
+                <div class="w-20 h-2.5 bg-white rounded-full"></div>
               </div>
             </div>
-            <div class="flex-1 flex flex-col justify-center items-center text-center">
-              <div class="text-3xl font-black text-white mb-2 leading-tight">${shortName}</div>
-              <div class="text-sm text-white/60 mb-4">Redefining Excellence</div>
-              <div class="px-6 py-2 bg-gradient-to-r ${template.color} rounded-full text-sm font-semibold text-white">
-                Get Started
+            
+            <!-- Hero -->
+            <div class="flex-1 flex flex-col justify-center relative z-10">
+              <div class="inline-flex self-start px-3 py-1 bg-white/5 rounded-full text-[10px] text-white/60 mb-3 border border-white/10">
+                ${tagline}
+              </div>
+              
+              <div class="text-2xl font-black text-white mb-3 leading-tight tracking-tight">
+                ${shortName}<br/>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r ${template.color}">Redefined</span>
+              </div>
+              
+              <div class="text-xs text-white/40 mb-4 max-w-[180px]">
+                Experience the future of service excellence
+              </div>
+              
+              <div class="flex items-center gap-3">
+                <div class="px-5 py-2 bg-gradient-to-r ${template.color} rounded-full text-xs font-bold text-white shadow-lg shadow-orange-500/25">
+                  Get Started
+                </div>
+                <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                  <span class="text-white/60 text-xs">▶</span>
+                </div>
               </div>
             </div>
-            <div class="flex gap-2 mt-4">
-              <div class="flex-1 h-16 bg-white/5 rounded-lg"></div>
-              <div class="flex-1 h-16 bg-white/5 rounded-lg"></div>
-              <div class="flex-1 h-16 bg-white/5 rounded-lg"></div>
+            
+            <!-- Feature cards -->
+            <div class="flex gap-2 mt-4 relative z-10">
+              <div class="flex-1 p-3 bg-white/5 rounded-xl border border-white/5">
+                <div class="w-6 h-6 rounded-lg bg-gradient-to-br ${template.color} mb-2"></div>
+                <div class="h-2 w-12 bg-white/20 rounded mb-1"></div>
+                <div class="h-1.5 w-8 bg-white/10 rounded"></div>
+              </div>
+              <div class="flex-1 p-3 bg-white/5 rounded-xl border border-white/5">
+                <div class="w-6 h-6 rounded-lg bg-white/10 mb-2"></div>
+                <div class="h-2 w-12 bg-white/20 rounded mb-1"></div>
+                <div class="h-1.5 w-8 bg-white/10 rounded"></div>
+              </div>
             </div>
           </div>
         `;
@@ -364,24 +397,51 @@
       
       if (template.name === "Clean & Professional") {
         return `
-          <div class="w-full h-full bg-white p-4 flex flex-col">
+          <div class="w-full h-full bg-gradient-to-br from-slate-50 to-white p-5 flex flex-col">
+            <!-- Nav -->
             <div class="flex items-center justify-between mb-6">
-              <div class="text-lg font-bold text-slate-800">${shortName}</div>
-              <div class="flex gap-3">
-                <div class="w-10 h-3 bg-slate-200 rounded"></div>
-                <div class="w-10 h-3 bg-slate-200 rounded"></div>
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br ${template.color}"></div>
+                <span class="text-sm font-bold text-slate-800">${shortName}</span>
               </div>
-            </div>
-            <div class="flex-1 flex">
-              <div class="flex-1 pr-4">
-                <div class="text-2xl font-bold text-slate-800 mb-2">Trusted ${shortName}</div>
-                <div class="text-xs text-slate-500 mb-3">Professional service you can count on</div>
-                <div class="flex gap-2">
-                  <div class="px-4 py-1.5 bg-blue-500 rounded text-xs text-white">Contact</div>
-                  <div class="px-4 py-1.5 border border-slate-300 rounded text-xs text-slate-600">Learn More</div>
+              <div class="flex gap-4">
+                <div class="w-12 h-2 bg-slate-200 rounded-full"></div>
+                <div class="w-12 h-2 bg-slate-200 rounded-full"></div>
+                <div class="px-3 py-1 bg-slate-800 rounded-full">
+                  <div class="w-10 h-2 bg-white rounded-full"></div>
                 </div>
               </div>
-              <div class="w-24 bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg"></div>
+            </div>
+            
+            <!-- Content -->
+            <div class="flex-1 flex">
+              <div class="flex-1 pr-4 flex flex-col justify-center">
+                <div class="text-[10px] text-blue-600 font-semibold tracking-wider uppercase mb-2">${tagline}</div>
+                
+                <div class="text-xl font-bold text-slate-800 mb-2 leading-tight">
+                  Trusted ${shortName}<br/>You Can Count On
+                </div>
+                
+                <div class="text-xs text-slate-500 mb-4 leading-relaxed">
+                  Professional excellence delivered with integrity
+                </div>
+                
+                <div class="flex items-center gap-3">
+                  <div class="px-4 py-2 bg-blue-600 rounded-lg text-xs font-semibold text-white shadow-md">
+                    Schedule Consultation
+                  </div>
+                  <div class="text-xs text-slate-400">Learn more →</div>
+                </div>
+              </div>
+              
+              <div class="w-28 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl relative overflow-hidden">
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <div class="w-16 h-16 rounded-full bg-gradient-to-br ${template.color} opacity-20"></div>
+                </div>
+                <div class="absolute bottom-3 left-3 right-3">
+                  <div class="h-8 bg-white/80 backdrop-blur rounded-lg shadow-sm"></div>
+                </div>
+              </div>
             </div>
           </div>
         `;
@@ -389,19 +449,44 @@
       
       if (template.name === "Warm & Inviting") {
         return `
-          <div class="w-full h-full bg-gradient-to-br from-amber-50 to-orange-50 p-4 flex flex-col">
-            <div class="flex items-center justify-between mb-4">
+          <div class="w-full h-full bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 p-5 flex flex-col relative overflow-hidden">
+            <!-- Decorative elements -->
+            <div class="absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br from-orange-200/50 to-amber-200/50 rounded-full blur-3xl"></div>
+            
+            <!-- Nav -->
+            <div class="flex items-center justify-between mb-6 relative z-10">
               <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-full bg-gradient-to-br ${template.color}"></div>
-                <div class="text-sm font-semibold text-amber-900">${shortName}</div>
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br ${template.color} shadow-lg shadow-orange-500/20"></div>
+                <span class="text-sm font-bold text-amber-900">${shortName}</span>
               </div>
             </div>
-            <div class="flex-1 flex flex-col items-center text-center">
-              <div class="w-20 h-20 rounded-full bg-gradient-to-br ${template.color} mb-3 opacity-80"></div>
-              <div class="text-xl font-bold text-amber-900 mb-1">Welcome to ${shortName}</div>
-              <div class="text-xs text-amber-700/70 mb-3">Where quality meets care</div>
-              <div class="px-5 py-2 bg-gradient-to-r ${template.color} rounded-full text-sm font-semibold text-white shadow-lg">
-                Book Now
+            
+            <!-- Hero -->
+            <div class="flex-1 flex flex-col items-center text-center relative z-10">
+              <div class="w-20 h-20 rounded-full bg-gradient-to-br ${template.color} mb-4 shadow-xl shadow-orange-500/30 flex items-center justify-center">
+                <span class="text-white text-2xl">✦</span>
+              </div>
+              
+              <div class="text-lg font-bold text-amber-900 mb-1">Welcome to</div>
+              <div class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r ${template.color} mb-2">
+                ${shortName}
+              </div>
+              
+              <div class="text-xs text-amber-700/70 mb-4 max-w-[200px]">
+                ${tagline}
+              </div>
+              
+              <div class="px-6 py-2.5 bg-gradient-to-r ${template.color} rounded-full text-sm font-bold text-white shadow-lg shadow-orange-500/30">
+                Book Your Visit
+              </div>
+              
+              <div class="flex items-center gap-4 mt-4">
+                <div class="flex -space-x-2">
+                  <div class="w-6 h-6 rounded-full bg-amber-200 border-2 border-white"></div>
+                  <div class="w-6 h-6 rounded-full bg-orange-200 border-2 border-white"></div>
+                  <div class="w-6 h-6 rounded-full bg-rose-200 border-2 border-white"></div>
+                </div>
+                <div class="text-[10px] text-amber-700/60">500+ happy customers</div>
               </div>
             </div>
           </div>
@@ -410,32 +495,70 @@
       
       // Premium & Elegant
       return `
-        <div class="w-full h-full bg-slate-950 p-4 flex flex-col">
-          <div class="flex items-center justify-between mb-6">
-            <div class="text-sm tracking-widest text-slate-400 uppercase">${shortName}</div>
-            <div class="flex gap-4">
-              <div class="w-8 h-3 bg-slate-800 rounded"></div>
-              <div class="w-8 h-3 bg-slate-800 rounded"></div>
-            </div>
-          </div>
+        <div class="w-full h-full bg-slate-950 p-5 flex flex-col relative overflow-hidden">
+          <!-- Luxurious background -->
+          <div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-900/20 via-transparent to-transparent"></div>
+          <div class="absolute bottom-0 right-0 w-48 h-48 bg-gradient-to-tl from-purple-600/10 to-transparent rounded-full blur-3xl"></div>
           
-          <div class="flex-1 flex flex-col justify-center">
-            <div class="text-xs text-purple-400 tracking-widest uppercase mb-2">Premium Service</div>
-            <div class="text-2xl font-light text-white mb-2">${shortName}</div>
-            <div class="text-xs text-slate-500 mb-4">Elevated experiences for discerning clients</div>
+          <!-- Nav -->
+          <div class="flex items-center justify-between mb-6 relative z-10">
+            <div class="text-xs tracking-[0.3em] text-slate-400 uppercase font-light">${shortName}</div>
             
-            <div class="flex items-center gap-3">
-              <div class="px-4 py-1.5 border border-purple-500/50 rounded text-xs text-purple-300">Discover</div>
-              <div class="text-xs text-slate-600">→</div>
+            <div class="flex gap-6">
+              <div class="w-10 h-2 bg-slate-800 rounded-full"></div>
+              <div class="w-10 h-2 bg-slate-800 rounded-full"></div>
             </div>
           </div>
           
-          <div class="flex gap-2">
-            <div class="flex-1 h-12 bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded"></div>
-            <div class="flex-1 h-12 bg-slate-900 rounded"></div>
+          <!-- Hero -->
+          <div class="flex-1 flex flex-col justify-center relative z-10">
+            <div class="text-[10px] text-purple-400 tracking-[0.2em] uppercase mb-3 font-medium">${tagline}</div>
+            
+            <div class="text-2xl font-light text-white mb-2 leading-tight">
+              ${shortName}
+            </div>
+            
+            <div class="text-xs text-slate-500 mb-6 font-light">
+              Elevated experiences for discerning clients
+            </div>
+            
+            <div class="flex items-center gap-4">
+              <div class="group flex items-center gap-2 cursor-pointer">
+                <div class="px-4 py-2 border border-purple-500/30 rounded-lg text-xs text-purple-300 group-hover:bg-purple-500/10 transition-colors">
+                  Discover
+                </div>
+                <span class="text-purple-500/50 text-xs">→</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Preview cards -->
+          <div class="flex gap-2 mt-4 relative z-10">
+            <div class="flex-1 h-14 bg-gradient-to-r from-purple-900/20 to-pink-900/20 rounded-lg border border-white/5">
+              <div class="h-full flex items-center justify-center">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br ${template.color} opacity-50"></div>
+              </div>
+            </div>
+            
+            <div class="flex-1 h-14 bg-slate-900 rounded-lg border border-white/5">
+              <div class="h-full flex items-center justify-center">
+                <div class="w-8 h-8 rounded-full bg-slate-800"></div>
+              </div>
+            </div>
           </div>
         </div>
       `;
+    }
+
+    function getTaglineForType(businessType) {
+      const lower = businessType.toLowerCase();
+      if (lower.includes('real estate') || lower.includes('property')) return 'Luxury Living';
+      if (lower.includes('electrician') || lower.includes('repair')) return 'Expert Service';
+      if (lower.includes('yoga') || lower.includes('fitness')) return 'Wellness';
+      if (lower.includes('cafe') || lower.includes('coffee')) return 'Artisan';
+      if (lower.includes('law') || lower.includes('legal')) return 'Professional';
+      if (lower.includes('medical') || lower.includes('health')) return 'Care';
+      return 'Excellence';
     }
 
     // Allow Enter key to submit
@@ -444,6 +567,189 @@
         generateConcepts();
       }
     });
+
+    // Booking Modal Functions
+    let selectedConcept = '';
+    let selectedBusiness = '';
+
+    function openBookingModal(concept, business) {
+      selectedConcept = concept;
+      selectedBusiness = business;
+      
+      document.getElementById('modal-concept').textContent = concept;
+      document.getElementById('modal-business').textContent = business;
+      document.getElementById('booking-modal').classList.remove('hidden');
+      document.getElementById('booking-modal').classList.add('flex');
+    }
+
+    function closeBookingModal() {
+      document.getElementById('booking-modal').classList.add('hidden');
+      document.getElementById('booking-modal').classList.remove('flex');
+    }
+
+    function selectBookingOption(option) {
+      // Hide both options, show selected
+      document.getElementById('option-consultation').classList.remove('ring-2', 'ring-azure-500');
+      document.getElementById('option-design-day').classList.remove('ring-2', 'ring-azure-500');
+      
+      if (option === 'consultation') {
+        document.getElementById('option-consultation').classList.add('ring-2', 'ring-azure-500');
+        document.getElementById('booking-form').classList.remove('hidden');
+        document.getElementById('stripe-checkout').classList.add('hidden');
+      } else {
+        document.getElementById('option-design-day').classList.add('ring-2', 'ring-azure-500');
+        document.getElementById('booking-form').classList.add('hidden');
+        document.getElementById('stripe-checkout').classList.remove('hidden');
+      }
+    }
+
+    function submitConsultation(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(e.target);
+      formData.append('concept', selectedConcept);
+      formData.append('business', selectedBusiness);
+      
+      // Submit to Formspree
+      fetch('https://formspree.io/f/mlgwyodd', {
+        method: 'POST',
+        body: formData,
+        headers: { 'Accept': 'application/json' }
+      }).then(response => {
+        if (response.ok) {
+          document.getElementById('booking-content').innerHTML = `
+            <div class="text-center py-8">
+              <div class="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              <h3 class="text-xl font-bold mb-2">Consultation Requested!</h3>
+              <p class="text-silver-400">We'll reach out within 24 hours to schedule your call.</p>
+            </div>
+          `;
+        }
+      });
+    }
+
+    function bookDesignDay() {
+      // Redirect to Stripe Checkout
+      const stripeLink = `https://buy.stripe.com/test_8wMg0N6Jm1xkbKw8wx?prefilled_email=${encodeURIComponent(document.getElementById('email-design-day').value)}`;
+      window.open(stripeLink, '_blank');
+      
+      // Show confirmation
+      document.getElementById('booking-content').innerHTML = `
+        <div class="text-center py-8">
+          <div class="w-16 h-16 bg-azure-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-azure-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold mb-2">Complete Your Booking</h3>
+          <p class="text-silver-400">Stripe checkout opened in a new tab. We'll email you within 2 hours to schedule your Design Day.</p>
+        </div>
+      `;
+    }
   </script>
+
+  <!-- Booking Modal -->
+  <div id="booking-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div class="glass-card rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+      <div class="p-8">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 class="text-2xl font-bold">Ready to Build?</h2>
+            <p class="text-silver-400 text-sm"><span id="modal-concept" class="text-azure-400"></span> for <span id="modal-business"></span></p>
+          </div>
+          <button onclick="closeBookingModal()" class="text-silver-400 hover:text-white transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+
+        <div id="booking-content">
+          <!-- Option Selection -->
+          <div class="grid md:grid-cols-2 gap-4 mb-8">
+            <div id="option-consultation" onclick="selectBookingOption('consultation')" 
+                 class="cursor-pointer p-5 rounded-2xl border border-white/10 hover:border-azure-500/50 transition-all">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 bg-azure-500/20 rounded-xl flex items-center justify-center">
+                  <svg class="w-5 h-5 text-azure-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <div class="font-semibold">Free Consultation</div>
+                  <div class="text-green-400 text-sm">$0</div>
+                </div>
+              </div>
+              <p class="text-sm text-silver-400">30-min call to discuss your project and get a quote.</p>
+            </div>
+
+            <div id="option-design-day" onclick="selectBookingOption('design-day')" 
+                 class="cursor-pointer p-5 rounded-2xl border border-white/10 hover:border-azure-500/50 transition-all">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
+                  <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <div class="font-semibold">Design Day</div>
+                  <div class="text-purple-400 text-sm">$500</div>
+                </div>
+              </div>
+              <p class="text-sm text-silver-400">One day of focused design work. Get 3 refined concepts.</p>
+            </div>
+          </div>
+
+          <!-- Consultation Form -->
+          <form id="booking-form" class="hidden space-y-4" onsubmit="submitConsultation(event)">
+            <input type="text" name="name" placeholder="Your name" required
+                   class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:border-azure-500 focus:outline-none transition-colors placeholder:text-silver-600">
+            <input type="email" name="email" placeholder="Your email" required
+                   class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:border-azure-500 focus:outline-none transition-colors placeholder:text-silver-600">
+            <textarea name="message" rows="3" placeholder="Tell us more about your project..." required
+                      class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:border-azure-500 focus:outline-none transition-colors resize-none placeholder:text-silver-600"></textarea>
+            
+            <input type="hidden" name="_subject" value="New Consultation Request from Design Explorer">
+            
+            <button type="submit" class="w-full py-3 bg-azure-500 hover:bg-azure-400 text-white rounded-xl font-semibold transition-colors">
+              Request Consultation
+            </button>
+          </form>
+
+          <!-- Design Day Checkout -->
+          <div id="stripe-checkout" class="hidden space-y-4">
+            <div class="p-4 bg-purple-500/10 border border-purple-500/30 rounded-xl">
+              <div class="flex items-center gap-3 mb-2">
+                <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span class="font-semibold text-purple-400">What's Included</span>
+              </div>
+              <ul class="text-sm text-silver-400 space-y-1 ml-8">
+                <li>8 hours of dedicated design work</li>
+                <li>3 refined concept directions</li>
+                <li>Interactive prototypes</li>
+                <li>1 revision round</li>
+              </ul>
+            </div>
+
+            <input type="email" id="email-design-day" placeholder="Your email for receipt" required
+                   class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:border-purple-500 focus:outline-none transition-colors placeholder:text-silver-600">
+
+            <button onclick="bookDesignDay()" class="w-full py-3 bg-purple-500 hover:bg-purple-400 text-white rounded-xl font-semibold transition-colors">
+              Pay $500 & Book Design Day
+            </button>
+
+            <p class="text-xs text-silver-500 text-center">Secure payment via Stripe. 100% refundable if not satisfied.</p>
+          </div>
+
+          <p class="text-center text-silver-500 text-sm mt-6">Questions? Email us at <a href="mailto:hello@ventusys.com" class="text-azure-400 hover:underline">hello@ventusys.com</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
