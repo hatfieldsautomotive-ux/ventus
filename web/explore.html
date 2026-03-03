@@ -601,9 +601,11 @@
         document.getElementById('booking-form').classList.add('hidden');
         document.getElementById('design-day-flow').classList.remove('hidden');
         
-        // Set hidden fields
+        // Set hidden fields and display
         document.getElementById('design-day-concept').value = selectedConcept;
         document.getElementById('design-day-business').value = selectedBusiness;
+        document.getElementById('selected-concept-display').textContent = selectedConcept;
+        document.getElementById('selected-business-display').textContent = selectedBusiness;
         
         // Build concept details for your reference
         const template = conceptTemplates.find(t => t.name === selectedConcept);
@@ -690,6 +692,8 @@ REFERENCE LINKS:
       e.preventDefault();
       
       const formData = new FormData(e.target);
+      const email = formData.get('email');
+      const name = formData.get('name');
       
       // Submit to Formspree
       fetch('https://formspree.io/f/mlgwyodd', {
@@ -698,10 +702,66 @@ REFERENCE LINKS:
         headers: { 'Accept': 'application/json' }
       }).then(response => {
         if (response.ok) {
-          // Hide form, show scheduling
+          // Hide form, show success with payment + calendar
           document.getElementById('design-day-info').classList.add('hidden');
-          document.getElementById('design-day-schedule').classList.remove('hidden');
+          document.getElementById('design-day-success').classList.remove('hidden');
+          
+          // Update Stripe link with prefilled email
+          document.getElementById('stripe-pay-link').href = 
+            `https://buy.stripe.com/4gMcN433Tcej0Pe39hffy00?prefilled_email=${encodeURIComponent(email)}`;
+          
+          // Send auto-reply with payment link (using a simple email approach)
+          sendAutoReply(name, email);
         }
+      });
+    }
+
+    function sendAutoReply(name, email) {
+      // Create a second Formspree submission for the auto-reply
+      // This sends an email to the customer with payment link
+      const autoReplyData = new FormData();
+      autoReplyData.append('name', name);
+      autoReplyData.append('email', email);
+      autoReplyData.append('_replyto', email);
+      autoReplyData.append('_subject', `Your Design Day Request - Next Steps`);
+      autoReplyData.append('message', `
+Hi ${name},
+
+Thanks for booking a Design Day with Ventus! We're excited to work with you.
+
+YOUR PROJECT:
+• Concept: ${selectedConcept}
+• Business: ${selectedBusiness}
+
+COMPLETE YOUR BOOKING:
+👉 https://buy.stripe.com/4gMcN433Tcej0Pe39hffy00
+
+WHAT'S INCLUDED ($500):
+• 8 hours of dedicated design work
+• 3 refined concept directions based on your selected style
+• Interactive prototypes
+• 1 revision round
+
+SCHEDULE YOUR DATE:
+👉 https://calendar.app.google/pN5fk4kG9t5EFCAF6
+
+NEXT STEPS:
+1. Complete payment via Stripe
+2. Schedule your Design Day on Google Calendar
+3. You'll receive onboarding details within 2 hours of payment
+
+QUESTIONS?
+Reply to this email or contact us at hello@ventusys.com
+
+— Paul
+Ventus
+      `.trim());
+      
+      // Send the auto-reply (this emails the customer)
+      fetch('https://formspree.io/f/mlgwyodd', {
+        method: 'POST',
+        body: autoReplyData,
+        headers: { 'Accept': 'application/json' }
       });
     }
 
@@ -798,63 +858,98 @@ REFERENCE LINKS:
                 </ul>
               </div>
 
-              <input type="text" name="name" placeholder="Your name" required
-                     class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:border-purple-500 focus:outline-none transition-colors placeholder:text-silver-600">
-              <input type="email" name="email" placeholder="Your email" required
-                     class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:border-purple-500 focus:outline-none transition-colors placeholder:text-silver-600">
+              <div class="grid md:grid-cols-2 gap-4">
+                <input type="text" name="name" placeholder="Your name" required
+                       class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:border-purple-500 focus:outline-none transition-colors placeholder:text-silver-600">
+                <input type="email" name="email" placeholder="Your email" required
+                       class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:border-purple-500 focus:outline-none transition-colors placeholder:text-silver-600">
+              </div>
+              
               <input type="tel" name="phone" placeholder="Phone number (optional)"
                      class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:border-purple-500 focus:outline-none transition-colors placeholder:text-silver-600">
-              <textarea name="notes" rows="2" placeholder="Any specific requirements or timeline..."
+              
+              <div class="p-4 bg-white/5 border border-white/10 rounded-xl">
+                <p class="text-sm text-silver-400 mb-2"><strong class="text-white">Selected Design:</strong> <span id="selected-concept-display"></span></p>
+                <p class="text-sm text-silver-400"><strong class="text-white">Business Type:</strong> <span id="selected-business-display"></span></p>
+              </div>
+              
+              <textarea name="notes" rows="3" placeholder="Tell us about your timeline, specific requirements, or any questions..."
                         class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:border-purple-500 focus:outline-none transition-colors resize-none placeholder:text-silver-600"></textarea>
               
               <input type="hidden" name="concept" id="design-day-concept">
               <input type="hidden" name="business" id="design-day-business">
               <input type="hidden" name="concept_details" id="design-day-concept-details">
-              <input type="hidden" name="_subject" value="New Design Day Booking Request">
+              <input type="hidden" name="_subject" value="New Design Day Booking - Action Required">
+              <input type="hidden" name="_autoresponse" value="Thanks for booking a Design Day! We've received your request and sent a confirmation email with next steps.">
               
-              <button type="submit" class="w-full py-3 bg-purple-500 hover:bg-purple-400 text-white rounded-xl font-semibold transition-colors">
-                Continue to Scheduling
+              <button type="submit" class="w-full py-4 bg-purple-500 hover:bg-purple-400 text-white rounded-xl font-semibold transition-colors flex items-center justify-center gap-2">
+                <span>Continue to Schedule & Payment</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
               </button>
+              
+              <p class="text-xs text-silver-500 text-center">You'll be redirected to Google Calendar to pick your date after submitting.</p>
             </form>
 
-            <!-- Step 2: Schedule (hidden initially) -->
-            <div id="design-day-schedule" class="hidden space-y-4">
-              <div class="text-center mb-4">
-                <h3 class="text-lg font-bold mb-2">Schedule Your Design Day</h3>
-                <p class="text-silver-400 text-sm">Pick a date that works for you. We'll confirm within 2 hours.</p>
+            <!-- Success State (hidden initially) -->
+            <div id="design-day-success" class="hidden space-y-6">
+              <div class="text-center">
+                <div class="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Info Received!</h3>                
+                <p class="text-silver-400">Check your email for the payment link, then schedule your date below.</p>
               </div>
               
-              <!-- Calendly Inline Embed -->
-              <div class="bg-white/5 rounded-xl overflow-hidden" style="height: 500px;">
-                <iframe 
-                  src="https://calendar.app.google/pN5fk4kG9t5EFCAF6" 
-                  width="100%" 
-                  height="100%" 
-                  frameborder="0"
-                  style="border:0"
-                  title="Schedule Design Day"
-                ></iframe>
+              <!-- Payment Link Box -->
+              <div class="p-6 bg-purple-500/10 border border-purple-500/30 rounded-2xl">
+                <div class="flex items-center justify-between mb-4">
+                  <div>
+                    <p class="text-sm text-silver-400">Secure your Design Day</p>
+                    <p class="text-2xl font-bold text-white">$500.00</p>
+                  </div>
+                  <div class="text-right">
+                    <p class="text-xs text-silver-500">via Stripe</p>
+                  </div>
+                </div>
+                
+                <a id="stripe-pay-link" href="https://buy.stripe.com/4gMcN433Tcej0Pe39hffy00" target="_blank" 
+                   class="block w-full py-3 bg-purple-500 hover:bg-purple-400 text-white text-center rounded-xl font-semibold transition-colors">
+                  Pay Now to Lock In Your Date
+                </a>
+                
+                <p class="text-xs text-silver-500 text-center mt-3">100% refundable. Invoice will be sent to your email.</p>
               </div>
-
-              <div class="p-4 bg-azure-500/10 border border-azure-500/30 rounded-xl">
-                <p class="text-sm text-silver-300">
-                  <strong class="text-azure-400">Next Steps:</strong><br>
-                  1. Schedule your date above<br>
-                  2. You'll receive a confirmation email with payment link within 5 minutes<br>
-                  3. Pay $500 to lock in your date<br>
-                  4. We start designing!
+              
+              <!-- Calendar Link Box -->
+              <div class="p-6 bg-azure-500/10 border border-azure-500/30 rounded-2xl">
+                <div class="flex items-center gap-3 mb-4">
+                  <div class="w-10 h-10 bg-azure-500/20 rounded-xl flex items-center justify-center">
+                    <svg class="w-5 h-5 text-azure-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="font-semibold">Step 2: Schedule Your Date</p>
+                    <p class="text-sm text-silver-400">Pick a day that works for you</p>
+                  </div>
+                </div>
+                
+                <a href="https://calendar.app.google/pN5fk4kG9t5EFCAF6" target="_blank"
+                   class="block w-full py-3 border border-azure-500/50 hover:bg-azure-500/10 text-azure-400 text-center rounded-xl font-semibold transition-colors">
+                  Open Google Calendar
+                </a>
+              </div>
+              
+              <div class="p-4 bg-white/5 rounded-xl">
+                <p class="text-sm text-silver-400">
+                  <strong class="text-white">What's Next:</strong><br>
+                  1. Complete payment above<br>
+                  2. Schedule your date<br>
+                  3. You'll receive onboarding details within 2 hours
                 </p>
               </div>
-
-              <div class="p-4 bg-purple-500/10 border border-purple-500/30 rounded-xl">
-                <p class="text-xs text-silver-400">
-                  <strong class="text-purple-400">Automated Process:</strong> After scheduling, our system will automatically email you the Stripe payment link. Once paid, you'll receive onboarding details and a project kickoff form.
-                </p>
-              </div>
-
-              <button onclick="closeBookingModal()" class="w-full py-3 border border-white/20 hover:border-white/40 text-white rounded-xl font-semibold transition-colors">
-                Done - Check Your Email
-              </button>
             </div>
           </div>
 
