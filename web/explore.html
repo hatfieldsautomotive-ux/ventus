@@ -691,9 +691,42 @@ REFERENCE LINKS:
     function submitDesignDayInfo(e) {
       e.preventDefault();
       
-      const formData = new FormData(e.target);
+      const form = e.target;
+      const formData = new FormData(form);
       const email = formData.get('email');
       const name = formData.get('name');
+      
+      // Make sure concept details are included
+      const template = conceptTemplates.find(t => t.name === selectedConcept);
+      const conceptDetails = `
+CONCEPT SELECTED: ${selectedConcept}
+BUSINESS TYPE: ${selectedBusiness}
+
+DESIGN DETAILS:
+- Style: ${template?.description || 'N/A'}
+- Features: ${template?.features?.join(', ') || 'N/A'}
+- Color Scheme: ${template?.color || 'N/A'}
+
+MOCKUP ELEMENTS:
+${getMockupDescription(selectedConcept)}
+
+CUSTOMER INFO:
+- Name: ${name}
+- Email: ${email}
+- Phone: ${formData.get('phone') || 'Not provided'}
+- Notes: ${formData.get('notes') || 'None'}
+
+STRIPE PAYMENT LINK:
+https://buy.stripe.com/4gMcN433Tcej0Pe39hffy00?prefilled_email=${encodeURIComponent(email)}
+
+GOOGLE CALENDAR:
+https://calendar.app.google/pN5fk4kG9t5EFCAF6
+
+ACTION REQUIRED: Send follow-up email with payment link
+      `.trim();
+      
+      formData.set('concept_details', conceptDetails);
+      formData.append('_subject', `New Design Day Booking - ${selectedConcept} for ${selectedBusiness}`);
       
       // Submit to Formspree
       fetch('https://formspree.io/f/mlgwyodd', {
@@ -710,58 +743,13 @@ REFERENCE LINKS:
           document.getElementById('stripe-pay-link').href = 
             `https://buy.stripe.com/4gMcN433Tcej0Pe39hffy00?prefilled_email=${encodeURIComponent(email)}`;
           
-          // Send auto-reply with payment link (using a simple email approach)
-          sendAutoReply(name, email);
+          // Note: Auto-reply requires Formspree Gold ($10/mo) or manual follow-up
+          // For now, show success message that email was sent to you
+          console.log('Design Day booking submitted:', { name, email, concept: selectedConcept, business: selectedBusiness });
         }
-      });
-    }
-
-    function sendAutoReply(name, email) {
-      // Create a second Formspree submission for the auto-reply
-      // This sends an email to the customer with payment link
-      const autoReplyData = new FormData();
-      autoReplyData.append('name', name);
-      autoReplyData.append('email', email);
-      autoReplyData.append('_replyto', email);
-      autoReplyData.append('_subject', `Your Design Day Request - Next Steps`);
-      autoReplyData.append('message', `
-Hi ${name},
-
-Thanks for booking a Design Day with Ventus! We're excited to work with you.
-
-YOUR PROJECT:
-• Concept: ${selectedConcept}
-• Business: ${selectedBusiness}
-
-COMPLETE YOUR BOOKING:
-👉 https://buy.stripe.com/4gMcN433Tcej0Pe39hffy00
-
-WHAT'S INCLUDED ($500):
-• 8 hours of dedicated design work
-• 3 refined concept directions based on your selected style
-• Interactive prototypes
-• 1 revision round
-
-SCHEDULE YOUR DATE:
-👉 https://calendar.app.google/pN5fk4kG9t5EFCAF6
-
-NEXT STEPS:
-1. Complete payment via Stripe
-2. Schedule your Design Day on Google Calendar
-3. You'll receive onboarding details within 2 hours of payment
-
-QUESTIONS?
-Reply to this email or contact us at hello@ventusys.com
-
-— Paul
-Ventus
-      `.trim());
-      
-      // Send the auto-reply (this emails the customer)
-      fetch('https://formspree.io/f/mlgwyodd', {
-        method: 'POST',
-        body: autoReplyData,
-        headers: { 'Accept': 'application/json' }
+      }).catch(err => {
+        console.error('Form submission error:', err);
+        alert('There was an error submitting your request. Please try again or email us directly at hello@ventusys.com');
       });
     }
 
