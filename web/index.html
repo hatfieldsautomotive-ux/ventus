@@ -3,71 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ventus — Digital Experiences That Convert</title>
-  <meta name="description" content="Award-winning web design studio crafting premium digital experiences for ambitious brands.">
+  <title>Ventus — Your Website Is Your Best Salesperson</title>
+  <meta name="description" content="Premium web design studio crafting digital experiences that convert visitors into customers.">
   
-  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Lenis Smooth Scroll -->
   <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
-  
-  <!-- GSAP + ScrollTrigger -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-  
-  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            silver: { 100: '#f5f5f5', 200: '#e5e5e5', 300: '#d4d4d4', 400: '#a3a3a3', 500: '#737373', 600: '#525252', 700: '#404040', 800: '#262626', 900: '#171717' },
-            azure: { 300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb' }
-          },
-          fontFamily: {
-            sans: ['Inter', 'system-ui', 'sans-serif'],
-          }
-        }
-      }
-    }
-  </script>
   
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    html, body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background: #000;
-      color: #fff;
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { 
+      font-family: 'Inter', system-ui, sans-serif; 
+      background: #000; 
+      color: #fff; 
       overflow-x: hidden;
     }
     
-    html.lenis, html.lenis body {
-      height: auto;
+    .gradient-text { 
+      background: linear-gradient(135deg, #fff 0%, #60a5fa 100%); 
+      -webkit-background-clip: text; 
+      -webkit-text-fill-color: transparent; 
     }
     
-    .lenis.lenis-smooth {
-      scroll-behavior: auto !important;
-    }
-    
-    .lenis.lenis-smooth [data-lenis-prevent] {
-      overscroll-behavior: contain;
-    }
-    
-    .lenis.lenis-stopped {
-      overflow: hidden;
-    }
-    
-    /* Preloader */
+    /* Cinematic Preloader */
     #preloader {
       position: fixed;
       inset: 0;
@@ -76,683 +38,474 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-direction: column;
-    }
-    
-    .preloader-logo {
-      font-size: 80px;
-      font-weight: 900;
-      background: linear-gradient(135deg, #fff 0%, #60a5fa 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      overflow: hidden;
     }
     
     .preloader-text {
-      margin-top: 24px;
       font-size: 14px;
-      color: #737373;
-      letter-spacing: 0.2em;
+      letter-spacing: 0.5em;
       text-transform: uppercase;
+      color: #525252;
     }
     
-    .preloader-bar {
-      width: 200px;
-      height: 2px;
-      background: rgba(255,255,255,0.1);
-      margin-top: 32px;
+    /* Architectural Typography */
+    .hero-line {
       overflow: hidden;
-      border-radius: 2px;
     }
     
-    .preloader-progress {
-      height: 100%;
-      background: linear-gradient(90deg, #60a5fa, #93c5fd);
-      width: 0%;
-      transition: width 0.3s ease;
-    }
-    
-    /* Custom Cursor */
-    .cursor {
-      position: fixed;
-      width: 20px;
-      height: 20px;
-      border: 2px solid rgba(96, 165, 250, 0.8);
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 9998;
-      transform: translate(-50%, -50%);
-      transition: width 0.3s, height 0.3s, border-color 0.3s, background 0.3s;
-      mix-blend-mode: difference;
-    }
-    
-    .cursor.hover {
-      width: 60px;
-      height: 60px;
-      border-color: #60a5fa;
-      background: rgba(96, 165, 250, 0.1);
-    }
-    
-    .cursor.view {
-      width: 100px;
-      height: 100px;
-      background: #60a5fa;
-      border-color: #60a5fa;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .cursor.view::after {
-      content: 'View';
-      color: #000;
-      font-weight: 600;
-      font-size: 14px;
-    }
-    
-    .cursor-dot {
-      position: fixed;
-      width: 6px;
-      height: 6px;
-      background: #60a5fa;
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 9999;
-      transform: translate(-50%, -50%);
-    }
-    
-    /* Text Split Animation */
-    .split-line {
-      overflow: hidden;
-      display: block;
-    }
-    
-    .split-line-inner {
+    .hero-line-inner {
       display: block;
       transform: translateY(100%);
     }
     
-    /* Gradient Text */
-    .gradient-text {
-      background: linear-gradient(135deg, #fff 0%, #60a5fa 50%, #93c5fd 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    
-    /* Glass Effect */
-    .glass {
-      background: rgba(255, 255, 255, 0.03);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255,255,255,0.06);
+    /* Cinematic Spacing */
+    section {
+      position: relative;
     }
     
     /* Magnetic Button */
-    .magnetic {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+    .magnetic-btn {
+      position: relative;
       transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
     
-    /* 3D Card Tilt */
-    .tilt-card {
-      transform-style: preserve-3d;
-      transform: perspective(1000px);
+    .magnetic-btn:hover {
+      transform: scale(1.02);
     }
     
-    .tilt-card-inner {
-      transition: transform 0.1s ease-out;
-      transform-style: preserve-3d;
+    /* Project Card Hover */
+    .project-card {
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     }
     
-    /* Image reveal */
-    .img-reveal {
-      overflow: hidden;
+    .project-card:hover {
+      transform: translateY(-8px);
     }
     
-    .img-reveal img {
-      transform: scale(1.2);
-      transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    .project-card:hover .project-image {
+      transform: scale(1.05);
     }
     
-    .img-reveal.revealed img {
-      transform: scale(1);
+    .project-image {
+      transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     }
     
-    /* Link underline animation */
-    .link-animated {
-      position: relative;
-      display: inline-block;
-    }
-    
-    .link-animated::after {
-      content: '';
-      position: absolute;
-      bottom: -2px;
-      left: 0;
-      width: 0;
-      height: 1px;
-      background: currentColor;
-      transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    
-    .link-animated:hover::after {
-      width: 100%;
-    }
-    
-    /* Parallax layers */
-    .parallax-slow { will-change: transform; }
-    .parallax-fast { will-change: transform; }
-    
-    /* Section transitions */
-    .section-reveal {
+    /* Process Step */
+    .process-step {
       opacity: 0;
-      transform: translateY(60px);
+      transform: translateY(40px);
     }
     
-    /* Video background */
-    .video-bg {
+    /* Testimonial */
+    .quote-mark {
+      font-size: 120px;
+      line-height: 1;
+      color: #1e1e1e;
       position: absolute;
-      inset: 0;
-      object-fit: cover;
-      width: 100%;
-      height: 100%;
-      opacity: 0.4;
+      top: -40px;
+      left: -20px;
     }
     
-    /* Noise overlay */
-    .noise {
-      position: relative;
+    /* FAQ Accordion */
+    .faq-item {
+      border-bottom: 1px solid rgba(255,255,255,0.1);
     }
     
-    .noise::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-      opacity: 0.03;
-      pointer-events: none;
-      z-index: 1;
+    .faq-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
     
-    /* Horizontal scroll section */
-    .horizontal-scroll {
-      display: flex;
-      flex-wrap: nowrap;
-      gap: 32px;
+    .faq-item.active .faq-content {
+      max-height: 200px;
     }
     
-    /* Hide scrollbar */
-    .hide-scrollbar::-webkit-scrollbar {
-      display: none;
+    .faq-item.active .faq-icon {
+      transform: rotate(45deg);
     }
     
-    .hide-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
+    .faq-icon {
+      transition: transform 0.3s ease;
     }
     
-    /* Selection */
-    ::selection {
-      background: rgba(96, 165, 250, 0.3);
-      color: #fff;
+    /* Navigation */
+    #nav {
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    #nav.visible {
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(20px);
     }
   </style>
 </head>
-<body class="hide-scrollbar">
-  
+<body>
   <!-- Preloader -->
   <div id="preloader">
-    <div class="preloader-logo">V</div>
-    <div class="preloader-text">Loading Experience</div>
-    <div class="preloader-bar">
-      <div class="preloader-progress" id="preloader-progress"></div>
-    </div>
+    <div class="preloader-text">Ventus</div>
   </div>
-  
-  <!-- Custom Cursor -->
-  <div class="cursor" id="cursor"></div>
-  <div class="cursor-dot" id="cursor-dot"></div>
-  
+
   <!-- Navigation -->
-  <nav id="nav" class="fixed top-0 left-0 right-0 z-50 py-6 px-8 transition-all duration-500 opacity-0 -translate-y-full">
+  <nav id="nav" class="fixed top-0 left-0 right-0 z-50 py-6 px-8 opacity-0 -translate-y-full">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
-      <a href="#" class="text-2xl font-black magnetic">Ventus</a>
-      
-      <div class="hidden md:flex items-center gap-12">
-        <a href="#work" class="link-animated text-sm font-medium text-silver-400 hover:text-white transition-colors">Work</a>
-        <a href="explore.html" class="link-animated text-sm font-medium text-azure-400 hover:text-azure-300 transition-colors">Explore ✨</a>
-        <a href="#services" class="link-animated text-sm font-medium text-silver-400 hover:text-white transition-colors">Services</a>
-        <a href="#about" class="link-animated text-sm font-medium text-silver-400 hover:text-white transition-colors">About</a>
-        <a href="#contact" class="link-animated text-sm font-medium text-silver-400 hover:text-white transition-colors">Contact</a>
-      </div>
-      
-      <a href="#contact" class="magnetic bg-white text-black px-6 py-3 rounded-full font-semibold text-sm hover:bg-azure-400 hover:text-black transition-colors">
-        Start Project
-      </a>
+      <a href="#" class="text-sm tracking-[0.3em] uppercase font-medium">Ventus</a>
+      <a href="#work" class="text-sm text-silver-400 hover:text-white transition-colors">Work</a>
     </div>
   </nav>
 
-  <!-- Hero Section -->
-  <section id="hero" class="relative min-h-screen flex items-center justify-center overflow-hidden noise">
-    <!-- Ambient Background -->
-    <div class="absolute inset-0 z-0">
-      <div class="absolute inset-0 bg-gradient-to-b from-azure-900/30 via-black to-black"></div>
-      <div class="absolute top-0 left-1/4 w-[800px] h-[800px] bg-azure-600/20 rounded-full blur-[150px] parallax-slow"></div>
-      <div class="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-silver-600/10 rounded-full blur-[120px] parallax-slow"></div>
-    </div>
-    
-    <div class="relative z-10 max-w-7xl mx-auto px-8 text-center">
-      <div class="mb-8">
-        <span class="inline-flex items-center gap-2 glass px-4 py-2 rounded-full text-sm text-silver-300">
-          <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-          Available for Q2 2026
-        </span>
-      </div>
-      
-      <h1 class="text-6xl md:text-8xl lg:text-9xl font-black leading-[0.9] mb-8">
-        <span class="split-line">
-          <span class="split-line-inner">We Build</span>
-        </span>
-        <span class="split-line">
-          <span class="split-line-inner gradient-text">Digital</span>
-        </span>
-        <span class="split-line">
-          <span class="split-line-inner">Experiences</span>
-        </span>
+  <!-- Section 1: Hero -->
+  <section class="min-h-screen flex items-center justify-center px-8">
+    <div class="max-w-6xl mx-auto text-center">
+      <h1 class="text-6xl md:text-8xl lg:text-[10rem] font-black leading-[0.9] tracking-tight mb-8">
+        <div class="hero-line">
+          <span class="hero-line-inner">Your Website</span>
+        </div>
+        <div class="hero-line">
+          <span class="hero-line-inner">Is Your</span>
+        </div>
+        <div class="hero-line">
+          <span class="hero-line-inner gradient-text">Best Salesperson</span>
+        </div>
       </h1>
       
-      <p class="text-xl md:text-2xl text-silver-400 max-w-2xl mx-auto mb-12 leading-relaxed">
-        Award-winning studio crafting premium websites that convert visitors into loyal customers.
+      <p class="text-lg md:text-xl text-silver-400 max-w-xl mx-auto mb-12 opacity-0" id="hero-subtext">
+        We design premium digital experiences that convert.
       </p>
       
-      <div class="flex flex-col sm:flex-row gap-4 justify-center">
-        <a href="#work" class="magnetic bg-azure-500 hover:bg-azure-400 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all inline-flex items-center justify-center gap-2">
-          View Our Work
-          <i data-lucide="arrow-down-right" class="w-5 h-5"></i>
-        </a>
-        
-        <a href="#contact" class="magnetic glass hover:bg-white/10 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all">
+      <div class="opacity-0" id="hero-cta">
+        <a href="#offer" class="magnetic-btn inline-flex items-center gap-3 bg-white text-black px-10 py-5 rounded-full font-semibold text-lg hover:bg-azure-400 transition-colors">
           Start Your Project
+          <i data-lucide="arrow-right" class="w-5 h-5"></i>
         </a>
       </div>
-    </div>
-    
-    <!-- Scroll Indicator -->
-    <div class="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4">
-      <span class="text-xs uppercase tracking-[0.3em] text-silver-500">Scroll</span>
-      <div class="w-[1px] h-16 bg-gradient-to-b from-silver-500 to-transparent"></div>
     </div>
   </section>
 
-  <!-- AI Design Explorer CTA -->
-  <section class="py-20 relative overflow-hidden">
-    <div class="absolute inset-0 bg-gradient-to-r from-azure-900/20 to-purple-900/20"></div>
-    <div class="max-w-5xl mx-auto px-8 relative">
-      <div class="glass rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center gap-8">
-        <div class="flex-1">
-          <div class="inline-flex items-center gap-2 bg-azure-500/10 border border-azure-500/30 rounded-full px-3 py-1 mb-4">
-            <span class="text-azure-400 text-xs font-medium">New ✨</span>
-          </div>
-          <h2 class="text-3xl md:text-4xl font-black mb-4">
-            See Your Website
-            <span class="gradient-text">Before It Exists</span>
-          </h2>
-          <p class="text-silver-400 mb-6">
-            Enter your business type and get 4 distinct AI-generated design concepts in seconds. 
-            Explore possibilities, then let's build the real thing.
-          </p>
-          <a href="explore.html" class="magnetic inline-flex items-center gap-2 bg-azure-500 hover:bg-azure-400 text-white px-6 py-3 rounded-full font-semibold transition-colors">
-            Try Design Explorer
-            <i data-lucide="sparkles" class="w-5 h-5"></i>
-          </a>
-        </div>
-        <div class="flex gap-4">
-          <div class="w-24 h-32 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl opacity-80"></div>
-          <div class="w-24 h-32 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl opacity-80 mt-8"></div>
-          <div class="w-24 h-32 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl opacity-80"></div>
-        </div>
-      </div>
-    </div>
-  <section>
-
-  <!-- Featured Work Section -->
-  <section id="work" class="py-32 relative">
-    <div class="max-w-7xl mx-auto px-8">
-      <div class="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
-        <div class="max-w-xl">
-          <span class="text-azure-400 text-sm font-semibold uppercase tracking-[0.2em] mb-4 block">Selected Work</span>
-          <h2 class="text-5xl md:text-6xl font-black leading-tight">
-            Projects That
-            <span class="gradient-text">Define</span>
-            Excellence
-          </h2>
-        </div>
-        
-        <p class="text-silver-400 max-w-md">
-          Every project is a partnership. We dive deep into your business to create experiences that drive real results.
-        </p>
+  <!-- Section 2: The Work -->
+  <section id="work" class="py-32 px-8">
+    <div class="max-w-7xl mx-auto">
+      <div class="mb-20">
+        <p class="text-silver-500 text-sm tracking-[0.3em] uppercase mb-4">Selected Work</p>
+        <h2 class="text-4xl md:text-5xl font-black">Projects That Perform</h2>
       </div>
       
-      <div class="space-y-32">
-        
-        <!-- Project 1 -->
-        <div class="project-item group cursor-pointer" data-cursor="view">
+      <div class="space-y-24">
+        <!-- Project 1: GhostWatch -->
+        <div class="project-card group cursor-pointer">
           <div class="grid lg:grid-cols-2 gap-12 items-center">
-            <div class="img-reveal rounded-3xl overflow-hidden tilt-card">
-              <div class="tilt-card-inner">
-                <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1400&q=80" 
-                     alt="GhostWatch" 
-                     class="w-full aspect-[4/3] object-cover transition-transform duration-700 group-hover:scale-105"
-                >
-              </div>
+            <div class="overflow-hidden rounded-2xl">
+              <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1400&q=80" 
+                   alt="GhostWatch Dashboard" 
+                   class="project-image w-full aspect-[4/3] object-cover">
             </div>
-            
             <div class="space-y-6">
               <div class="flex items-center gap-4">
-                <span class="px-4 py-1.5 bg-azure-500/20 text-azure-300 rounded-full text-xs font-medium">SaaS Platform</span>
-                <span class="text-silver-500 text-sm">2026</span>
+                <span class="text-xs text-silver-500 tracking-widest uppercase">SaaS Platform</span>
+                <span class="w-8 h-px bg-silver-700"></span>
+                <span class="text-xs text-silver-500">2026</span>
               </div>
-              
               <h3 class="text-4xl md:text-5xl font-black">GhostWatch</h3>
-              
               <p class="text-silver-400 text-lg leading-relaxed">
-                Competitor intelligence platform with AI-powered insights. Real-time monitoring 
-                that helps founders stay ahead of the market.
+                Competitor intelligence platform that helps founders stay ahead of market shifts. Built for conversion from day one.
               </p>
-              
-              <div class="flex flex-wrap gap-3 pt-4">
-                <span class="text-sm text-silver-500">React</span>
-                <span class="text-silver-600">•</span>
-                <span class="text-sm text-silver-500">Node.js</span>
-                <span class="text-silver-600">•</span>
-                <span class="text-sm text-silver-500">AI Integration</span>
-                <span class="text-silver-600">•</span>
-                <span class="text-sm text-silver-500">Stripe</span>
-              </div>
-              
-              <div class="flex gap-12 pt-6 border-t border-white/10">
+              <div class="flex items-center gap-8 pt-4">
                 <div>
-                  <span class="text-3xl font-black text-azure-400">3×</span>
-                  <span class="text-silver-500 text-sm ml-2">Conversion</span>
+                  <p class="text-3xl font-black text-azure-400">3×</p>
+                  <p class="text-sm text-silver-500">Conversion Rate</p>
                 </div>
                 <div>
-                  <span class="text-3xl font-black text-azure-400">50+</span>
-                  <span class="text-silver-500 text-sm ml-2">Customers</span>
+                  <p class="text-3xl font-black text-azure-400">50+</p>
+                  <p class="text-sm text-silver-500">Paying Customers</p>
                 </div>
               </div>
-              
-              <a href="case-study-ghostwatch.html" class="inline-flex items-center gap-2 text-azure-400 hover:text-azure-300 font-medium transition-colors pt-4">
-                View Case Study
-                <i data-lucide="arrow-right" class="w-4 h-4"></i>
-              </a>
             </div>
           </div>
         </div>
         
-        <!-- Project 2 -->
-        <div class="project-item group cursor-pointer" data-cursor="view">
+        <!-- Project 2: Hatfield's -->
+        <div class="project-card group cursor-pointer">
           <div class="grid lg:grid-cols-2 gap-12 items-center">
             <div class="order-2 lg:order-1 space-y-6">
               <div class="flex items-center gap-4">
-                <span class="px-4 py-1.5 bg-blue-500/20 text-blue-300 rounded-full text-xs font-medium">Automotive</span>
-                <span class="text-silver-500 text-sm">2026</span>
+                <span class="text-xs text-silver-500 tracking-widest uppercase">Automotive</span>
+                <span class="w-8 h-px bg-silver-700"></span>
+                <span class="text-xs text-silver-500">2026</span>
               </div>
-              
               <h3 class="text-4xl md:text-5xl font-black">Hatfield's Automotive</h3>
-              
               <p class="text-silver-400 text-lg leading-relaxed">
-                Premium website for a family-owned automotive repair shop. 
-                Online booking, service estimator, and trust-building design that increased appointments by 40%.
+                Premium auto shop website with online booking and service estimator. Turned a family business into a local leader.
               </p>
-              
-              <div class="flex flex-wrap gap-3 pt-4">
-                <span class="text-sm text-silver-500">Custom Booking</span>
-                <span class="text-silver-600">•</span>
-                <span class="text-sm text-silver-500">Service Estimator</span>
-                <span class="text-silver-600">•</span>
-                <span class="text-sm text-silver-500">Local SEO</span>
+              <div class="flex items-center gap-8 pt-4">
+                <div>
+                  <p class="text-3xl font-black text-azure-400">+40%</p>
+                  <p class="text-sm text-silver-500">Appointments</p>
+                </div>
+                <div>
+                  <p class="text-3xl font-black text-azure-400">2.3×</p>
+                  <p class="text-sm text-silver-500">Time on Site</p>
+                </div>
               </div>
-              
-              <a href="case-study-hatfields.html" class="inline-flex items-center gap-2 text-azure-400 hover:text-azure-300 font-medium transition-colors pt-4">
-                View Live Site
-                <i data-lucide="arrow-right" class="w-4 h-4"></i>
-              </a>
             </div>
-            
-            <div class="order-1 lg:order-2 img-reveal rounded-3xl overflow-hidden tilt-card">
-              <div class="tilt-card-inner">
-                <img src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=1400&q=80" 
-                     alt="Hatfield's Automotive" 
-                     class="w-full aspect-[4/3] object-cover transition-transform duration-700 group-hover:scale-105"
-                >
-              </div>
+            <div class="order-1 lg:order-2 overflow-hidden rounded-2xl">
+              <img src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=1400&q=80" 
+                   alt="Hatfield's Automotive" 
+                   class="project-image w-full aspect-[4/3] object-cover">
             </div>
           </div>
         </div>
         
+        <!-- Project 3: Along -->
+        <div class="project-card group cursor-pointer">
+          <div class="grid lg:grid-cols-2 gap-12 items-center">
+            <div class="overflow-hidden rounded-2xl">
+              <img src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=1400&q=80" 
+                   alt="Along iOS App" 
+                   class="project-image w-full aspect-[4/3] object-cover">
+            </div>
+            <div class="space-y-6">
+              <div class="flex items-center gap-4">
+                <span class="text-xs text-silver-500 tracking-widest uppercase">iOS App</span>
+                <span class="w-8 h-px bg-silver-700"></span>
+                <span class="text-xs text-silver-500">2026</span>
+              </div>
+              <h3 class="text-4xl md:text-5xl font-black">Along</h3>
+              <p class="text-silver-400 text-lg leading-relaxed">
+                Proactive AI operator for busy professionals. A complete rebrand from concept to TestFlight in 30 days.
+              </p>
+              <div class="flex items-center gap-8 pt-4">
+                <div>
+                  <p class="text-3xl font-black text-azure-400">Live</p>
+                  <p class="text-sm text-silver-500">On TestFlight</p>
+                </div>
+                <div>
+                  <p class="text-3xl font-black text-azure-400">30</p>
+                  <p class="text-sm text-silver-500">Days to Launch</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- Services Section -->
-  <section id="services" class="py-32 relative overflow-hidden">
-    <div class="absolute inset-0 bg-gradient-to-b from-azure-950/50 to-transparent"></div>
-    
-    <div class="max-w-7xl mx-auto px-8 relative">
-      <div class="text-center max-w-3xl mx-auto mb-20">
-        <span class="text-azure-400 text-sm font-semibold uppercase tracking-[0.2em] mb-4 block">Services</span>
-        <h2 class="text-5xl md:text-6xl font-black mb-6">
-          End-to-End
-          <span class="gradient-text">Solutions</span>
-        </h2>
-        <p class="text-silver-400 text-lg">
-          Strategy, design, and development—all under one roof.
+  <!-- Section 3: Process -->
+  <section class="py-32 px-8 border-t border-white/5">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-20">
+        <p class="text-silver-500 text-sm tracking-[0.3em] uppercase mb-4">Our Process</p>
+        <h2 class="text-4xl md:text-5xl font-black">From Concept to Reality</h2>
+      </div>
+      
+      <div class="grid md:grid-cols-3 gap-12">
+        <div class="process-step text-center">
+          <div class="w-16 h-16 border border-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <span class="text-2xl font-light">01</span>
+          </div>
+          <h3 class="text-xl font-bold mb-3">Design Exploration</h3>
+          <p class="text-silver-400 leading-relaxed">
+            We generate 50+ design directions using AI, then curate the strongest concepts for your brand.
+          </p>
+        </div>
+        
+        <div class="process-step text-center">
+          <div class="w-16 h-16 border border-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <span class="text-2xl font-light">02</span>
+          </div>
+          <h3 class="text-xl font-bold mb-3">Collaborative Curation</h3>
+          <p class="text-silver-400 leading-relaxed">
+            Together, we refine typography, spacing, and interactions until every pixel feels intentional.
+          </p>
+        </div>
+        
+        <div class="process-step text-center">
+          <div class="w-16 h-16 border border-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <span class="text-2xl font-light">03</span>
+          </div>
+          <h3 class="text-xl font-bold mb-3">Superb Build</h3>
+          <p class="text-silver-400 leading-relaxed">
+            Clean, performant code. Real features that work—booking systems, payments, integrations.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 4: Proof -->
+  <section class="py-32 px-8">
+    <div class="max-w-4xl mx-auto">
+      <div class="relative mb-20">
+        <span class="quote-mark">"</span>
+        <blockquote class="text-3xl md:text-4xl font-medium leading-tight relative z-10">
+          Ventus didn't just build us a website—they built us a <span class="gradient-text">business engine</span>. We're now booked 2 weeks out and had to hire another mechanic.
+        </blockquote>
+      </div>
+      
+      <div class="flex items-center gap-6">
+        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400"></div>
+        <div>
+          <p class="font-semibold">James Hatfield</p>
+          <p class="text-sm text-silver-500">Owner, Hatfield's Automotive</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 5: Philosophy -->
+  <section class="py-32 px-8 border-t border-white/5">
+    <div class="max-w-4xl mx-auto text-center">
+      <p class="text-silver-500 text-sm tracking-[0.3em] uppercase mb-8">Our Philosophy</p>
+      <h2 class="text-4xl md:text-6xl font-black leading-tight mb-8">
+        Every Project Is a<br>
+        <span class="gradient-text">Partnership</span>
+      </h2>
+      <p class="text-xl text-silver-400 leading-relaxed max-w-2xl mx-auto">
+        We don't do templates. We don't do "good enough." We work with ambitious brands who believe their website should be their best salesperson.
+      </p>
+    </div>
+  </section>
+
+  <!-- Section 6: The Offer -->
+  <section id="offer" class="py-32 px-8">
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center mb-16">
+        <p class="text-silver-500 text-sm tracking-[0.3em] uppercase mb-4">Start Here</p>
+        <h2 class="text-4xl md:text-6xl font-black mb-6">The Design Day</h2>
+        <p class="text-2xl text-silver-400">$500</p>
+      </div>
+      
+      <div class="grid md:grid-cols-2 gap-12 mb-12">
+        <div class="space-y-6">
+          <p class="text-lg leading-relaxed">
+            One day of focused design work. We explore concepts, refine direction, and deliver interactive prototypes you can actually use.
+          </p>
+          <ul class="space-y-4">
+            <li class="flex items-center gap-3">
+              <i data-lucide="check" class="w-5 h-5 text-azure-400"></i>
+              <span>8 hours dedicated design work</span>
+            </li>
+            <li class="flex items-center gap-3">
+              <i data-lucide="check" class="w-5 h-5 text-azure-400"></i>
+              <span>3 refined concept directions</span>
+            </li>
+            <li class="flex items-center gap-3">
+              <i data-lucide="check" class="w-5 h-5 text-azure-400"></i>
+              <span>Interactive prototypes</span>
+            </li>
+            <li class="flex items-center gap-3">
+              <i data-lucide="check" class="w-5 h-5 text-azure-400"></i>
+              <span>1 revision round</span>
+            </li>
+          </ul>
+        </div>
+        
+        <div class="space-y-6">
+          <p class="text-silver-400">
+            Perfect for:
+          </p>
+          <ul class="space-y-3 text-silver-400">
+            <li>• Startups validating a new direction</li>
+            <li>• Established businesses refreshing their brand</li>
+            <li>• Founders who want to see before they commit</li>
+          </ul>
+          <p class="text-sm text-silver-500 pt-4">
+            100% refundable if you're not satisfied. No questions asked.
+          </p>
+        </div>
+      </div>
+      
+      <div class="text-center">
+        <a href="explore.html" class="magnetic-btn inline-flex items-center gap-3 bg-white text-black px-12 py-6 rounded-full font-semibold text-xl hover:bg-azure-400 transition-colors">
+          Book Your Design Day
+          <i data-lucide="arrow-right" class="w-6 h-6"></i>
+        </a>
+        <p class="text-sm text-silver-500 mt-6">
+          Or <a href="mailto:hello@ventusys.com" class="text-azure-400 hover:underline">email us</a> to discuss a larger project
         </p>
       </div>
+    </div>
+  </section>
+
+  <!-- Section 7: FAQ -->
+  <section class="py-32 px-8 border-t border-white/5">
+    <div class="max-w-3xl mx-auto">
+      <div class="text-center mb-16">
+        <p class="text-silver-500 text-sm tracking-[0.3em] uppercase mb-4">FAQ</p>
+        <h2 class="text-4xl font-black">Common Questions</h2>
+      </div>
       
-      <div class="grid md:grid-cols-3 gap-8">
-        
-        <!-- Service 1 -->
-        <div class="service-card glass rounded-3xl p-10 hover:bg-white/[0.05] transition-all duration-500 group">
-          <div class="w-16 h-16 mb-8 relative">
-            <div class="absolute inset-0 bg-azure-500/20 rounded-2xl rotate-6 group-hover:rotate-12 transition-transform"></div>
-            <div class="absolute inset-0 bg-azure-500 rounded-2xl flex items-center justify-center">
-              <i data-lucide="compass" class="w-8 h-8 text-white"></i>
-            </div>
+      <div class="space-y-0">
+        <div class="faq-item py-6 cursor-pointer" onclick="toggleFaq(this)">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-semibold pr-8">How is this different from hiring a typical agency?</h3>
+            <i data-lucide="plus" class="w-5 h-5 faq-icon flex-shrink-0"></i>
           </div>
-          
-          <h3 class="text-2xl font-bold mb-4">Strategy & UX</h3>
-          
-          <p class="text-silver-400 leading-relaxed">
-            Market research, competitive analysis, user journeys, and conversion-focused 
-            information architecture.
-          </p>
-        </div>
-        
-        <!-- Service 2 -->
-        <div class="service-card glass rounded-3xl p-10 hover:bg-white/[0.05] transition-all duration-500 group">
-          <div class="w-16 h-16 mb-8 relative">
-            <div class="absolute inset-0 bg-azure-500/20 rounded-2xl rotate-6 group-hover:rotate-12 transition-transform"></div>
-            <div class="absolute inset-0 bg-azure-500 rounded-2xl flex items-center justify-center">
-              <i data-lucide="palette" class="w-8 h-8 text-white"></i>
-            </div>
+          <div class="faq-content">
+            <p class="text-silver-400 pt-4 leading-relaxed">
+              We combine AI exploration with human curation to move faster without sacrificing quality. Most agencies take weeks to show concepts. We take hours. Plus, we actually build—no handoffs to developers who weren't in the room.
+            </p>
           </div>
-          
-          <h3 class="text-2xl font-bold mb-4">Visual Design</h3>
-          
-          <p class="text-silver-400 leading-relaxed">
-            Brand identity, UI/UX design, design systems, and motion design that 
-            brings your product to life.
-          </p>
         </div>
         
-        <!-- Service 3 -->
-        <div class="service-card glass rounded-3xl p-10 hover:bg-white/[0.05] transition-all duration-500 group">
-          <div class="w-16 h-16 mb-8 relative">
-            <div class="absolute inset-0 bg-azure-500/20 rounded-2xl rotate-6 group-hover:rotate-12 transition-transform"></div>
-            <div class="absolute inset-0 bg-azure-500 rounded-2xl flex items-center justify-center">
-              <i data-lucide="code-2" class="w-8 h-8 text-white"></i>
-            </div>
+        <div class="faq-item py-6 cursor-pointer" onclick="toggleFaq(this)">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-semibold pr-8">What if I don't like the Design Day concepts?</h3>
+            <i data-lucide="plus" class="w-5 h-5 faq-icon flex-shrink-0"></i>
           </div>
-          
-          <h3 class="text-2xl font-bold mb-4">Development</h3>
-          
-          <p class="text-silver-400 leading-relaxed">
-            React, Next.js, headless CMS, e-commerce, APIs—clean, performant 
-            code built to scale.
-          </p>
+          <div class="faq-content">
+            <p class="text-silver-400 pt-4 leading-relaxed">
+              Full refund, no questions asked. We only want to work with clients who are excited about the direction. That said, we've never had a Design Day not result in a happy client.
+            </p>
+          </div>
         </div>
         
-      </div>
-    </div>
-  </section>
-
-  <!-- Stats Section -->
-  <section class="py-32 border-y border-white/5">
-    <div class="max-w-7xl mx-auto px-8">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-12">
-        <div class="text-center">
-          <span class="text-6xl md:text-7xl font-black text-azure-400 block mb-2">50+</span>
-          <span class="text-silver-400">Projects Delivered</span>
+        <div class="faq-item py-6 cursor-pointer" onclick="toggleFaq(this)">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-semibold pr-8">How long does a full website take?</h3>
+            <i data-lucide="plus" class="w-5 h-5 faq-icon flex-shrink-0"></i>
+          </div>
+          <div class="faq-content">
+            <p class="text-silver-400 pt-4 leading-relaxed">
+              Most projects ship in 2-4 weeks. Complex builds (e-commerce, custom integrations) can take 6-8 weeks. We'll give you a clear timeline during our first call.
+            </p>
+          </div>
         </div>
         
-        <div class="text-center">
-          <span class="text-6xl md:text-7xl font-black text-azure-400 block mb-2">3×</span>
-          <span class="text-silver-400">Avg Conversion Lift</span>
-        </div>
-        
-        <div class="text-center">
-          <span class="text-6xl md:text-7xl font-black text-azure-400 block mb-2">98%</span>
-          <span class="text-silver-400">Client Satisfaction</span>
-        </div>
-        
-        <div class="text-center">
-          <span class="text-6xl md:text-7xl font-black text-azure-400 block mb-2">14</span>
-          <span class="text-silver-400">Day Avg Delivery</span>
-        </div>
-        
-      </div>
-    </div>
-  </section>
-
-  <!-- About Section -->
-  <section id="about" class="py-32">
-    <div class="max-w-7xl mx-auto px-8">
-      <div class="grid lg:grid-cols-2 gap-20 items-center">
-        <div class="space-y-8">
-          <span class="text-azure-400 text-sm font-semibold uppercase tracking-[0.2em]">About Us</span>
-          
-          <h2 class="text-5xl md:text-6xl font-black leading-tight">
-            We Believe Design
-            <span class="gradient-text">Drives Business</span>
-          </h2>
-          
-          <p class="text-silver-400 text-lg leading-relaxed">
-            Ventus is a premium web design studio founded on a simple belief: your 
-            website should be your best salesperson. We combine strategic thinking with 
-            world-class design to create digital experiences that convert.
-          </p>
-          
-          <p class="text-silver-400 text-lg leading-relaxed">
-            Every project is custom. Every detail matters. We're not just designers 
-            and developers—we're your partners in digital success.
-          </p>
-          
-          <a href="#contact" class="magnetic inline-flex items-center gap-2 bg-white text-black px-8 py-4 rounded-full font-semibold hover:bg-azure-400 transition-colors">
-            Work With Us
-            <i data-lucide="arrow-right" class="w-5 h-5"></i>
-          </a>
-        </div>
-        
-        <div class="img-reveal rounded-3xl overflow-hidden">
-          <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&q=80" 
-               alt="Team working" 
-               class="w-full aspect-[4/3] object-cover"
-          >
+        <div class="faq-item py-6 cursor-pointer" onclick="toggleFaq(this)">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-semibold pr-8">Do you work with startups or only big companies?</h3>
+            <i data-lucide="plus" class="w-5 h-5 faq-icon flex-shrink-0"></i>
+          </div>
+          <div class="faq-content">
+            <p class="text-silver-400 pt-4 leading-relaxed">
+              Both. Startups love us because we move fast and think about conversion from day one. Established companies love us because we bring fresh perspective without the agency overhead.
+            </p>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- CTA Section -->
-  <section class="py-32 relative overflow-hidden">
-    <div class="absolute inset-0 bg-gradient-to-r from-azure-900/30 to-transparent"></div>
-    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-azure-500/10 rounded-full blur-[150px]"></div>
-    
-    <div class="max-w-4xl mx-auto px-8 text-center relative">
-      <h2 class="text-5xl md:text-7xl font-black mb-8">
-        Ready to Build Something
-        <span class="gradient-text">Extraordinary?</span>
+  <!-- Section 8: Final CTA -->
+  <section class="py-48 px-8">
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="text-5xl md:text-7xl font-black leading-tight mb-8">
+        Ready to Turn Your<br>
+        <span class="gradient-text">Website Into Revenue?</span>
       </h2>
-      
-      <p class="text-silver-400 text-xl mb-12 max-w-2xl mx-auto">
-        Let's create a website that turns visitors into customers.
-      </p>
-      
-      <a href="#contact" class="magnetic inline-flex items-center gap-3 bg-azure-500 hover:bg-azure-400 text-white px-10 py-5 rounded-full font-bold text-lg transition-all">
+      <a href="explore.html" class="magnetic-btn inline-flex items-center gap-3 bg-white text-black px-12 py-6 rounded-full font-semibold text-xl hover:bg-azure-400 transition-colors mt-8">
         Start Your Project
         <i data-lucide="arrow-right" class="w-6 h-6"></i>
       </a>
     </div>
   </section>
 
-  <!-- Contact Section -->
-  <section id="contact" class="py-32">
-    <div class="max-w-3xl mx-auto px-8">
-      <div class="glass rounded-3xl p-10 md:p-16">
-        <div class="text-center mb-12">
-          <span class="text-azure-400 text-sm font-semibold uppercase tracking-[0.2em] mb-4 block">Get in Touch</span>
-          <h2 class="text-4xl font-black mb-4">Let's Talk</h2>
-          <p class="text-silver-400">Tell us about your project. We'll respond within 24 hours.</p>
-        </div>
-        
-        <form id="contact-form" action="https://formspree.io/f/mlgwyodd" method="POST" class="space-y-6">
-          <div class="grid md:grid-cols-2 gap-6">
-            <input type="text" name="name" placeholder="Name" required class="w-full px-4 py-4 bg-white/5 border border-white/10 rounded-xl focus:border-azure-500 focus:outline-none transition-colors placeholder:text-silver-600">
-            <input type="email" name="email" placeholder="Email" required class="w-full px-4 py-4 bg-white/5 border border-white/10 rounded-xl focus:border-azure-500 focus:outline-none transition-colors placeholder:text-silver-600">
-          </div>
-          
-          <input type="text" name="company" placeholder="Company" class="w-full px-4 py-4 bg-white/5 border border-white/10 rounded-xl focus:border-azure-500 focus:outline-none transition-colors placeholder:text-silver-600">
-          
-          <select name="budget" class="w-full px-4 py-4 bg-white/5 border border-white/10 rounded-xl focus:border-azure-500 focus:outline-none transition-colors text-silver-600">
-            <option value="">Budget Range</option>
-            <option value="5k-15k">$5,000 - $15,000</option>
-            <option value="15k-30k">$15,000 - $30,000</option>
-            <option value="30k+">$30,000+</option>
-          </select>
-          
-          <textarea name="message" rows="4" placeholder="Tell us about your project..." required class="w-full px-4 py-4 bg-white/5 border border-white/10 rounded-xl focus:border-azure-500 focus:outline-none transition-colors resize-none placeholder:text-silver-600"></textarea>
-          
-          <button type="submit" id="submit-btn" class="w-full py-4 bg-azure-500 hover:bg-azure-400 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2">
-            <span id="btn-text">Send Message</span>
-            <i data-lucide="send" class="w-5 h-5" id="btn-icon"></i>
-          </button>
-          
-          <p id="form-status" class="text-center text-sm hidden"></p>
-        </form>
-      </div>
-    </div>
-  </section>
-
   <!-- Footer -->
-  <footer class="py-12 border-t border-white/10">
-    <div class="max-w-7xl mx-auto px-8">
-      <div class="flex flex-col md:flex-row justify-between items-center gap-6">
-        <span class="text-2xl font-black">Ventus</span>
-        
-        <div class="flex items-center gap-6">
-          <a href="https://twitter.com/Ventus" target="_blank" rel="noopener" class="text-silver-400 hover:text-white transition-colors"><i data-lucide="twitter" class="w-5 h-5"></i></a>
-          <a href="https://linkedin.com/company/Ventus" target="_blank" rel="noopener" class="text-silver-400 hover:text-white transition-colors"><i data-lucide="linkedin" class="w-5 h-5"></i></a>
-          <a href="https://instagram.com/Ventus" target="_blank" rel="noopener" class="text-silver-400 hover:text-white transition-colors"><i data-lucide="instagram" class="w-5 h-5"></i></a>
-          <a href="https://dribbble.com/Ventus" target="_blank" rel="noopener" class="text-silver-400 hover:text-white transition-colors"><i data-lucide="dribbble" class="w-5 h-5"></i></a>
-        </div>
-        
-        <p class="text-silver-500 text-sm">© 2026 Ventus. All rights reserved.</p>
-      </div>
+  <footer class="py-12 px-8 border-t border-white/5">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+      <span class="text-sm tracking-[0.3em] uppercase">Ventus</span>
+      <p class="text-silver-500 text-sm">© 2026 Ventus. All rights reserved.</p>
+      <a href="mailto:hello@ventusys.com" class="text-sm text-silver-400 hover:text-white transition-colors">hello@ventusys.com</a>
     </div>
   </footer>
 
@@ -765,10 +518,7 @@
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       direction: 'vertical',
-      gestureDirection: 'vertical',
-      smooth: true,
-      smoothTouch: false,
-      touchMultiplier: 2,
+      smooth: true
     });
     
     function raf(time) {
@@ -777,273 +527,125 @@
     }
     requestAnimationFrame(raf);
     
-    // Connect Lenis to GSAP ScrollTrigger
-    lenis.on('scroll', ScrollTrigger.update);
-    gsap.ticker.add((time) => {
-      lenis.raf(time * 1000);
-    });
-    gsap.ticker.lagSmoothing(0);
+    // GSAP Animations
+    gsap.registerPlugin(ScrollTrigger);
     
     // Preloader
     const preloader = document.getElementById('preloader');
-    const preloaderProgress = document.getElementById('preloader-progress');
-    let progress = 0;
     
-    const loadInterval = setInterval(() => {
-      progress += Math.random() * 15;
-      if (progress >= 100) {
-        progress = 100;
-        clearInterval(loadInterval);
-        
-        setTimeout(() => {
-          gsap.to(preloader, {
-            opacity: 0,
-            duration: 0.8,
-            ease: 'power2.inOut',
-            onComplete: () => {
-              preloader.style.display = 'none';
-              initAnimations();
-            }
-          });
-        }, 500);
-      }
-      preloaderProgress.style.width = progress + '%';
-    }, 150);
-    
-    // Custom Cursor
-    const cursor = document.getElementById('cursor');
-    const cursorDot = document.getElementById('cursor-dot');
-    let mouseX = 0, mouseY = 0;
-    let cursorX = 0, cursorY = 0;
-    let dotX = 0, dotY = 0;
-    
-    if (window.matchMedia('(pointer: fine)').matches) {
-      document.addEventListener('mousemove', (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-      });
-      
-      function animateCursor() {
-        // Smooth follow for outer cursor
-        cursorX += (mouseX - cursorX) * 0.15;
-        cursorY += (mouseY - cursorY) * 0.15;
-        cursor.style.left = cursorX + 'px';
-        cursor.style.top = cursorY + 'px';
-        
-        // Faster follow for dot
-        dotX += (mouseX - dotX) * 0.35;
-        dotY += (mouseY - dotY) * 0.35;
-        cursorDot.style.left = dotX + 'px';
-        cursorDot.style.top = dotY + 'px';
-        
-        requestAnimationFrame(animateCursor);
-      }
-      animateCursor();
-      
-      // Cursor states
-      document.querySelectorAll('a, button').forEach(el => {
-        el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
-        el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
-      });
-      
-      document.querySelectorAll('[data-cursor="view"]').forEach(el => {
-        el.addEventListener('mouseenter', () => {
-          cursor.classList.add('view');
-          cursor.classList.remove('hover');
-        });
-        el.addEventListener('mouseleave', () => cursor.classList.remove('view'));
-      });
-    } else {
-      cursor.style.display = 'none';
-      cursorDot.style.display = 'none';
-    }
-    
-    // Navigation show on scroll
-    const nav = document.getElementById('nav');
-    let lastScroll = 0;
-    
-    window.addEventListener('scroll', () => {
-      const currentScroll = window.pageYOffset;
-      
-      if (currentScroll > 100) {
-        nav.style.opacity = '1';
-        nav.style.transform = 'translateY(0)';
-        nav.classList.add('glass');
-      } else {
-        nav.style.opacity = '0';
-        nav.style.transform = 'translateY(-100%)';
-        nav.classList.remove('glass');
-      }
-      
-      lastScroll = currentScroll;
-    }, { passive: true });
-    
-    // Initialize GSAP animations
-    function initAnimations() {
-      // Split text reveal for hero
-      gsap.to('.split-line-inner', {
-        y: '0%',
-        duration: 1.2,
-        stagger: 0.1,
-        ease: 'power4.out',
-        delay: 0.2
-      });
-      
-      // ScrollTrigger animations
-      gsap.registerPlugin(ScrollTrigger);
-      
-      // Parallax orbs
-      gsap.to('.parallax-slow', {
-        yPercent: -20,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: '#hero',
-          start: 'top top',
-          end: 'bottom top',
-          scrub: true
-        }
-      });
-      
-      // Image reveal
-      document.querySelectorAll('.img-reveal').forEach(img => {
-        gsap.fromTo(img, 
-          { clipPath: 'inset(100% 0 0 0)' },
-          {
-            clipPath: 'inset(0% 0 0 0)',
-            duration: 1.2,
-            ease: 'power4.out',
-            scrollTrigger: {
-              trigger: img,
-              start: 'top 80%',
-              toggleActions: 'play none none none'
-            },
-            onComplete: () => img.classList.add('revealed')
-          }
-        );
-      });
-      
-      // Section reveals
-      document.querySelectorAll('section > div').forEach(section => {
-        gsap.fromTo(section,
-          { opacity: 0, y: 60 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 1,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: section,
-              start: 'top 85%',
-              toggleActions: 'play none none none'
-            }
-          }
-        );
-      });
-      
-      // 3D Tilt effect on project cards
-      document.querySelectorAll('.tilt-card').forEach(card => {
-        const inner = card.querySelector('.tilt-card-inner');
-        
-        card.addEventListener('mousemove', (e) => {
-          const rect = card.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
-          
-          const centerX = rect.width / 2;
-          const centerY = rect.height / 2;
-          
-          const rotateX = (y - centerY) / 20;
-          const rotateY = (centerX - x) / 20;
-          
-          inner.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
-        });
-        
-        card.addEventListener('mouseleave', () => {
-          inner.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
-        });
-      });
-      
-      // Magnetic buttons
-      document.querySelectorAll('.magnetic').forEach(btn => {
-        btn.addEventListener('mousemove', (e) => {
-          const rect = btn.getBoundingClientRect();
-          const x = e.clientX - rect.left - rect.width / 2;
-          const y = e.clientY - rect.top - rect.height / 2;
-          
-          btn.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
-        });
-        
-        btn.addEventListener('mouseleave', () => {
-          btn.style.transform = 'translate(0, 0)';
-        });
-      });
-    }
-    
-    // Smooth scroll for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function(e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-          lenis.scrollTo(target, { offset: -80 });
+    window.addEventListener('load', () => {
+      gsap.to(preloader, {
+        opacity: 0,
+        duration: 0.8,
+        delay: 0.5,
+        ease: 'power2.inOut',
+        onComplete: () => {
+          preloader.style.display = 'none';
+          initAnimations();
         }
       });
     });
     
-    // Contact Form Handling
-    const form = document.getElementById('contact-form');
-    const submitBtn = document.getElementById('submit-btn');
-    const btnText = document.getElementById('btn-text');
-    const btnIcon = document.getElementById('btn-icon');
-    const formStatus = document.getElementById('form-status');
-    
-    if (form) {
-      form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        // Show loading state
-        submitBtn.disabled = true;
-        btnText.textContent = 'Sending...';
-        btnIcon.style.display = 'none';
-        formStatus.className = 'text-center text-sm text-silver-400';
-        formStatus.textContent = 'Sending your message...';
-        formStatus.classList.remove('hidden');
-        
-        try {
-          const response = await fetch(form.action, {
-            method: 'POST',
-            body: new FormData(form),
-            headers: {
-              'Accept': 'application/json'
-            }
-          });
-          
-          if (response.ok) {
-            // Success
-            form.reset();
-            btnText.textContent = 'Message Sent!';
-            formStatus.className = 'text-center text-sm text-green-400';
-            formStatus.textContent = 'Thanks! We\'ll get back to you within 24 hours.';
-            
-            setTimeout(() => {
-              btnText.textContent = 'Send Message';
-              btnIcon.style.display = 'inline-block';
-              submitBtn.disabled = false;
-              formStatus.classList.add('hidden');
-            }, 5000);
-          } else {
-            throw new Error('Failed to send');
+    function initAnimations() {
+      // Hero text reveal
+      gsap.to('.hero-line-inner', {
+        y: '0%',
+        duration: 1.2,
+        stagger: 0.15,
+        ease: 'power4.out'
+      });
+      
+      // Hero subtext
+      gsap.to('#hero-subtext', {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        delay: 0.8,
+        ease: 'power3.out'
+      });
+      
+      // Hero CTA
+      gsap.to('#hero-cta', {
+        opacity: 1,
+        scale: 1,
+        duration: 0.8,
+        delay: 1.2,
+        ease: 'back.out(1.7)'
+      });
+      
+      // Navigation show on scroll
+      ScrollTrigger.create({
+        start: 'top -100',
+        onUpdate: (self) => {
+          const nav = document.getElementById('nav');
+          if (self.direction === -1 || self.progress > 0) {
+            nav.classList.add('visible');
+            gsap.to(nav, { opacity: 1, y: 0, duration: 0.3 });
           }
-        } catch (error) {
-          // Error
-          btnText.textContent = 'Try Again';
-          formStatus.className = 'text-center text-sm text-red-400';
-          formStatus.textContent = 'Something went wrong. Please try again or email us directly.';
-          submitBtn.disabled = false;
         }
       });
+      
+      // Process steps reveal
+      gsap.utils.toArray('.process-step').forEach((step, i) => {
+        gsap.to(step, {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: step,
+            start: 'top 80%',
+            toggleActions: 'play none none none'
+          },
+          delay: i * 0.2
+        });
+      });
+      
+      // Project cards parallax
+      gsap.utils.toArray('.project-card').forEach((card) => {
+        gsap.from(card, {
+          y: 60,
+          opacity: 0,
+          duration: 1,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: card,
+            start: 'top 85%',
+            toggleActions: 'play none none none'
+          }
+        });
+      });
     }
+    
+    // FAQ Toggle
+    function toggleFaq(element) {
+      const isActive = element.classList.contains('active');
+      
+      // Close all
+      document.querySelectorAll('.faq-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      
+      // Open clicked if wasn't active
+      if (!isActive) {
+        element.classList.add('active');
+      }
+    }
+    
+    // Magnetic button effect
+    document.querySelectorAll('.magnetic-btn').forEach(btn => {
+      btn.addEventListener('mousemove', (e) => {
+        const rect = btn.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        
+        btn.style.transform = `translate(${x * 0.1}px, ${y * 0.1}px)`;
+      });
+      
+      btn.addEventListener('mouseleave', () => {
+        btn.style.transform = 'translate(0, 0)';
+      });
+    });
   </script>
 </body>
 </html>
-
