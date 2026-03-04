@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ventus — Your Website Is Your Best Salesperson</title>
-  <meta name="description" content="Premium web design studio crafting digital experiences that convert visitors into customers.">
+  <title>Ventus — Your Website Is Embarrassing You</title>
+  <meta name="description" content="Premium web design studio. We build websites that make your competitors cry.">
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
@@ -24,9 +24,15 @@
     }
     
     .gradient-text { 
-      background: linear-gradient(135deg, #fff 0%, #60a5fa 100%); 
+      background: linear-gradient(135deg, #fff 0%, #f97316 100%); 
       -webkit-background-clip: text; 
       -webkit-text-fill-color: transparent; 
+    }
+    
+    .gradient-text-blue {
+      background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
     
     /* Cinematic Preloader */
@@ -70,6 +76,7 @@
     
     .magnetic-btn:hover {
       transform: scale(1.02);
+      box-shadow: 0 20px 60px -20px rgba(249, 115, 22, 0.4);
     }
     
     /* Project Card Hover */
@@ -117,7 +124,7 @@
     }
     
     .faq-item.active .faq-content {
-      max-height: 200px;
+      max-height: 300px;
     }
     
     .faq-item.active .faq-icon {
@@ -137,6 +144,29 @@
       background: rgba(0,0,0,0.8);
       backdrop-filter: blur(20px);
     }
+    
+    /* Typing cursor */
+    .typing-cursor::after {
+      content: '|';
+      animation: blink 1s infinite;
+      color: #f97316;
+    }
+    
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    
+    /* Shake animation for failure section */
+    @keyframes subtle-shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-2px); }
+      75% { transform: translateX(2px); }
+    }
+    
+    .shake-on-scroll {
+      animation: subtle-shake 0.5s ease-in-out infinite;
+    }
   </style>
 </head>
 <body>
@@ -149,49 +179,149 @@
   <nav id="nav" class="fixed top-0 left-0 right-0 z-50 py-6 px-8 opacity-0 -translate-y-full">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
       <a href="#" class="text-sm tracking-[0.3em] uppercase font-medium">Ventus</a>
-      <a href="#work" class="text-sm text-silver-400 hover:text-white transition-colors">Work</a>
+      <div class="flex items-center gap-8">
+        <a href="#work" class="text-sm text-neutral-400 hover:text-white transition-colors">Work</a>
+        <a href="#offer" class="text-sm bg-white text-black px-4 py-2 rounded-full font-medium hover:bg-orange-400 transition-colors">Book a Call</a>
+      </div>
     </div>
   </nav>
 
-  <!-- Section 1: Hero -->
-  <section class="min-h-screen flex items-center justify-center px-8">
-    <div class="max-w-6xl mx-auto text-center">
+  <!-- Section 1: Hero (THE INTERVENTION) -->
+  <section class="min-h-screen flex items-center justify-center px-8 relative">
+    <div class="absolute inset-0 bg-gradient-to-b from-orange-500/5 via-transparent to-transparent"></div>
+    
+    <div class="max-w-6xl mx-auto text-center relative z-10">
+      <p class="text-orange-400 text-xs uppercase tracking-[0.3em] mb-8 opacity-0" id="hero-label">
+        We Need To Talk
+      </p>
+      
       <h1 class="text-6xl md:text-8xl lg:text-[10rem] font-black leading-[0.9] tracking-tight mb-8">
         <div class="hero-line">
           <span class="hero-line-inner">Your Website</span>
         </div>
         <div class="hero-line">
-          <span class="hero-line-inner">Is Your</span>
+          <span class="hero-line-inner">Is</span>
         </div>
         <div class="hero-line">
-          <span class="hero-line-inner gradient-text">Best Salesperson</span>
+          <span class="hero-line-inner gradient-text">Embarrassing</span>
+        </div>
+        <div class="hero-line">
+          <span class="hero-line-inner">You</span>
         </div>
       </h1>
       
-      <p class="text-lg md:text-xl text-silver-400 max-w-xl mx-auto mb-12 opacity-0" id="hero-subtext">
-        We design premium digital experiences that convert.
+      <p class="text-lg md:text-xl text-neutral-400 max-w-2xl mx-auto mb-12 opacity-0" id="hero-subtext">
+        And not in a "cute, relatable" way. In a "your mom saw it and didn't call for three days" way. We fix that. Fast. Ruthlessly. Beautifully.
       </p>
       
       <div class="opacity-0" id="hero-cta">
-        <a href="#offer" class="magnetic-btn inline-flex items-center gap-3 bg-white text-black px-10 py-5 rounded-full font-semibold text-lg hover:bg-azure-400 transition-colors">
-          Start Your Project
+        <a href="#offer" class="magnetic-btn inline-flex items-center gap-3 bg-white text-black px-10 py-5 rounded-full font-semibold text-lg hover:bg-orange-400 transition-colors">
+          Stop The Humiliation
           <i data-lucide="arrow-right" class="w-5 h-5"></i>
         </a>
+        <p class="text-sm text-neutral-500 mt-4">No meetings. No "let's circle back." Just results.</p>
       </div>
     </div>
   </section>
 
-  <!-- Section 2: The Work -->
-  <section id="work" class="py-32 px-8">
+  <!-- Section 2: THE ROAST (Problem) -->
+  <section class="py-32 px-8 border-t border-white/5">
+    <div class="max-w-5xl mx-auto">
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+        <div>
+          <p class="text-neutral-500 text-sm tracking-[0.3em] uppercase mb-6">The Intervention</p>
+          <h2 class="text-4xl md:text-5xl font-black mb-8 leading-tight">
+            It's Not "Minimalist."<br>
+            <span class="gradient-text">It's Unfinished.</span>
+          </h2>
+          <div class="space-y-6 text-lg text-neutral-400 leading-relaxed">
+            <p>
+              That template you bought for $49? <strong class="text-white">Everyone can tell.</strong> Your competitors are laughing. Your customers are leaving. Your bounce rate is higher than your self-esteem after reading this.
+            </p>
+            <p>
+              But hey, at least it loads... eventually... on good wifi... if the user sacrifices a goat first.
+            </p>
+          </div>
+        </div>
+        
+        <div class="space-y-6">
+          <div class="bg-neutral-900/50 border border-white/10 rounded-2xl p-8">
+            <div class="flex items-center gap-4 mb-4">
+              <div class="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
+                <i data-lucide="x" class="w-6 h-6 text-red-400"></i>
+              </div>
+              <p class="font-semibold">Your Current Site</p>
+            </div>
+            <ul class="space-y-3 text-neutral-400">
+              <li class="flex items-center gap-2"><span class="text-red-400">×</span> "We'll fix it in the next update" (for 2 years)</li>
+              <li class="flex items-center gap-2"><span class="text-red-400">×</span> Stock photos that scream "we don't care"</li>
+              <li class="flex items-center gap-2"><span class="text-red-400">×</span> Mobile experience from 2012</li>
+              <li class="flex items-center gap-2"><span class="text-red-400">×</span> Contact form that goes to /dev/null</li>
+            </ul>
+          </div>
+          
+          <div class="bg-gradient-to-br from-orange-500/10 to-purple-500/10 border border-orange-500/20 rounded-2xl p-8">
+            <div class="flex items-center gap-4 mb-4">
+              <div class="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center">
+                <i data-lucide="check" class="w-6 h-6 text-green-400"></i>
+              </div>
+              <p class="font-semibold">What We Build</p>
+            </div>
+            <ul class="space-y-3 text-neutral-300">
+              <li class="flex items-center gap-2"><span class="text-green-400">✓</span> Sites that convert visitors into customers</li>
+              <li class="flex items-center gap-2"><span class="text-green-400">✓</span> Custom photography & brand assets</li>
+              <li class="flex items-center gap-2"><span class="text-green-400">✓</span> Mobile-first, blazing fast</li>
+              <li class="flex items-center gap-2"><span class="text-green-400">✓</span> Real booking systems that actually work</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 3: THE FLEX (Guide) -->
+  <section class="py-32 px-8">
+    <div class="max-w-5xl mx-auto text-center">
+      <p class="text-neutral-500 text-sm tracking-[0.3em] uppercase mb-6">Who We Are (Besides Brilliant)</p>
+      <h2 class="text-4xl md:text-6xl font-black mb-8 leading-tight">
+        We're Not Like<br>
+        <span class="gradient-text">Other Agencies</span>
+      </h2>
+      <p class="text-xl text-neutral-400 leading-relaxed max-w-3xl mx-auto mb-16">
+        Other agencies will send you 47 revision rounds, three project managers, and a bill that requires therapy. We'll send you a website that converts. Then we'll disappear into the night like design Batman.
+      </p>
+      
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="text-center">
+          <p class="text-6xl md:text-7xl font-black gradient-text-blue mb-2">847%</p>
+          <p class="text-neutral-400">Average traffic increase</p>
+          <p class="text-sm text-neutral-600 mt-1">(not a typo, you're just that behind)</p>
+        </div>
+        <div class="text-center">
+          <p class="text-6xl md:text-7xl font-black gradient-text mb-2">$0</p>
+          <p class="text-neutral-400">Times we've used "synergy"</p>
+          <p class="text-sm text-neutral-600 mt-1">(unironically, at least)</p>
+        </div>
+        <div class="text-center">
+          <p class="text-6xl md:text-7xl font-black text-white mb-2">∞</p>
+          <p class="text-neutral-400">The gap between us</p>
+          <p class="text-sm text-neutral-600 mt-1">and your cousin who "knows WordPress"</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 4: THE WORK -->
+  <section id="work" class="py-32 px-8 border-t border-white/5">
     <div class="max-w-7xl mx-auto">
       <div class="mb-20">
-        <p class="text-silver-500 text-sm tracking-[0.3em] uppercase mb-4">Selected Work</p>
-        <h2 class="text-4xl md:text-5xl font-black">Projects That Perform</h2>
+        <p class="text-neutral-500 text-sm tracking-[0.3em] uppercase mb-4">Proof We Know What We're Doing</p>
+        <h2 class="text-4xl md:text-5xl font-black">Projects That Actually Perform</h2>
       </div>
       
       <div class="space-y-24">
         <!-- Project 1: GhostWatch -->
-        <div class="project-card group cursor-pointer">
+        <a href="case-study-ghostwatch.html" class="project-card group block">
           <div class="grid lg:grid-cols-2 gap-12 items-center">
             <div class="overflow-hidden rounded-2xl">
               <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1400&q=80" 
@@ -200,51 +330,57 @@
             </div>
             <div class="space-y-6">
               <div class="flex items-center gap-4">
-                <span class="text-xs text-silver-500 tracking-widest uppercase">SaaS Platform</span>
-                <span class="w-8 h-px bg-silver-700"></span>
-                <span class="text-xs text-silver-500">2026</span>
+                <span class="text-xs text-neutral-500 tracking-widest uppercase">SaaS Platform</span>
+                <span class="w-8 h-px bg-neutral-700"></span>
+                <span class="text-xs text-neutral-500">2026</span>
               </div>
               <h3 class="text-4xl md:text-5xl font-black">GhostWatch</h3>
-              <p class="text-silver-400 text-lg leading-relaxed">
-                Competitor intelligence platform that helps founders stay ahead of market shifts. Built for conversion from day one.
+              <p class="text-neutral-400 text-lg leading-relaxed">
+                Competitor intelligence platform. Built for conversion from day one. Their old site looked like a Bootstrap tutorial. This one looks like money.
               </p>
               <div class="flex items-center gap-8 pt-4">
                 <div>
-                  <p class="text-3xl font-black text-azure-400">3×</p>
-                  <p class="text-sm text-silver-500">Conversion Rate</p>
+                  <p class="text-3xl font-black text-orange-400">3×</p>
+                  <p class="text-sm text-neutral-500">Conversion Rate</p>
                 </div>
                 <div>
-                  <p class="text-3xl font-black text-azure-400">50+</p>
-                  <p class="text-sm text-silver-500">Paying Customers</p>
+                  <p class="text-3xl font-black text-orange-400">50+</p>
+                  <p class="text-sm text-neutral-500">Paying Customers</p>
                 </div>
               </div>
+              <p class="text-orange-400 text-sm flex items-center gap-2 pt-2">
+                View Case Study <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </p>
             </div>
           </div>
-        </div>
+        </a>
         
         <!-- Project 2: Hatfield's -->
-        <div class="project-card group cursor-pointer">
+        <a href="case-study-hatfields.html" class="project-card group block">
           <div class="grid lg:grid-cols-2 gap-12 items-center">
             <div class="order-2 lg:order-1 space-y-6">
               <div class="flex items-center gap-4">
-                <span class="text-xs text-silver-500 tracking-widest uppercase">Automotive</span>
-                <span class="w-8 h-px bg-silver-700"></span>
-                <span class="text-xs text-silver-500">2026</span>
+                <span class="text-xs text-neutral-500 tracking-widest uppercase">Automotive</span>
+                <span class="w-8 h-px bg-neutral-700"></span>
+                <span class="text-xs text-neutral-500">2026</span>
               </div>
               <h3 class="text-4xl md:text-5xl font-black">Hatfield's Automotive</h3>
-              <p class="text-silver-400 text-lg leading-relaxed">
-                Premium auto shop website with online booking and service estimator. Turned a family business into a local leader.
+              <p class="text-neutral-400 text-lg leading-relaxed">
+                Family auto shop that needed to look premium. Their old site had Comic Sans (we're not joking). Now they're the most booked shop in the city.
               </p>
               <div class="flex items-center gap-8 pt-4">
                 <div>
-                  <p class="text-3xl font-black text-azure-400">+40%</p>
-                  <p class="text-sm text-silver-500">Appointments</p>
+                  <p class="text-3xl font-black text-orange-400">+40%</p>
+                  <p class="text-sm text-neutral-500">Appointments</p>
                 </div>
                 <div>
-                  <p class="text-3xl font-black text-azure-400">2.3×</p>
-                  <p class="text-sm text-silver-500">Time on Site</p>
+                  <p class="text-3xl font-black text-orange-400">2.3×</p>
+                  <p class="text-sm text-neutral-500">Time on Site</p>
                 </div>
               </div>
+              <p class="text-orange-400 text-sm flex items-center gap-2 pt-2">
+                View Case Study <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </p>
             </div>
             <div class="order-1 lg:order-2 overflow-hidden rounded-2xl">
               <img src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=1400&q=80" 
@@ -252,10 +388,10 @@
                    class="project-image w-full aspect-[4/3] object-cover">
             </div>
           </div>
-        </div>
+        </a>
         
         <!-- Project 3: Along -->
-        <div class="project-card group cursor-pointer">
+        <div class="project-card group">
           <div class="grid lg:grid-cols-2 gap-12 items-center">
             <div class="overflow-hidden rounded-2xl">
               <img src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=1400&q=80" 
@@ -264,22 +400,22 @@
             </div>
             <div class="space-y-6">
               <div class="flex items-center gap-4">
-                <span class="text-xs text-silver-500 tracking-widest uppercase">iOS App</span>
-                <span class="w-8 h-px bg-silver-700"></span>
-                <span class="text-xs text-silver-500">2026</span>
+                <span class="text-xs text-neutral-500 tracking-widest uppercase">iOS App</span>
+                <span class="w-8 h-px bg-neutral-700"></span>
+                <span class="text-xs text-neutral-500">2026</span>
               </div>
               <h3 class="text-4xl md:text-5xl font-black">Along</h3>
-              <p class="text-silver-400 text-lg leading-relaxed">
-                Proactive AI operator for busy professionals. A complete rebrand from concept to TestFlight in 30 days.
+              <p class="text-neutral-400 text-lg leading-relaxed">
+                Proactive AI operator. Complete rebrand from concept to TestFlight in 30 days. Because we're slightly unhinged. But mostly obsessed.
               </p>
               <div class="flex items-center gap-8 pt-4">
                 <div>
-                  <p class="text-3xl font-black text-azure-400">Live</p>
-                  <p class="text-sm text-silver-500">On TestFlight</p>
+                  <p class="text-3xl font-black text-orange-400">Live</p>
+                  <p class="text-sm text-neutral-500">On TestFlight</p>
                 </div>
                 <div>
-                  <p class="text-3xl font-black text-azure-400">30</p>
-                  <p class="text-sm text-silver-500">Days to Launch</p>
+                  <p class="text-3xl font-black text-orange-400">30</p>
+                  <p class="text-sm text-neutral-500">Days to Launch</p>
                 </div>
               </div>
             </div>
@@ -289,203 +425,200 @@
     </div>
   </section>
 
-  <!-- Section 3: Process -->
+  <!-- Section 5: THE PLAN (Process) -->
   <section class="py-32 px-8 border-t border-white/5">
     <div class="max-w-5xl mx-auto">
       <div class="text-center mb-20">
-        <p class="text-silver-500 text-sm tracking-[0.3em] uppercase mb-4">Our Process</p>
-        <h2 class="text-4xl md:text-5xl font-black">From Concept to Reality</h2>
+        <p class="text-neutral-500 text-sm tracking-[0.3em] uppercase mb-4">How This Works</p>
+        <h2 class="text-4xl md:text-5xl font-black">Shockingly Simple</h2>
+        <p class="text-neutral-400 mt-4">(Unlike your current website strategy)</p>
       </div>
       
       <div class="grid md:grid-cols-3 gap-12">
         <div class="process-step text-center">
-          <div class="w-16 h-16 border border-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
+          <div class="w-16 h-16 border border-orange-500/30 rounded-full flex items-center justify-center mx-auto mb-6">
             <span class="text-2xl font-light">01</span>
           </div>
-          <h3 class="text-xl font-bold mb-3">Design Exploration</h3>
-          <p class="text-silver-400 leading-relaxed">
-            We generate 50+ design directions using AI, then curate the strongest concepts for your brand.
+          <h3 class="text-xl font-bold mb-3">The Audit</h3>
+          <p class="text-neutral-400 leading-relaxed">
+            We look at your current site. We take notes. We probably laugh a little. Then we tell you exactly what's wrong. Brutal honesty, zero sugar.
           </p>
         </div>
         
         <div class="process-step text-center">
-          <div class="w-16 h-16 border border-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
+          <div class="w-16 h-16 border border-orange-500/30 rounded-full flex items-center justify-center mx-auto mb-6">
             <span class="text-2xl font-light">02</span>
           </div>
-          <h3 class="text-xl font-bold mb-3">Collaborative Curation</h3>
-          <p class="text-silver-400 leading-relaxed">
-            Together, we refine typography, spacing, and interactions until every pixel feels intentional.
+          <h3 class="text-xl font-bold mb-3">The Build</h3>
+          <p class="text-neutral-400 leading-relaxed">
+            You don't hear from us for 2-3 weeks. We're not ghosting you. We're building. Eating pizza. Questioning our life choices. Emerging with gold.
           </p>
         </div>
         
         <div class="process-step text-center">
-          <div class="w-16 h-16 border border-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
+          <div class="w-16 h-16 border border-orange-500/30 rounded-full flex items-center justify-center mx-auto mb-6">
             <span class="text-2xl font-light">03</span>
           </div>
-          <h3 class="text-xl font-bold mb-3">Superb Build</h3>
-          <p class="text-silver-400 leading-relaxed">
-            Clean, performant code. Real features that work—booking systems, payments, integrations.
+          <h3 class="text-xl font-bold mb-3">The Launch</h3>
+          <p class="text-neutral-400 leading-relaxed">
+            Your new site goes live. Your phone starts ringing. You wonder why you didn't do this sooner. (We wonder too, but we're polite enough not to ask.)
           </p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Section 4: Proof -->
+  <!-- Section 6: THE DREAM (Success) -->
   <section class="py-32 px-8">
-    <div class="max-w-4xl mx-auto">
-      <div class="relative mb-20">
-        <span class="quote-mark">"</span>
-        <blockquote class="text-3xl md:text-4xl font-medium leading-tight relative z-10">
-          Ventus didn't just build us a website—they built us a <span class="gradient-text">business engine</span>. We're now booked 2 weeks out and had to hire another mechanic.
-        </blockquote>
-      </div>
-      
-      <div class="flex items-center gap-6">
-        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400"></div>
-        <div>
-          <p class="font-semibold">James Hatfield</p>
-          <p class="text-sm text-silver-500">Owner, Hatfield's Automotive</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Section 5: Philosophy -->
-  <section class="py-32 px-8 border-t border-white/5">
     <div class="max-w-4xl mx-auto text-center">
-      <p class="text-silver-500 text-sm tracking-[0.3em] uppercase mb-8">Our Philosophy</p>
-      <h2 class="text-4xl md:text-6xl font-black leading-tight mb-8">
-        Every Project Is a<br>
-        <span class="gradient-text">Partnership</span>
+      <p class="text-neutral-500 text-sm tracking-[0.3em] uppercase mb-6">Imagine</p>
+      <h2 class="text-4xl md:text-6xl font-black mb-8 leading-tight">
+        A Website That<br>
+        <span class="gradient-text">Actually Sells</span>
       </h2>
-      <p class="text-xl text-silver-400 leading-relaxed max-w-2xl mx-auto">
-        We don't do templates. We don't do "good enough." We work with ambitious brands who believe their website should be their best salesperson.
+      <p class="text-xl text-neutral-400 leading-relaxed">
+        Someone finds you on Google. They click. They don't immediately hit the back button. They scroll. They think "damn, these people know what they're doing."
+      </p>
+      <p class="text-xl text-neutral-400 leading-relaxed mt-6">
+        They fill out your form. They call your number. They buy your thing. <strong class="text-white">While you sleep.</strong> While you eat. While you're on vacation pretending to check emails but actually just drinking margaritas.
       </p>
     </div>
   </section>
 
-  <!-- Section 6: The Offer -->
+  <!-- Section 7: THE DOOM (Failure) -->
+  <section class="py-32 px-8 border-t border-white/5 bg-red-500/5">
+    <div class="max-w-4xl mx-auto text-center">
+      <p class="text-red-400 text-sm tracking-[0.3em] uppercase mb-6">Or... Don't</p>
+      <h2 class="text-4xl md:text-6xl font-black mb-8 leading-tight">
+        Keep Your Current Site.<br>
+        <span class="text-red-400">See What Happens.</span>
+      </h2>
+      <div class="space-y-4 text-xl text-neutral-400">
+        <p>Keep explaining to potential clients that "the site is just temporary."</p>
+        <p>Keep losing leads to competitors with better design.</p>
+        <p>Keep pretending that "word of mouth" is a sustainable strategy in 2026.</p>
+      </div>
+      <p class="text-2xl text-white font-semibold mt-12">
+        We'll be here. Getting more expensive.
+      </p>
+    </div>
+  </section>
+
+  <!-- Section 8: THE OFFER -->
   <section id="offer" class="py-32 px-8">
     <div class="max-w-4xl mx-auto">
       <div class="text-center mb-16">
-        <p class="text-silver-500 text-sm tracking-[0.3em] uppercase mb-4">Start Here</p>
+        <p class="text-neutral-500 text-sm tracking-[0.3em] uppercase mb-4">Start Here</p>
         <h2 class="text-4xl md:text-6xl font-black mb-6">The Design Day</h2>
-        <p class="text-2xl text-silver-400">$500</p>
+        <p class="text-2xl text-neutral-400">$500</p>
+        <p class="text-neutral-500 mt-2">One day. No BS. Real results.</p>
       </div>
       
       <div class="grid md:grid-cols-2 gap-12 mb-12">
         <div class="space-y-6">
-          <p class="text-lg leading-relaxed">
+          <p class="text-lg leading-relaxed text-neutral-300">
             One day of focused design work. We explore concepts, refine direction, and deliver interactive prototypes you can actually use.
           </p>
           <ul class="space-y-4">
             <li class="flex items-center gap-3">
-              <i data-lucide="check" class="w-5 h-5 text-azure-400"></i>
+              <i data-lucide="check" class="w-5 h-5 text-orange-400"></i>
               <span>8 hours dedicated design work</span>
             </li>
             <li class="flex items-center gap-3">
-              <i data-lucide="check" class="w-5 h-5 text-azure-400"></i>
+              <i data-lucide="check" class="w-5 h-5 text-orange-400"></i>
               <span>3 refined concept directions</span>
             </li>
             <li class="flex items-center gap-3">
-              <i data-lucide="check" class="w-5 h-5 text-azure-400"></i>
+              <i data-lucide="check" class="w-5 h-5 text-orange-400"></i>
               <span>Interactive prototypes</span>
             </li>
             <li class="flex items-center gap-3">
-              <i data-lucide="check" class="w-5 h-5 text-azure-400"></i>
+              <i data-lucide="check" class="w-5 h-5 text-orange-400"></i>
               <span>1 revision round</span>
             </li>
           </ul>
         </div>
         
-        <div class="space-y-6">
-          <p class="text-silver-400">
-            Perfect for:
+        <div class="bg-neutral-900/50 border border-white/10 rounded-2xl p-8">
+          <h3 class="text-xl font-bold mb-6">Ready to Stop Losing Money?</h3>
+          <p class="text-neutral-400 mb-6">
+            We take 4 projects per month. Not because we're exclusive. Because we're human and sleep is non-negotiable.
           </p>
-          <ul class="space-y-3 text-silver-400">
-            <li>• Startups validating a new direction</li>
-            <li>• Established businesses refreshing their brand</li>
-            <li>• Founders who want to see before they commit</li>
-          </ul>
-          <p class="text-sm text-silver-500 pt-4">
-            100% refundable if you're not satisfied. No questions asked.
-          </p>
-        </div>
-      </div>
-      
-      <div class="text-center">
-        <a href="explore.html" class="magnetic-btn inline-flex items-center gap-3 bg-white text-black px-12 py-6 rounded-full font-semibold text-xl hover:bg-azure-400 transition-colors">
-          Explore Designs First
-          <i data-lucide="arrow-right" class="w-6 h-6"></i>
-        </a>
-        
-        <div class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-silver-500">
-          <span>Already know what you want?</span>
-          <a href="https://calendar.app.google/pN5fk4kG9t5EFCAF6" target="_blank" class="text-azure-400 hover:underline inline-flex items-center gap-1">
-            Book directly
-            <i data-lucide="external-link" class="w-3 h-3"></i>
+          <a href="https://cal.com/ventus/design-day" target="_blank" class="magnetic-btn w-full inline-flex items-center justify-center gap-3 bg-white text-black px-8 py-4 rounded-full font-semibold text-lg hover:bg-orange-400 transition-colors mb-4">
+            Book a Call — If You Dare
+            <i data-lucide="arrow-right" class="w-5 h-5"></i>
           </a>
-          <span class="hidden sm:inline">•</span>
-          <a href="mailto:hello@ventusys.com" class="text-azure-400 hover:underline">Discuss larger project</a>
+          <p class="text-sm text-neutral-500 text-center">Currently booking 2-3 weeks out</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Section 7: FAQ -->
+  <!-- Section 9: FAQ -->
   <section class="py-32 px-8 border-t border-white/5">
     <div class="max-w-3xl mx-auto">
       <div class="text-center mb-16">
-        <p class="text-silver-500 text-sm tracking-[0.3em] uppercase mb-4">FAQ</p>
-        <h2 class="text-4xl font-black">Common Questions</h2>
+        <p class="text-neutral-500 text-sm tracking-[0.3em] uppercase mb-4">FAQ</p>
+        <h2 class="text-4xl md:text-5xl font-black">Questions You Should Ask</h2>
       </div>
       
       <div class="space-y-0">
         <div class="faq-item py-6 cursor-pointer" onclick="toggleFaq(this)">
           <div class="flex items-center justify-between">
-            <h3 class="text-lg font-semibold pr-8">How is this different from hiring a typical agency?</h3>
+            <h3 class="text-lg font-semibold pr-8">How much does a full website cost?</h3>
             <i data-lucide="plus" class="w-5 h-5 faq-icon flex-shrink-0"></i>
           </div>
           <div class="faq-content">
-            <p class="text-silver-400 pt-4 leading-relaxed">
-              We combine AI exploration with human curation to move faster without sacrificing quality. Most agencies take weeks to show concepts. We take hours. Plus, we actually build—no handoffs to developers who weren't in the room.
+            <p class="text-neutral-400 pt-4 leading-relaxed">
+              Most projects range from $3,000-$8,000 depending on complexity. E-commerce, custom integrations, or advanced animations add to the scope. We start with a Design Day ($500) so you can see our work before committing to the full build.
             </p>
           </div>
         </div>
         
         <div class="faq-item py-6 cursor-pointer" onclick="toggleFaq(this)">
           <div class="flex items-center justify-between">
-            <h3 class="text-lg font-semibold pr-8">What if I don't like the Design Day concepts?</h3>
+            <h3 class="text-lg font-semibold pr-8">How long does it take?</h3>
             <i data-lucide="plus" class="w-5 h-5 faq-icon flex-shrink-0"></i>
           </div>
           <div class="faq-content">
-            <p class="text-silver-400 pt-4 leading-relaxed">
-              Full refund, no questions asked. We only want to work with clients who are excited about the direction. That said, we've never had a Design Day not result in a happy client.
+            <p class="text-neutral-400 pt-4 leading-relaxed">
+              Design Day: 1 week. Full website: 3-4 weeks from kickoff to launch. We work fast because we've done this 100+ times. Your site won't be "almost done" for six months. That's not how we operate.
             </p>
           </div>
         </div>
         
         <div class="faq-item py-6 cursor-pointer" onclick="toggleFaq(this)">
           <div class="flex items-center justify-between">
-            <h3 class="text-lg font-semibold pr-8">How long does a full website take?</h3>
+            <h3 class="text-lg font-semibold pr-8">What if I don't like the design?</h3>
             <i data-lucide="plus" class="w-5 h-5 faq-icon flex-shrink-0"></i>
           </div>
           <div class="faq-content">
-            <p class="text-silver-400 pt-4 leading-relaxed">
-              Most projects ship in 2-4 weeks. Complex builds (e-commerce, custom integrations) can take 6-8 weeks. We'll give you a clear timeline during our first call.
+            <p class="text-neutral-400 pt-4 leading-relaxed">
+              That's what the Design Day is for. You see 3 directions before we build anything. If we're not aligned after that, we part ways and you keep the design concepts. No hard feelings. (Okay, maybe a few. We're sensitive.)
             </p>
           </div>
         </div>
         
         <div class="faq-item py-6 cursor-pointer" onclick="toggleFaq(this)">
           <div class="flex items-center justify-between">
-            <h3 class="text-lg font-semibold pr-8">Do you work with startups or only big companies?</h3>
+            <h3 class="text-lg font-semibold pr-8">Do you do SEO?</h3>
             <i data-lucide="plus" class="w-5 h-5 faq-icon flex-shrink-0"></i>
           </div>
           <div class="faq-content">
-            <p class="text-silver-400 pt-4 leading-relaxed">
-              Both. Startups love us because we move fast and think about conversion from day one. Established companies love us because we bring fresh perspective without the agency overhead.
+            <p class="text-neutral-400 pt-4 leading-relaxed">
+              Every site we build is technically optimized for search engines (fast, mobile-friendly, proper structure). For ongoing SEO strategy and content, we partner with specialists. We know what we're good at, and we stay in our lane.
+            </p>
+          </div>
+        </div>
+        
+        <div class="faq-item py-6 cursor-pointer" onclick="toggleFaq(this)">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-semibold pr-8">What platform do you use?</h3>
+            <i data-lucide="plus" class="w-5 h-5 faq-icon flex-shrink-0"></i>
+          </div>
+          <div class="faq-content">
+            <p class="text-neutral-400 pt-4 leading-relaxed">
+              Custom code (React/Next.js) for maximum performance and flexibility. No templates. No page builders that slow your site to a crawl. Clean, fast, scalable code that you actually own.
             </p>
           </div>
         </div>
@@ -493,26 +626,37 @@
     </div>
   </section>
 
-  <!-- Section 8: Final CTA -->
-  <section class="py-48 px-8">
+  <!-- Section 10: Final CTA -->
+  <section class="py-32 px-8 bg-gradient-to-b from-transparent to-orange-500/5">
     <div class="max-w-4xl mx-auto text-center">
       <h2 class="text-5xl md:text-7xl font-black leading-tight mb-8">
-        Ready to Turn Your<br>
-        <span class="gradient-text">Website Into Revenue?</span>
+        Your Move
       </h2>
-      <a href="explore.html" class="magnetic-btn inline-flex items-center gap-3 bg-white text-black px-12 py-6 rounded-full font-semibold text-xl hover:bg-azure-400 transition-colors mt-8">
-        Start Your Project
-        <i data-lucide="arrow-right" class="w-6 h-6"></i>
-      </a>
+      <p class="text-xl text-neutral-400 mb-12 max-w-2xl mx-auto">
+        The longer you wait, the longer your competitors win. Simple math. Painful math.
+      </p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="https://cal.com/ventus/design-day" target="_blank" class="magnetic-btn inline-flex items-center gap-3 bg-white text-black px-10 py-5 rounded-full font-semibold text-lg hover:bg-orange-400 transition-colors">
+          Book Your Design Day
+          <i data-lucide="arrow-right" class="w-5 h-5"></i>
+        </a>
+        <a href="#work" class="inline-flex items-center gap-3 border border-white/20 px-10 py-5 rounded-full font-semibold text-lg hover:bg-white/5 transition-colors">
+          See More Work
+        </a>
+      </div>
+      <p class="text-sm text-neutral-500 mt-8">"No pressure. But also... some pressure."</p>
     </div>
   </section>
 
   <!-- Footer -->
   <footer class="py-12 px-8 border-t border-white/5">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-      <span class="text-sm tracking-[0.3em] uppercase">Ventus</span>
-      <p class="text-silver-500 text-sm">© 2026 Ventus. All rights reserved.</p>
-      <a href="mailto:hello@ventusys.com" class="text-sm text-silver-400 hover:text-white transition-colors">hello@ventusys.com</a>
+      <span class="text-sm tracking-[0.3em] uppercase font-medium">Ventus</span>
+      <p class="text-neutral-500 text-sm">Your website called. It's breaking up with you.</p>
+      <div class="flex items-center gap-6">
+        <a href="mailto:hello@ventusys.com" class="text-sm text-neutral-400 hover:text-white transition-colors">hello@ventusys.com</a>
+        <a href="explore.html" class="text-sm text-neutral-400 hover:text-white transition-colors">Explore</a>
+      </div>
     </div>
   </footer>
 
@@ -520,27 +664,30 @@
     // Initialize Lucide icons
     lucide.createIcons();
     
-    // Initialize Lenis smooth scroll
+    // Lenis Smooth Scroll
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       direction: 'vertical',
-      smooth: true
+      gestureDirection: 'vertical',
+      smooth: true,
+      smoothTouch: false,
+      touchMultiplier: 2
     });
-    
+
     function raf(time) {
       lenis.raf(time);
       requestAnimationFrame(raf);
     }
     requestAnimationFrame(raf);
-    
-    // GSAP Animations
+
+    // GSAP ScrollTrigger setup
     gsap.registerPlugin(ScrollTrigger);
-    
+
     // Preloader
-    const preloader = document.getElementById('preloader');
-    
     window.addEventListener('load', () => {
+      const preloader = document.getElementById('preloader');
+      
       gsap.to(preloader, {
         opacity: 0,
         duration: 0.8,
@@ -552,7 +699,7 @@
         }
       });
     });
-    
+
     function initAnimations() {
       // Hero text reveal
       gsap.to('.hero-line-inner', {
@@ -562,37 +709,42 @@
         ease: 'power4.out'
       });
       
+      // Hero label
+      gsap.to('#hero-label', {
+        opacity: 1,
+        duration: 0.8,
+        delay: 0.6
+      });
+      
       // Hero subtext
       gsap.to('#hero-subtext', {
         opacity: 1,
         y: 0,
         duration: 1,
-        delay: 0.8,
-        ease: 'power3.out'
+        delay: 0.9
       });
       
       // Hero CTA
       gsap.to('#hero-cta', {
         opacity: 1,
-        scale: 1,
         duration: 0.8,
-        delay: 1.2,
-        ease: 'back.out(1.7)'
+        delay: 1.2
       });
       
-      // Navigation show on scroll
+      // Nav show on scroll
       ScrollTrigger.create({
         start: 'top -100',
         onUpdate: (self) => {
           const nav = document.getElementById('nav');
-          if (self.direction === -1 || self.progress > 0) {
+          if (self.progress > 0) {
+            nav.style.opacity = '1';
+            nav.style.transform = 'translateY(0)';
             nav.classList.add('visible');
-            gsap.to(nav, { opacity: 1, y: 0, duration: 0.3 });
           }
         }
       });
       
-      // Process steps reveal
+      // Process steps
       gsap.utils.toArray('.process-step').forEach((step, i) => {
         gsap.to(step, {
           opacity: 1,
@@ -601,58 +753,21 @@
           ease: 'power3.out',
           scrollTrigger: {
             trigger: step,
-            start: 'top 80%',
-            toggleActions: 'play none none none'
+            start: 'top 85%'
           },
-          delay: i * 0.2
-        });
-      });
-      
-      // Project cards parallax
-      gsap.utils.toArray('.project-card').forEach((card) => {
-        gsap.from(card, {
-          y: 60,
-          opacity: 0,
-          duration: 1,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: card,
-            start: 'top 85%',
-            toggleActions: 'play none none none'
-          }
+          delay: i * 0.1
         });
       });
     }
-    
+
     // FAQ Toggle
-    function toggleFaq(element) {
-      const isActive = element.classList.contains('active');
-      
-      // Close all
-      document.querySelectorAll('.faq-item').forEach(item => {
-        item.classList.remove('active');
+    function toggleFaq(item) {
+      const allItems = document.querySelectorAll('.faq-item');
+      allItems.forEach(faq => {
+        if (faq !== item) faq.classList.remove('active');
       });
-      
-      // Open clicked if wasn't active
-      if (!isActive) {
-        element.classList.add('active');
-      }
+      item.classList.toggle('active');
     }
-    
-    // Magnetic button effect
-    document.querySelectorAll('.magnetic-btn').forEach(btn => {
-      btn.addEventListener('mousemove', (e) => {
-        const rect = btn.getBoundingClientRect();
-        const x = e.clientX - rect.left - rect.width / 2;
-        const y = e.clientY - rect.top - rect.height / 2;
-        
-        btn.style.transform = `translate(${x * 0.1}px, ${y * 0.1}px)`;
-      });
-      
-      btn.addEventListener('mouseleave', () => {
-        btn.style.transform = 'translate(0, 0)';
-      });
-    });
   </script>
 </body>
 </html>
