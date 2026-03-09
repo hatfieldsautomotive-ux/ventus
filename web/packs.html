@@ -4,90 +4,91 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Ventus Collections</title>
-  <meta name="description" content="Ventus Prompt Collections: structured .md systems for Builder, Operator, Creator, Research, and Strategy workflows."/>
+  <meta name="description" content="Ventus prompt collections and .md systems."/>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <style>
-    :root{--bg:#f7f8fa;--text:#111318;--muted:#5e6673;--line:#e7eaf0;--card:#fff;--blue:#3a6ff7;--violet:#7a5af8;--dark:#0e1320}
-    *{box-sizing:border-box} html,body{margin:0;font-family:Inter,sans-serif;background:var(--bg);color:var(--text)}
-    .display{font-family:'Space Grotesk',sans-serif}.container{max-width:1160px;margin:0 auto;padding:0 24px}
-    .hero-dark{background:radial-gradient(900px 360px at 80% -10%,rgba(122,90,248,.25),transparent 60%),linear-gradient(180deg,#111827,#0e1320);color:#eef3ff}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:16px}
-    .btn{background:linear-gradient(120deg,var(--blue),var(--violet));color:#fff;font-weight:700}
-    .btn2{border:1px solid #cdd6e7;color:#1f2937}
-    .fade-up{opacity:0;transform:translateY(20px)}
+    :root{--bg:#050505;--surface:#0b0b0b;--surface2:#111;--line:#232323;--text:#f5f5f5;--muted:#9a9a9a;--accent:#f97316}
+    *{box-sizing:border-box} html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,sans-serif}
+    .container{max-width:1140px;margin:0 auto;padding:0 24px}
+    .card{background:linear-gradient(180deg,var(--surface),var(--surface2));border:1px solid var(--line);border-radius:20px}
+    .btn{background:linear-gradient(120deg,var(--accent),#fb923c);color:#120b05;font-weight:800;border-radius:12px;padding:12px 16px;display:inline-block;text-decoration:none}
+    .btn2{border:1px solid #3a3a3a;color:#ddd;border-radius:12px;padding:12px 16px;display:inline-block;text-decoration:none}
+    .fade-up{opacity:0;transform:translateY(16px)}
   </style>
 </head>
 <body>
-  <header class="sticky top-0 z-50 bg-white/85 backdrop-blur border-b border-[var(--line)]">
+  <header class="sticky top-0 z-50 border-b" style="border-color:var(--line);background:rgba(5,5,5,.88);backdrop-filter:blur(8px)">
     <div class="container py-4 flex items-center justify-between">
-      <a class="display font-bold tracking-wide" href="index.html">VENTUS</a>
-      <nav class="hidden md:flex items-center gap-6 text-sm text-slate-600">
-        <a href="index.html#collections">Collections</a><a href="index.html#service">Service</a><a href="booking.html">Book</a>
+      <a href="index.html" class="text-sm tracking-[0.35em] uppercase font-semibold">Ventus</a>
+      <nav class="hidden md:flex items-center gap-6 text-sm" style="color:var(--muted)">
+        <a href="index.html">Home</a>
+        <a href="index.html#service">Built System</a>
+        <a href="booking.html" class="btn" style="padding:10px 18px">Get Started</a>
       </nav>
     </div>
   </header>
 
-  <section class="hero-dark py-20">
+  <section class="py-20 px-8 text-center">
     <div class="container">
-      <p class="text-xs uppercase tracking-[.28em] text-cyan-300 mb-4">Ventus Collections</p>
-      <h1 class="display text-5xl md:text-6xl leading-[1.03] mb-5">Prompt systems designed for real outcomes.</h1>
-      <p class="text-lg text-slate-300 max-w-2xl">Each Collection gives your AI structured expertise for a specific type of work — then scales that quality across your workflow.</p>
+      <p class="text-xs tracking-[0.28em] uppercase mb-4" style="color:var(--accent)">Ventus Collections</p>
+      <h1 class="text-5xl md:text-6xl font-black mb-4">Prompt Systems Built For Real Work</h1>
+      <p class="text-lg max-w-2xl mx-auto" style="color:var(--muted)">Choose a Collection, install the framework, and run AI in expert mode.</p>
     </div>
   </section>
 
-  <section class="py-16">
+  <section class="pb-16 px-8">
     <div class="container grid md:grid-cols-3 gap-6">
       <article class="card p-6 fade-up">
-        <p class="text-xs uppercase tracking-[.2em] text-blue-600 mb-2">Design System</p>
-        <h2 class="display text-2xl mb-2">Ventus Elite Builder</h2>
-        <p class="text-[var(--muted)] mb-5">7-mode premium design framework for cinematic landing pages, conversion copy, and polished visual systems.</p>
-        <p class="text-3xl font-bold mb-4">$75</p>
-        <a class="btn inline-block rounded-xl px-4 py-3 w-full text-center" href="https://buy.stripe.com/9B69AS33Tfqv55ufW3ffy01" target="_blank">Buy Collection</a>
-        <a class="inline-block mt-3 text-sm text-slate-600 hover:text-slate-900" href="packs/elite-builder/README.md" target="_blank">Preview files</a>
+        <p class="text-xs uppercase tracking-[.2em] mb-2" style="color:#f59e0b">Design System</p>
+        <h2 class="text-2xl font-extrabold mb-2">Ventus Elite Builder</h2>
+        <p style="color:var(--muted)" class="mb-5">7-mode premium framework for cinematic pages, copy systems, and polished visual output.</p>
+        <p class="text-3xl font-black mb-4">$75</p>
+        <a class="btn w-full text-center" href="https://buy.stripe.com/9B69AS33Tfqv55ufW3ffy01" target="_blank">Buy Collection</a>
+        <a class="btn2 w-full text-center mt-3" href="packs/elite-builder/README.md" target="_blank">Preview Files</a>
       </article>
 
       <article class="card p-6 fade-up">
-        <p class="text-xs uppercase tracking-[.2em] text-blue-600 mb-2">Executive Operator</p>
-        <h2 class="display text-2xl mb-2">CEO Operator Pack</h2>
-        <p class="text-[var(--muted)] mb-5">Decision frameworks, brief templates, and operational cadence systems for founders and executives.</p>
-        <p class="text-3xl font-bold mb-4">$90</p>
-        <a class="btn inline-block rounded-xl px-4 py-3 w-full text-center" href="https://buy.stripe.com/fZuaEW9sh6TZ69ycJRffy02" target="_blank">Buy Collection</a>
-        <a class="inline-block mt-3 text-sm text-slate-600 hover:text-slate-900" href="packs/ceo-operator/README.md" target="_blank">Preview files</a>
+        <p class="text-xs uppercase tracking-[.2em] mb-2" style="color:#c084fc">Executive Operator</p>
+        <h2 class="text-2xl font-extrabold mb-2">CEO Operator Pack</h2>
+        <p style="color:var(--muted)" class="mb-5">Decision frameworks, brief templates, and cadence systems for founders and operators.</p>
+        <p class="text-3xl font-black mb-4">$90</p>
+        <a class="btn w-full text-center" href="https://buy.stripe.com/fZuaEW9sh6TZ69ycJRffy02" target="_blank">Buy Collection</a>
+        <a class="btn2 w-full text-center mt-3" href="packs/ceo-operator/README.md" target="_blank">Preview Files</a>
       </article>
 
       <article class="card p-6 fade-up">
-        <p class="text-xs uppercase tracking-[.2em] text-blue-600 mb-2">Vertical Expert</p>
-        <h2 class="display text-2xl mb-2">Automotive Expert</h2>
-        <p class="text-[var(--muted)] mb-5">Service advisor scripts, customer explainers, and ethical upsell frameworks for automotive operators.</p>
-        <p class="text-3xl font-bold mb-4">$50</p>
-        <a class="btn inline-block rounded-xl px-4 py-3 w-full text-center" href="https://buy.stripe.com/3cI7sK8odfqvcxWbFNffy03" target="_blank">Buy Collection</a>
-        <a class="inline-block mt-3 text-sm text-slate-600 hover:text-slate-900" href="packs/automotive-expert/README.md" target="_blank">Preview files</a>
+        <p class="text-xs uppercase tracking-[.2em] mb-2" style="color:#5eead4">Vertical Expert</p>
+        <h2 class="text-2xl font-extrabold mb-2">Automotive Expert</h2>
+        <p style="color:var(--muted)" class="mb-5">Service advisor scripts, explainers, and ethical upsell frameworks for automotive teams.</p>
+        <p class="text-3xl font-black mb-4">$50</p>
+        <a class="btn w-full text-center" href="https://buy.stripe.com/3cI7sK8odfqvcxWbFNffy03" target="_blank">Buy Collection</a>
+        <a class="btn2 w-full text-center mt-3" href="packs/automotive-expert/README.md" target="_blank">Preview Files</a>
       </article>
     </div>
   </section>
 
-  <section class="py-8">
+  <section class="pb-16 px-8">
     <div class="container">
       <div class="card p-8 fade-up">
-        <p class="text-sm text-blue-600 mb-2">Optional Service</p>
-        <h3 class="display text-3xl mb-3">Need implementation done for you?</h3>
-        <p class="text-[var(--muted)] mb-6 max-w-3xl">Ventus can set up and maintain your AI system in OpenClaw (or equivalent) using the Collections above, tailored to your team workflow and operating goals.</p>
-        <div class="grid md:grid-cols-2 gap-4">
-          <div class="card p-5"><p class="text-sm text-[var(--muted)]">AI System Setup</p><p class="display text-3xl">$1500</p><p class="text-sm text-[var(--muted)]">one-time</p></div>
-          <div class="card p-5"><p class="text-sm text-[var(--muted)]">AI System Management</p><p class="display text-3xl">$500</p><p class="text-sm text-[var(--muted)]">per month</p></div>
+        <p class="text-sm mb-2" style="color:var(--accent)">Built System Offer</p>
+        <h3 class="text-3xl font-extrabold mb-3">Need implementation done for you?</h3>
+        <p style="color:var(--muted)" class="mb-6">We set up and maintain your AI system in OpenClaw (or equivalent). Monthly management is only available for setup clients.</p>
+        <div class="grid md:grid-cols-2 gap-4 mb-6">
+          <div class="card p-5"><p class="text-sm" style="color:var(--muted)">AI System Setup</p><p class="text-3xl font-black">$1500</p><p class="text-sm" style="color:var(--muted)">one-time</p></div>
+          <div class="card p-5"><p class="text-sm" style="color:var(--muted)">AI System Management</p><p class="text-3xl font-black">$500</p><p class="text-sm" style="color:var(--muted)">per month (setup clients only)</p></div>
         </div>
-        <div class="mt-6"><a href="booking.html" class="btn2 inline-block px-5 py-3 rounded-xl">Book Setup Call</a></div>
+        <a href="booking.html" class="btn">Book Setup Call</a>
       </div>
     </div>
   </section>
 
-  <footer class="py-8 border-t border-[var(--line)] bg-white">
-    <div class="container text-sm text-[var(--muted)] flex flex-col md:flex-row justify-between gap-4">
+  <footer class="py-8 border-t" style="border-color:var(--line)">
+    <div class="container flex flex-col md:flex-row gap-4 justify-between text-sm" style="color:var(--muted)">
       <p>© 2026 Ventus Systems</p>
       <div class="flex gap-6"><a href="index.html">Home</a><a href="booking.html">Book</a><a href="mailto:automations@ventusys.com">automations@ventusys.com</a></div>
     </div>
@@ -95,7 +96,7 @@
 
   <script>
     gsap.registerPlugin(ScrollTrigger);
-    gsap.utils.toArray('.fade-up').forEach(el=>gsap.fromTo(el,{opacity:0,y:18},{opacity:1,y:0,duration:.55,scrollTrigger:{trigger:el,start:'top 88%'}}));
+    gsap.utils.toArray('.fade-up').forEach(el=>gsap.fromTo(el,{opacity:0,y:16},{opacity:1,y:0,duration:.5,scrollTrigger:{trigger:el,start:'top 88%'}}));
   </script>
 </body>
 </html>
