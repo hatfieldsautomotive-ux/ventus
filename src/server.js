@@ -43,6 +43,12 @@ const PRODUCT_MAP = {
   'Ventus Automotive Expert Pack': 'automotive-expert'
 };
 
+const CHECKOUT_PRODUCTS = {
+  'elite-builder': { name: 'Ventus Elite Builder Pack', amount: 7500 },
+  'ceo-operator': { name: 'Ventus CEO Operator Pack', amount: 9000 },
+  'automotive-expert': { name: 'Ventus Automotive Expert Pack', amount: 5000 }
+};
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(WEB_DIR));
@@ -87,37 +93,65 @@ app.get('/api/download/:product', (req, res) => {
   });
 });
 
-// Optional Stripe webhook for paid fulfillment token issuance
+// Create Stripe Checkout session per collection (no public direct file access)
+app.get('/buy/:product', async (req, res) => {
+  if (!stripe) return res.status(500).send('Stripe not configured');
+  const product = req.params.product;
+  const cfg = CHECKOUT_PRODUCTS[product];
+  if (!cfg) return res.status(404).send('Unknown product');
+
+  try {
+    const origin = `${req.protocol}://${req.get('host')}`;
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            unit_amount: cfg.amount,
+            product_data: { name: cfg.name }
+          },
+          quantity: 1
+        }
+      ],
+      success_url: `${origin}/paid-success.html?session_id={CHECKOUT_SESSION_ID}&product=${product}`,
+      cancel_url: `${origin}/packs.html`
+    });
+
+    return res.redirect(303, session.url);
+  } catch (e) {
+    return res.status(500).send('Could not create checkout session');
+  }
+});
+
+// Verify checkout session and issue one-time download token
+app.get('/api/checkout-complete', async (req, res) => {
+  if (!stripe) return res.status(500).json({ error: 'Stripe not configured' });
+  const { session_id, product } = req.query;
+  if (!session_id || !product) return res.status(400).json({ error: 'Missing params' });
+
+  const cfg = CHECKOUT_PRODUCTS[product];
+  if (!cfg) return res.status(400).json({ error: 'Invalid product' });
+
+  try {
+    const session = await stripe.checkout.sessions.retrieve(session_id);
+    if (session.payment_status !== 'paid') return res.status(402).json({ error: 'Payment not completed' });
+    if (session.amount_total !== cfg.amount) return res.status(400).json({ error: 'Amount mismatch' });
+
+    const email = session.customer_details?.email || '';
+    issueToken(email, product, (err, token) => {
+      if (err) return res.status(500).json({ error: 'Token issue failed' });
+      return res.json({ ok: true, downloadUrl: `/api/download/${product}?token=${token}` });
+    });
+  } catch (e) {
+    return res.status(500).json({ error: 'Verification failed' });
+  }
+});
+
+// Optional Stripe webhook for future email fulfillment
 app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), (req, res) => {
   if (!stripe || !stripeWebhookSecret) return res.status(400).send('Stripe webhook not configured');
-
-  let event;
-  try {
-    const sig = req.headers['stripe-signature'];
-    event = stripe.webhooks.constructEvent(req.body, sig, stripeWebhookSecret);
-  } catch (err) {
-    return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
-
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data.object;
-    const email = session.customer_details?.email || '';
-
-    // Resolve line items -> product names
-    stripe.checkout.sessions.listLineItems(session.id, { expand: ['data.price.product'] })
-      .then((items) => {
-        items.data.forEach((item) => {
-          const name = item.price.product.name;
-          const product = PRODUCT_MAP[name];
-          if (product) {
-            issueToken(email, product, () => {});
-          }
-        });
-      })
-      .catch(() => {});
-  }
-
-  res.json({ received: true });
+  return res.json({ received: true });
 });
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', service: 'Ventus' }));

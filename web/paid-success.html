@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Payment Complete | Ventus</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>body{background:#050505;color:#f5f5f5;font-family:Inter,sans-serif}</style>
+</head>
+<body class="min-h-screen grid place-items-center p-6">
+  <div class="max-w-xl w-full border border-white/10 rounded-2xl p-8 bg-white/5 text-center">
+    <h1 class="text-3xl font-bold mb-3">Payment confirmed</h1>
+    <p class="text-neutral-400 mb-6" id="status">Verifying your purchase and preparing download...</p>
+    <a id="dl" class="hidden inline-block bg-orange-500 text-black font-bold px-6 py-3 rounded-xl" href="#">Download Your Collection</a>
+    <div class="mt-6 text-sm text-neutral-500"><a href="packs.html" class="underline">Back to Collections</a></div>
+  </div>
+  <script>
+    const p = new URLSearchParams(location.search);
+    const session_id = p.get('session_id');
+    const product = p.get('product');
+    const status = document.getElementById('status');
+    const dl = document.getElementById('dl');
+
+    async function run(){
+      try {
+        const r = await fetch(`/api/checkout-complete?session_id=${encodeURIComponent(session_id)}&product=${encodeURIComponent(product)}`);
+        const data = await r.json();
+        if(data?.downloadUrl){
+          status.textContent = 'Ready. Click below to download your collection.';
+          dl.href = data.downloadUrl;
+          dl.classList.remove('hidden');
+        } else {
+          status.textContent = 'Could not verify payment. Please contact automations@ventusys.com';
+        }
+      } catch(e){
+        status.textContent = 'Verification failed. Please contact automations@ventusys.com';
+      }
+    }
+    run();
+  </script>
+</body>
+</html>
