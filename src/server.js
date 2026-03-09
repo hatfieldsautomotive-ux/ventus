@@ -47,6 +47,7 @@ const CHECKOUT_PRODUCTS = {
   'elite-builder': { name: 'Ventus Elite Builder Pack', amount: 7500 },
   'ceo-operator': { name: 'Ventus CEO Operator Pack', amount: 9000 },
   'automotive-expert': { name: 'Ventus Automotive Expert Pack', amount: 5000 },
+  'coo-systems': { name: 'Ventus COO Systems Collection', amount: 7900 },
   'sales-strategist': { name: 'Ventus Sales Strategist Collection', amount: 7900 },
   'app-architect': { name: 'Ventus App Architect Collection', amount: 8900 },
   'content-studio': { name: 'Ventus Content Studio Collection', amount: 7900 },
