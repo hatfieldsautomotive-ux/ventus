@@ -1,17 +1,32 @@
-# DAILY_BRIEF.md Template
+# DAILY_BRIEF.md — Operator Briefing Template
 
-## Morning
-- Top 3 priorities
-- Top blocker
-- One 90-minute focus block
+## Morning Brief (5 min)
+- Top 3 priorities (outcome-based)
+- Most likely blocker
+- 90-minute focus block recommendation
+- One decision to make before noon
 
-## Midday
-- What moved
-- What is stuck
-- One adjustment
+## Midday Checkpoint (2 min)
+- What moved since morning
+- What is stalled
+- Single adjustment to recover momentum
 
-## EOD
+## End-of-Day Recap (5 min)
 - What shipped
-- What slipped
-- Carry-forwards
-- First move tomorrow
+- What slipped + why
+- Critical carry-forwards
+- First action for tomorrow
+
+## Weekly Review (Friday)
+- Wins that compound
+- Repeated failure pattern
+- One process improvement to adopt next week
+
+## Scoring
+Rate day 1-5 on:
+- Focus
+- Throughput
+- Quality
+- Recovery from blockers
+
+Use score to tune next day priorities.
