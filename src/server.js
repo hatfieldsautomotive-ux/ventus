@@ -46,7 +46,27 @@ const PRODUCT_MAP = {
 const CHECKOUT_PRODUCTS = {
   'elite-builder': { name: 'Ventus Elite Builder Pack', amount: 7500 },
   'ceo-operator': { name: 'Ventus CEO Operator Pack', amount: 9000 },
-  'automotive-expert': { name: 'Ventus Automotive Expert Pack', amount: 5000 }
+  'automotive-expert': { name: 'Ventus Automotive Expert Pack', amount: 5000 },
+  'sales-strategist': { name: 'Ventus Sales Strategist Collection', amount: 7900 },
+  'app-architect': { name: 'Ventus App Architect Collection', amount: 8900 },
+  'content-studio': { name: 'Ventus Content Studio Collection', amount: 7900 },
+  'research-engine': { name: 'Ventus Research Engine Collection', amount: 8900 },
+  'developer-copilot': { name: 'Ventus Developer Copilot Collection', amount: 8900 },
+  'landing-page-conversion': { name: 'Ventus Landing Page Conversion Collection', amount: 8900 },
+  'ai-agent-builder': { name: 'Ventus AI Agent Builder Collection', amount: 9900 },
+  'prompt-qa': { name: 'Ventus Prompt QA Collection', amount: 7900 },
+  'market-intelligence': { name: 'Ventus Market Intelligence Collection', amount: 8900 },
+  'no-code-automation': { name: 'Ventus No-Code Automation Collection', amount: 7900 },
+  'project-manager': { name: 'Ventus Project Manager Collection', amount: 6900 },
+  'executive-assistant': { name: 'Ventus Executive Assistant Collection', amount: 6900 },
+  'customer-success': { name: 'Ventus Customer Success Collection', amount: 6900 },
+  'recruiting-operator': { name: 'Ventus Recruiting Operator Collection', amount: 6900 },
+  'closer-call-scripts': { name: 'Ventus Closer Call Scripts Collection', amount: 6900 },
+  'linkedin-authority': { name: 'Ventus LinkedIn Authority Collection', amount: 6900 },
+  'youtube-growth': { name: 'Ventus YouTube Growth Collection', amount: 7900 },
+  'newsletter-engine': { name: 'Ventus Newsletter Engine Collection', amount: 6900 },
+  'paid-ads-creative': { name: 'Ventus Paid Ads Creative Collection', amount: 7900 },
+  'brand-voice': { name: 'Ventus Brand Voice Collection', amount: 5900 }
 };
 
 app.use(express.json());
