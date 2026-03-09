@@ -1,792 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ventus — Websites That Actually Work</title>
-  <meta name="description" content="Premium web design studio. We build websites that turn visitors into customers.">
-  
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ventus — Turn AI Into Expert Systems</title>
+  <meta name="description" content="Ventus builds modular .md prompt systems that transform AI into specialized expert operators." />
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { 
-      font-family: 'Inter', system-ui, sans-serif; 
-      background: #000; 
-      color: #fff; 
-      overflow-x: hidden;
-    }
-    
-    .gradient-text { 
-      background: linear-gradient(135deg, #fff 0%, #f97316 100%); 
-      -webkit-background-clip: text; 
-      -webkit-text-fill-color: transparent; 
-    }
-    
-    .gradient-text-blue {
-      background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    
-    /* Cinematic Preloader */
-    #preloader {
-      position: fixed;
-      inset: 0;
-      background: #000;
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .preloader-text {
-      font-size: 14px;
-      letter-spacing: 0.5em;
-      text-transform: uppercase;
-      color: #525252;
-    }
-    
-    /* Architectural Typography */
-    .hero-line {
-      overflow: hidden;
-    }
-    
-    .hero-line-inner {
-      display: block;
-      transform: translateY(100%);
-    }
-    
-    /* Cinematic Spacing */
-    section {
-      position: relative;
-    }
-    
-    /* Magnetic Button */
-    .magnetic-btn {
-      position: relative;
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    
-    .magnetic-btn:hover {
-      transform: scale(1.02);
-      box-shadow: 0 20px 60px -20px rgba(249, 115, 22, 0.4);
-    }
-    
-    /* Project Card Hover */
-    .project-card {
-      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    
-    .project-card:hover {
-      transform: translateY(-8px);
-    }
-    
-    .project-card:hover .project-image {
-      transform: scale(1.05);
-    }
-    
-    .project-image {
-      transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    
-    /* Process Step */
-    .process-step {
-      opacity: 0;
-      transform: translateY(40px);
-    }
-    
-    /* Testimonial */
-    .quote-mark {
-      font-size: 120px;
-      line-height: 1;
-      color: #1e1e1e;
-      position: absolute;
-      top: -40px;
-      left: -20px;
-    }
-    
-    /* FAQ Accordion */
-    .faq-item {
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-    
-    .faq-content {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    
-    .faq-item.active .faq-content {
-      max-height: 300px;
-    }
-    
-    .faq-item.active .faq-icon {
-      transform: rotate(45deg);
-    }
-    
-    .faq-icon {
-      transition: transform 0.3s ease;
-    }
-    
-    /* Navigation */
-    #nav {
-      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    
-    #nav.visible {
-      background: rgba(0,0,0,0.8);
-      backdrop-filter: blur(20px);
-    }
-    
-    /* Typing cursor */
-    .typing-cursor::after {
-      content: '|';
-      animation: blink 1s infinite;
-      color: #f97316;
-    }
-    
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
-    
-    /* Shake animation for failure section */
-    @keyframes subtle-shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-2px); }
-      75% { transform: translateX(2px); }
-    }
-    
-    .shake-on-scroll {
-      animation: subtle-shake 0.5s ease-in-out infinite;
-    }
+    :root{--bg:#080b12;--bg2:#0f1422;--text:#eaf2ff;--muted:#9fb2d1;--accent:#5de4c7;--violet:#8b7dff}
+    *{box-sizing:border-box}
+    body{font-family:Inter,sans-serif;background:radial-gradient(1200px 600px at 70% -10%,#1c2a4d 0%,transparent 60%),linear-gradient(180deg,var(--bg),var(--bg2));color:var(--text);overflow-x:hidden}
+    .display{font-family:'Space Grotesk',sans-serif}
+    .glass{background:rgba(17,24,39,.5);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.08)}
+    .core{width:220px;height:220px;border-radius:999px;background:radial-gradient(circle at 30% 30%,#7cf0db, #4769ff 45%, #12182a 75%);box-shadow:0 0 80px rgba(93,228,199,.25)}
+    .module{position:absolute;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);font-size:12px;color:#dbe8ff}
+    .btn{background:var(--accent);color:#051016;font-weight:700}
+    .btn:hover{filter:brightness(1.06)}
   </style>
 </head>
 <body>
-  <!-- Preloader -->
-  <div id="preloader">
-    <div class="preloader-text">Ventus</div>
-  </div>
-
-  <!-- Navigation -->
-  <nav id="nav" class="fixed top-0 left-0 right-0 z-50 py-6 px-8 opacity-0 -translate-y-full">
-    <div class="max-w-7xl mx-auto flex items-center justify-between">
-      <a href="#" class="text-sm tracking-[0.3em] uppercase font-medium">Ventus</a>
-      <div class="flex items-center gap-8">
-        <a href="packs.html" class="text-sm text-teal-300 hover:text-teal-200 transition-colors">Packs</a>
-        <a href="explore.html" class="text-sm text-orange-400 hover:text-orange-300 transition-colors">Try the Tool →</a>
-        <a href="#work" class="text-sm text-neutral-400 hover:text-white transition-colors">Work</a>
-        <a href="booking.html" class="text-sm bg-white text-black px-4 py-2 rounded-full font-medium hover:bg-orange-400 transition-colors">Book a Call</a>
-      </div>
+  <header class="fixed top-0 w-full z-50 border-b border-white/10 bg-[#080b12]/80 backdrop-blur">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="#" class="display text-lg font-bold tracking-wide">VENTUS</a>
+      <nav class="flex items-center gap-6 text-sm text-slate-300">
+        <a href="#modes" class="hover:text-white">Modes</a>
+        <a href="#proof" class="hover:text-white">Proof</a>
+        <a href="packs.html" class="hover:text-white">Packs</a>
+        <a href="explore.html" class="hover:text-white">Explorer</a>
+        <a href="booking.html" class="btn px-4 py-2 rounded-full">Book a Call</a>
+      </nav>
     </div>
-  </nav>
+  </header>
 
-  <!-- Section 1: Hero -->
-  <section class="min-h-screen flex items-center justify-center px-8 relative">
-    <div class="absolute inset-0 bg-gradient-to-b from-orange-500/5 via-transparent to-transparent"></div>
-    
-    <div class="max-w-6xl mx-auto text-center relative z-10">
-      <p class="text-orange-400 text-xs uppercase tracking-[0.3em] mb-8 opacity-0" id="hero-label">
-        Premium Web Design
-      </p>
-      
-      <h1 class="text-6xl md:text-8xl lg:text-[10rem] font-black leading-[0.9] tracking-tight mb-8">
-        <div class="hero-line">
-          <span class="hero-line-inner">Websites</span>
+  <main class="pt-28">
+    <section class="min-h-[88vh] max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
+      <div>
+        <p class="text-xs tracking-[0.3em] uppercase text-teal-300 mb-6">Prompt Engineering Firm</p>
+        <h1 class="display text-5xl md:text-7xl font-bold leading-tight mb-6">Turn AI Into <span class="text-teal-300">Whatever You Need</span></h1>
+        <p class="text-lg text-slate-300 mb-8 max-w-xl">Ventus creates modular .md frameworks that transform AI into expert systems: design studios, software architects, automation operators, business advisors, and research engines.</p>
+        <div class="flex flex-wrap gap-4">
+          <a href="packs.html" class="btn px-7 py-4 rounded-full">Explore the System</a>
+          <a href="#plan" class="px-7 py-4 rounded-full border border-white/20 hover:border-teal-300">See the Plan</a>
         </div>
-        <div class="hero-line">
-          <span class="hero-line-inner">That Actually</span>
-        </div>
-        <div class="hero-line">
-          <span class="hero-line-inner gradient-text">Work</span>
-        </div>
-      </h1>
-      
-      <p class="text-lg md:text-xl text-neutral-400 max-w-2xl mx-auto mb-12 opacity-0" id="hero-subtext">
-        Good design is nice. Good results are better. We build websites that turn visitors into customers—without the agency drama.
-      </p>
-      
-      <div class="opacity-0" id="hero-cta">
-        <a href="booking.html" class="magnetic-btn inline-flex items-center gap-3 bg-white text-black px-10 py-5 rounded-full font-semibold text-lg hover:bg-orange-400 transition-colors">
-          Let's Build Something Better
-          <i data-lucide="arrow-right" class="w-5 h-5"></i>
-        </a>
-        <p class="text-sm text-neutral-500 mt-4">No endless revisions. No surprise invoices. Just results.</p>
       </div>
-    </div>
-  </section>
+      <div class="relative h-[420px] flex items-center justify-center">
+        <div class="core" id="core"></div>
+        <span class="module" style="top:10%;left:10%">Design Studio</span>
+        <span class="module" style="top:18%;right:8%">App Architect</span>
+        <span class="module" style="bottom:20%;left:8%">Automation Operator</span>
+        <span class="module" style="bottom:14%;right:12%">Sales Strategist</span>
+        <span class="module" style="top:48%;left:-2%">Research Engine</span>
+        <span class="module" style="top:52%;right:-2%">Content Studio</span>
+      </div>
+    </section>
 
-  <!-- Section 2: THE TOOL (Explore) -->
-  <section class="py-24 px-8 bg-gradient-to-b from-orange-500/5 to-transparent">
-    <div class="max-w-4xl mx-auto text-center">
-      <p class="text-orange-400 text-sm tracking-[0.3em] uppercase mb-4">Curious?</p>
-      <h2 class="text-4xl md:text-5xl font-black mb-6">
-        See What's Possible<br>
-        <span class="gradient-text">In Seconds</span>
-      </h2>
-      <p class="text-xl text-neutral-400 mb-8 max-w-2xl mx-auto">
-        Our AI tool generates 4 custom design concepts instantly. No email required. Just a preview of what your website could be.
-      </p>
-      <a href="explore.html" class="magnetic-btn inline-flex items-center gap-3 bg-gradient-to-r from-orange-500 to-red-500 text-white px-10 py-5 rounded-full font-semibold text-lg hover:from-orange-400 hover:to-red-400 transition-colors">
-        Try the Design Explorer
-        <i data-lucide="sparkles" class="w-5 h-5"></i>
-      </a>
-      <p class="text-sm text-neutral-500 mt-4">Takes 30 seconds. Might change everything.</p>
-    </div>
-  </section>
+    <section class="max-w-6xl mx-auto px-6 py-24">
+      <div class="glass rounded-3xl p-10">
+        <h2 class="display text-4xl font-bold mb-4">AI is powerful. Without structure, it produces average.</h2>
+        <p class="text-slate-300 text-lg">Generic output. Inconsistent quality. Unpredictable behavior. Ventus adds a system layer so your AI behaves like a repeatable specialist team.</p>
+      </div>
+    </section>
 
-  <!-- Section 3: The Problem -->
-  <section class="py-32 px-8 border-t border-white/5">
-    <div class="max-w-5xl mx-auto">
-      <div class="grid lg:grid-cols-2 gap-16 items-center">
-        <div>
-          <p class="text-neutral-500 text-sm tracking-[0.3em] uppercase mb-6">The Common Scenario</p>
-          <h2 class="text-4xl md:text-5xl font-black mb-8 leading-tight">
-            Your Website Shouldn't<br>
-            <span class="gradient-text">Confuse Customers</span>
-          </h2>
-          <div class="space-y-6 text-lg text-neutral-400 leading-relaxed">
-            <p>
-              We've all seen it—that moment when a potential customer opens your site, pauses, and quietly clicks away. <strong class="text-white">Your website has about 3 seconds to make an impression.</strong> Most don't make it.
-            </p>
-            <p>
-              The good news? This is fixable. The better news? We've done it 100+ times.
-            </p>
-          </div>
-        </div>
-        
-        <div class="space-y-6">
-          <div class="bg-neutral-900/50 border border-white/10 rounded-2xl p-8">
-            <div class="flex items-center gap-4 mb-4">
-              <div class="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
-                <i data-lucide="x" class="w-6 h-6 text-red-400"></i>
-              </div>
-              <p class="font-semibold">What We Often See</p>
-            </div>
-            <ul class="space-y-3 text-neutral-400">
-              <li class="flex items-center gap-2"><span class="text-red-400">×</span> Templates that look like everyone else's</li>
-              <li class="flex items-center gap-2"><span class="text-red-400">×</span> Copy that doesn't explain what you do</li>
-              <li class="flex items-center gap-2"><span class="text-red-400">×</span> Mobile experiences that require patience</li>
-              <li class="flex items-center gap-2"><span class="text-red-400">×</span> Contact forms that seem to go nowhere</li>
-            </ul>
-          </div>
-          
-          <div class="bg-gradient-to-br from-orange-500/10 to-purple-500/10 border border-orange-500/20 rounded-2xl p-8">
-            <div class="flex items-center gap-4 mb-4">
-              <div class="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center">
-                <i data-lucide="check" class="w-6 h-6 text-green-400"></i>
-              </div>
-              <p class="font-semibold">What We Build Instead</p>
-            </div>
-            <ul class="space-y-3 text-neutral-300">
-              <li class="flex items-center gap-2"><span class="text-green-400">✓</span> Custom designs that reflect your brand</li>
-              <li class="flex items-center gap-2"><span class="text-green-400">✓</span> Clear messaging that converts visitors</li>
-              <li class="flex items-center gap-2"><span class="text-green-400">✓</span> Mobile-first, blazing fast experiences</li>
-              <li class="flex items-center gap-2"><span class="text-green-400">✓</span> Systems that actually capture leads</li>
-            </ul>
-          </div>
-        </div>
+    <section id="plan" class="max-w-6xl mx-auto px-6 py-20">
+      <h3 class="display text-4xl font-bold mb-12">How it works</h3>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="glass rounded-2xl p-6"><p class="text-teal-300 mb-2">01</p><h4 class="font-bold text-xl mb-2">Install Frameworks</h4><p class="text-slate-300">Load modular .md files that define role, behavior, quality, and output format.</p></div>
+        <div class="glass rounded-2xl p-6"><p class="text-teal-300 mb-2">02</p><h4 class="font-bold text-xl mb-2">Activate Modes</h4><p class="text-slate-300">Switch into specialized systems for design, product, automation, strategy, and research.</p></div>
+        <div class="glass rounded-2xl p-6"><p class="text-teal-300 mb-2">03</p><h4 class="font-bold text-xl mb-2">Generate Expert Output</h4><p class="text-slate-300">Produce premium deliverables with consistent quality and clear execution logic.</p></div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Section 4: The Guide -->
-  <section class="py-32 px-8">
-    <div class="max-w-5xl mx-auto text-center">
-      <p class="text-neutral-500 text-sm tracking-[0.3em] uppercase mb-6">Who We Are</p>
-      <h2 class="text-4xl md:text-6xl font-black mb-8 leading-tight">
-        Good Websites Don't Happen<br>
-        <span class="gradient-text">By Accident</span>
-      </h2>
-      <p class="text-xl text-neutral-400 leading-relaxed max-w-3xl mx-auto mb-16">
-        We've built enough websites to know what works, what doesn't, and what absolutely needs to go. 
-        No jargon. No endless meetings. Just websites that do their job.
-      </p>
-      
-      <div class="grid md:grid-cols-3 gap-8">
-        <div class="text-center">
-          <p class="text-6xl md:text-7xl font-black gradient-text-blue mb-2">847%</p>
-          <p class="text-neutral-400">Average traffic increase</p>
-          <p class="text-sm text-neutral-600 mt-1">For clients who commit to the process</p>
-        </div>
-        <div class="text-center">
-          <p class="text-6xl md:text-7xl font-black gradient-text mb-2">$0</p>
-          <p class="text-neutral-400">Hidden fees</p>
-          <p class="text-sm text-neutral-600 mt-1">The price we quote is the price you pay</p>
-        </div>
-        <div class="text-center">
-          <p class="text-6xl md:text-7xl font-black text-white mb-2">3</p>
-          <p class="text-neutral-400">Weeks average delivery</p>
-          <p class="text-sm text-neutral-600 mt-1">From kickoff to launch</p>
-        </div>
+    <section id="modes" class="max-w-7xl mx-auto px-6 py-20">
+      <h3 class="display text-4xl font-bold mb-12">Transformation Modes</h3>
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div class="glass rounded-2xl p-6"><h4 class="font-bold mb-2">Design Studio Mode</h4><p class="text-slate-300 text-sm">Cinematic web/app concepts, premium hierarchy, conversion-focused layouts.</p></div>
+        <div class="glass rounded-2xl p-6"><h4 class="font-bold mb-2">App Architect Mode</h4><p class="text-slate-300 text-sm">Feature architecture, UX flow maps, implementation-ready specs.</p></div>
+        <div class="glass rounded-2xl p-6"><h4 class="font-bold mb-2">Automation Operator Mode</h4><p class="text-slate-300 text-sm">Process design, task orchestration, execution loops and handoffs.</p></div>
+        <div class="glass rounded-2xl p-6"><h4 class="font-bold mb-2">Sales Strategist Mode</h4><p class="text-slate-300 text-sm">Offer positioning, conversion messaging, outreach scripts.</p></div>
+        <div class="glass rounded-2xl p-6"><h4 class="font-bold mb-2">Research Engine Mode</h4><p class="text-slate-300 text-sm">Structured analysis, insight synthesis, decision support outputs.</p></div>
+        <div class="glass rounded-2xl p-6"><h4 class="font-bold mb-2">Content Studio Mode</h4><p class="text-slate-300 text-sm">Editorial systems, channel-specific messaging, campaign-ready content.</p></div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Section 5: THE WORK -->
-  <section id="work" class="py-32 px-8 border-t border-white/5">
-    <div class="max-w-7xl mx-auto">
-      <div class="mb-20">
-        <p class="text-neutral-500 text-sm tracking-[0.3em] uppercase mb-4">Selected Work</p>
-        <h2 class="text-4xl md:text-5xl font-black">Projects That Deliver Results</h2>
-      </div>
-      
-      <div class="space-y-24">
-        <!-- Project 1: GhostWatch -->
-        <a href="case-study-ghostwatch.html" class="project-card group block">
-          <div class="grid lg:grid-cols-2 gap-12 items-center">
-            <div class="overflow-hidden rounded-2xl">
-              <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1400&q=80" 
-                   alt="GhostWatch Dashboard" 
-                   class="project-image w-full aspect-[4/3] object-cover">
-            </div>
-            <div class="space-y-6">
-              <div class="flex items-center gap-4">
-                <span class="text-xs text-neutral-500 tracking-widest uppercase">SaaS Platform</span>
-                <span class="w-8 h-px bg-neutral-700"></span>
-                <span class="text-xs text-neutral-500">2026</span>
-              </div>
-              <h3 class="text-4xl md:text-5xl font-black">GhostWatch</h3>
-              <p class="text-neutral-400 text-lg leading-relaxed">
-                Competitor intelligence platform. We redesigned their entire experience from landing page to dashboard. The result? A site that finally matches the sophistication of their product.
-              </p>
-              <div class="flex items-center gap-8 pt-4">
-                <div>
-                  <p class="text-3xl font-black text-orange-400">3×</p>
-                  <p class="text-sm text-neutral-500">Conversion Rate</p>
-                </div>
-                <div>
-                  <p class="text-3xl font-black text-orange-400">50+</p>
-                  <p class="text-sm text-neutral-500">Paying Customers</p>
-                </div>
-              </div>
-              <p class="text-orange-400 text-sm flex items-center gap-2 pt-2">
-                View Case Study <i data-lucide="arrow-right" class="w-4 h-4"></i>
-              </p>
-            </div>
-          </div>
-        </a>
-        
-        <!-- Project 2: Hatfield's -->
-        <a href="case-study-hatfields.html" class="project-card group block">
-          <div class="grid lg:grid-cols-2 gap-12 items-center">
-            <div class="order-2 lg:order-1 space-y-6">
-              <div class="flex items-center gap-4">
-                <span class="text-xs text-neutral-500 tracking-widest uppercase">Automotive</span>
-                <span class="w-8 h-px bg-neutral-700"></span>
-                <span class="text-xs text-neutral-500">2026</span>
-              </div>
-              <h3 class="text-4xl md:text-5xl font-black">Hatfield's Automotive</h3>
-              <p class="text-neutral-400 text-lg leading-relaxed">
-                Family auto shop that needed to look as professional as their service. We built an online booking system and brand presence that turned them into the most booked shop in the city.
-              </p>
-              <div class="flex items-center gap-8 pt-4">
-                <div>
-                  <p class="text-3xl font-black text-orange-400">+40%</p>
-                  <p class="text-sm text-neutral-500">Appointments</p>
-                </div>
-                <div>
-                  <p class="text-3xl font-black text-orange-400">2.3×</p>
-                  <p class="text-sm text-neutral-500">Time on Site</p>
-                </div>
-              </div>
-              <p class="text-orange-400 text-sm flex items-center gap-2 pt-2">
-                View Case Study <i data-lucide="arrow-right" class="w-4 h-4"></i>
-              </p>
-            </div>
-            <div class="order-1 lg:order-2 overflow-hidden rounded-2xl">
-              <img src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=1400&q=80" 
-                   alt="Hatfield's Automotive" 
-                   class="project-image w-full aspect-[4/3] object-cover">
-            </div>
-          </div>
-        </a>
-        
-        <!-- Project 3: Along -->
-        <div class="project-card group">
-          <div class="grid lg:grid-cols-2 gap-12 items-center">
-            <div class="overflow-hidden rounded-2xl">
-              <img src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=1400&q=80" 
-                   alt="Along iOS App" 
-                   class="project-image w-full aspect-[4/3] object-cover">
-            </div>
-            <div class="space-y-6">
-              <div class="flex items-center gap-4">
-                <span class="text-xs text-neutral-500 tracking-widest uppercase">iOS App</span>
-                <span class="w-8 h-px bg-neutral-700"></span>
-                <span class="text-xs text-neutral-500">2026</span>
-              </div>
-              <h3 class="text-4xl md:text-5xl font-black">Along</h3>
-              <p class="text-neutral-400 text-lg leading-relaxed">
-                Proactive AI operator. Complete brand identity and app design from concept to TestFlight in 30 days. Sometimes tight deadlines bring out the best work.
-              </p>
-              <div class="flex items-center gap-8 pt-4">
-                <div>
-                  <p class="text-3xl font-black text-orange-400">Live</p>
-                  <p class="text-sm text-neutral-500">On TestFlight</p>
-                </div>
-                <div>
-                  <p class="text-3xl font-black text-orange-400">30</p>
-                  <p class="text-sm text-neutral-500">Days to Launch</p>
-                </div>
-              </div>
-            </div>
-          </div>
+    <section id="proof" class="max-w-6xl mx-auto px-6 py-24">
+      <div class="glass rounded-3xl p-10">
+        <p class="text-teal-300 text-sm mb-3">Proof</p>
+        <h3 class="display text-4xl font-bold mb-4">This site was built using the same prompt system.</h3>
+        <p class="text-slate-300 mb-8">Websites generated. Apps designed. Automations planned. Systems shipped. Ventus frameworks are built for real output, not inspiration theater.</p>
+        <div class="flex flex-wrap gap-4">
+          <a href="packs.html" class="btn px-6 py-3 rounded-full">Get the Prompt System</a>
+          <a href="explore.html" class="px-6 py-3 rounded-full border border-white/20 hover:border-teal-300">Try Design Explorer</a>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
+  </main>
 
-  <!-- Section 6: THE PLAN (Process) -->
-  <section class="py-32 px-8 border-t border-white/5">
-    <div class="max-w-5xl mx-auto">
-      <div class="text-center mb-20">
-        <p class="text-neutral-500 text-sm tracking-[0.3em] uppercase mb-4">Our Process</p>
-        <h2 class="text-4xl md:text-5xl font-black">How This Works</h2>
-        <p class="text-neutral-400 mt-4">Good websites don't happen by accident. Luckily we have a process.</p>
-      </div>
-      
-      <div class="grid md:grid-cols-3 gap-12">
-        <div class="process-step text-center">
-          <div class="w-16 h-16 border border-orange-500/30 rounded-full flex items-center justify-center mx-auto mb-6">
-            <span class="text-2xl font-light">01</span>
-          </div>
-          <h3 class="text-xl font-bold mb-3">We Learn Your Business</h3>
-          <p class="text-neutral-400 leading-relaxed">
-            Deep dive into what you do, who you serve, and what makes you different. We ask questions. You share insights.
-          </p>
-        </div>
-        
-        <div class="process-step text-center">
-          <div class="w-16 h-16 border border-orange-500/30 rounded-full flex items-center justify-center mx-auto mb-6">
-            <span class="text-2xl font-light">02</span>
-          </div>
-          <h3 class="text-xl font-bold mb-3">We Design Something Better</h3>
-          <p class="text-neutral-400 leading-relaxed">
-            You get 3 distinct directions. We refine together until it's exactly right. No surprises at the end.
-          </p>
-        </div>
-        
-        <div class="process-step text-center">
-          <div class="w-16 h-16 border border-orange-500/30 rounded-full flex items-center justify-center mx-auto mb-6">
-            <span class="text-2xl font-light">03</span>
-          </div>
-          <h3 class="text-xl font-bold mb-3">You Start Getting Results</h3>
-          <p class="text-neutral-400 leading-relaxed">
-            Launch day. Your new site goes live. The leads start coming in. You wonder why you waited so long.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Section 7: Success -->
-  <section class="py-32 px-8">
-    <div class="max-w-4xl mx-auto text-center">
-      <p class="text-neutral-500 text-sm tracking-[0.3em] uppercase mb-6">The Result</p>
-      <h2 class="text-4xl md:text-6xl font-black mb-8 leading-tight">
-        A Website That<br>
-        <span class="gradient-text">Works While You Sleep</span>
-      </h2>
-      <p class="text-xl text-neutral-400 leading-relaxed">
-        Someone finds you on Google. They click. They stay. They explore. They think "this company knows what they're doing."
-      </p>
-      <p class="text-xl text-neutral-400 leading-relaxed mt-6">
-        They fill out your form. They call your number. They buy your thing. <strong class="text-white">All while you're doing something else.</strong> That's what happens when your website does its job.
-      </p>
-    </div>
-  </section>
-
-  <!-- Section 8: Alternative -->
-  <section class="py-32 px-8 border-t border-white/5 bg-neutral-950">
-    <div class="max-w-4xl mx-auto text-center">
-      <p class="text-neutral-500 text-sm tracking-[0.3em] uppercase mb-6">Or</p>
-      <h2 class="text-4xl md:text-6xl font-black mb-8 leading-tight">
-        Keep Your Current Site.<br>
-        <span class="text-neutral-500">See How That Goes.</span>
-      </h2>
-      <div class="space-y-4 text-xl text-neutral-400">
-        <p>Keep losing leads to competitors with clearer messaging.</p>
-        <p>Keep explaining that your website "isn't your priority right now."</p>
-        <p>Keep wondering why your marketing budget isn't paying off.</p>
-      </div>
-      <p class="text-xl text-white font-medium mt-12">
-        We'll still be here when you're ready.
-      </p>
-    </div>
-  </section>
-
-  <!-- Section 9: THE OFFER -->
-  <section id="offer" class="py-32 px-8">
-    <div class="max-w-4xl mx-auto">
-      <div class="text-center mb-16">
-        <p class="text-neutral-500 text-sm tracking-[0.3em] uppercase mb-4">Start Here</p>
-        <h2 class="text-4xl md:text-6xl font-black mb-6">The Design Day</h2>
-        <p class="text-2xl text-neutral-400">$500</p>
-        <p class="text-neutral-500 mt-2">One day of focused design work. Real results.</p>
-      </div>
-      
-      <div class="grid md:grid-cols-2 gap-12 mb-12">
-        <div class="space-y-6">
-          <p class="text-lg leading-relaxed text-neutral-300">
-            A full day dedicated to your project. We explore concepts, refine direction, and deliver interactive prototypes you can actually use.
-          </p>
-          <ul class="space-y-4">
-            <li class="flex items-center gap-3">
-              <i data-lucide="check" class="w-5 h-5 text-orange-400"></i>
-              <span>8 hours of dedicated design work</span>
-            </li>
-            <li class="flex items-center gap-3">
-              <i data-lucide="check" class="w-5 h-5 text-orange-400"></i>
-              <span>3 refined concept directions</span>
-            </li>
-            <li class="flex items-center gap-3">
-              <i data-lucide="check" class="w-5 h-5 text-orange-400"></i>
-              <span>Interactive prototypes</span>
-            </li>
-            <li class="flex items-center gap-3">
-              <i data-lucide="check" class="w-5 h-5 text-orange-400"></i>
-              <span>1 revision round</span>
-            </li>
-          </ul>
-        </div>
-        
-        <div class="bg-neutral-900/50 border border-white/10 rounded-2xl p-8">
-          <h3 class="text-xl font-bold mb-6">Ready for an Upgrade?</h3>
-          <p class="text-neutral-400 mb-6">
-            We take on 4 projects per month. Not to be exclusive—so we can give each one the attention it deserves.
-          </p>
-          <a href="booking.html" class="magnetic-btn w-full inline-flex items-center justify-center gap-3 bg-white text-black px-8 py-4 rounded-full font-semibold text-lg hover:bg-orange-400 transition-colors mb-4">
-            Book Your Design Day
-            <i data-lucide="arrow-right" class="w-5 h-5"></i>
-          </a>
-          <p class="text-sm text-neutral-500 text-center">Currently booking 2-3 weeks out</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Section 10: FAQ -->
-  <section class="py-32 px-8 border-t border-white/5">
-    <div class="max-w-3xl mx-auto">
-      <div class="text-center mb-16">
-        <p class="text-neutral-500 text-sm tracking-[0.3em] uppercase mb-4">FAQ</p>
-        <h2 class="text-4xl md:text-5xl font-black">Questions You Might Have</h2>
-      </div>
-      
-      <div class="space-y-0">
-        <div class="faq-item py-6 cursor-pointer" onclick="toggleFaq(this)">
-          <div class="flex items-center justify-between">
-            <h3 class="text-lg font-semibold pr-8">How much does a full website cost?</h3>
-            <i data-lucide="plus" class="w-5 h-5 faq-icon flex-shrink-0"></i>
-          </div>
-          <div class="faq-content">
-            <p class="text-neutral-400 pt-4 leading-relaxed">
-              Most projects range from $3,000-$8,000 depending on complexity. E-commerce, custom integrations, or advanced animations add to the scope. We start with a Design Day ($500) so you can see our work before committing to the full build.
-            </p>
-          </div>
-        </div>
-        
-        <div class="faq-item py-6 cursor-pointer" onclick="toggleFaq(this)">
-          <div class="flex items-center justify-between">
-            <h3 class="text-lg font-semibold pr-8">How long does it take?</h3>
-            <i data-lucide="plus" class="w-5 h-5 faq-icon flex-shrink-0"></i>
-          </div>
-          <div class="faq-content">
-            <p class="text-neutral-400 pt-4 leading-relaxed">
-              Design Day: 1 week. Full website: 3-4 weeks from kickoff to launch. We work fast because we've done this 100+ times. Your site won't be "almost done" for six months. That's not how we operate.
-            </p>
-          </div>
-        </div>
-        
-        <div class="faq-item py-6 cursor-pointer" onclick="toggleFaq(this)">
-          <div class="flex items-center justify-between">
-            <h3 class="text-lg font-semibold pr-8">What if I don't like the design?</h3>
-            <i data-lucide="plus" class="w-5 h-5 faq-icon flex-shrink-0"></i>
-          </div>
-          <div class="faq-content">
-            <p class="text-neutral-400 pt-4 leading-relaxed">
-              That's exactly why we start with a Design Day. You see 3 directions before we build anything. If we're not aligned after that, we part ways and you keep the concepts. Better to find out early than after weeks of work.
-            </p>
-          </div>
-        </div>
-        
-        <div class="faq-item py-6 cursor-pointer" onclick="toggleFaq(this)">
-          <div class="flex items-center justify-between">
-            <h3 class="text-lg font-semibold pr-8">Do you do SEO?</h3>
-            <i data-lucide="plus" class="w-5 h-5 faq-icon flex-shrink-0"></i>
-          </div>
-          <div class="faq-content">
-            <p class="text-neutral-400 pt-4 leading-relaxed">
-              Every site we build is technically optimized for search engines (fast, mobile-friendly, proper structure). For ongoing SEO strategy and content, we partner with specialists. We know what we're good at, and we stay in our lane.
-            </p>
-          </div>
-        </div>
-        
-        <div class="faq-item py-6 cursor-pointer" onclick="toggleFaq(this)">
-          <div class="flex items-center justify-between">
-            <h3 class="text-lg font-semibold pr-8">What platform do you use?</h3>
-            <i data-lucide="plus" class="w-5 h-5 faq-icon flex-shrink-0"></i>
-          </div>
-          <div class="faq-content">
-            <p class="text-neutral-400 pt-4 leading-relaxed">
-              Custom code (React/Next.js) for maximum performance and flexibility. No templates. No page builders that slow your site to a crawl. Clean, fast, scalable code that you actually own.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Section 11: Final CTA -->
-  <section class="py-32 px-8 bg-gradient-to-b from-transparent to-orange-500/5">
-    <div class="max-w-4xl mx-auto text-center">
-      <h2 class="text-5xl md:text-7xl font-black leading-tight mb-8">
-        Let's Make Your Website Better
-      </h2>
-      <p class="text-xl text-neutral-400 mb-12 max-w-2xl mx-auto">
-        Your customers are looking for you right now. Let's make sure they like what they find.
-      </p>
-      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-        <a href="booking.html" class="magnetic-btn inline-flex items-center gap-3 bg-white text-black px-10 py-5 rounded-full font-semibold text-lg hover:bg-orange-400 transition-colors">
-          Book Your Design Day
-          <i data-lucide="arrow-right" class="w-5 h-5"></i>
-        </a>
-        <a href="#work" class="inline-flex items-center gap-3 border border-white/20 px-10 py-5 rounded-full font-semibold text-lg hover:bg-white/5 transition-colors">
-          See More Work
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="py-12 px-8 border-t border-white/5">
-    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-      <span class="text-sm tracking-[0.3em] uppercase font-medium">Ventus</span>
-      <p class="text-neutral-500 text-sm">© 2026 Ventus. Websites that actually work.</p>
-      <div class="flex items-center gap-6">
-        <a href="mailto:hello@ventusys.com" class="text-sm text-neutral-400 hover:text-white transition-colors">hello@ventusys.com</a>
-        <a href="packs.html" class="text-sm text-neutral-400 hover:text-white transition-colors">Packs</a>
-        <a href="explore.html" class="text-sm text-neutral-400 hover:text-white transition-colors">Explore</a>
+  <footer class="py-10 border-t border-white/10">
+    <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row gap-4 items-center justify-between text-sm text-slate-400">
+      <p>© 2026 Ventus Systems</p>
+      <div class="flex gap-5">
+        <a href="packs.html" class="hover:text-white">Packs</a>
+        <a href="booking.html" class="hover:text-white">Book</a>
+        <a href="mailto:automations@ventusys.com" class="hover:text-white">automations@ventusys.com</a>
       </div>
     </div>
   </footer>
 
   <script>
-    // Initialize Lucide icons
-    lucide.createIcons();
-    
-    // Lenis Smooth Scroll
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      direction: 'vertical',
-      gestureDirection: 'vertical',
-      smooth: true,
-      smoothTouch: false,
-      touchMultiplier: 2
-    });
-
-    function raf(time) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-    requestAnimationFrame(raf);
-
-    // GSAP ScrollTrigger setup
     gsap.registerPlugin(ScrollTrigger);
-
-    // Preloader
-    window.addEventListener('load', () => {
-      const preloader = document.getElementById('preloader');
-      
-      gsap.to(preloader, {
-        opacity: 0,
-        duration: 0.8,
-        delay: 0.5,
-        ease: 'power2.inOut',
-        onComplete: () => {
-          preloader.style.display = 'none';
-          initAnimations();
-        }
-      });
+    gsap.to('#core',{scale:1.06,duration:2.4,yoyo:true,repeat:-1,ease:'sine.inOut'});
+    gsap.utils.toArray('.glass').forEach((el)=>{
+      gsap.from(el,{opacity:0,y:36,duration:.6,scrollTrigger:{trigger:el,start:'top 85%'}})
     });
-
-    function initAnimations() {
-      // Hero text reveal
-      gsap.to('.hero-line-inner', {
-        y: '0%',
-        duration: 1.2,
-        stagger: 0.15,
-        ease: 'power4.out'
-      });
-      
-      // Hero label
-      gsap.to('#hero-label', {
-        opacity: 1,
-        duration: 0.8,
-        delay: 0.6
-      });
-      
-      // Hero subtext
-      gsap.to('#hero-subtext', {
-        opacity: 1,
-        y: 0,
-        duration: 1,
-        delay: 0.9
-      });
-      
-      // Hero CTA
-      gsap.to('#hero-cta', {
-        opacity: 1,
-        duration: 0.8,
-        delay: 1.2
-      });
-      
-      // Nav show on scroll
-      ScrollTrigger.create({
-        start: 'top -100',
-        onUpdate: (self) => {
-          const nav = document.getElementById('nav');
-          if (self.progress > 0) {
-            nav.style.opacity = '1';
-            nav.style.transform = 'translateY(0)';
-            nav.classList.add('visible');
-          }
-        }
-      });
-      
-      // Process steps
-      gsap.utils.toArray('.process-step').forEach((step, i) => {
-        gsap.to(step, {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: step,
-            start: 'top 85%'
-          },
-          delay: i * 0.1
-        });
-      });
-    }
-
-    // FAQ Toggle
-    function toggleFaq(item) {
-      const allItems = document.querySelectorAll('.faq-item');
-      allItems.forEach(faq => {
-        if (faq !== item) faq.classList.remove('active');
-      });
-      item.classList.toggle('active');
-    }
   </script>
 </body>
 </html>
