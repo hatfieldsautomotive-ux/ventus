@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ventus — Turn AI Into Expert Systems</title>
-  <meta name="description" content="Ventus builds modular .md prompt systems that transform AI into specialized expert operators." />
+  <title>Ventus — Build Your Own AI Systems</title>
+  <meta name="description" content="Ventus is a modular prompt and .md framework system that transforms AI into specialized expert tools." />
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
@@ -12,100 +12,243 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   <style>
-    :root{--bg:#080b12;--bg2:#0f1422;--text:#eaf2ff;--muted:#9fb2d1;--accent:#5de4c7;--violet:#8b7dff}
-    *{box-sizing:border-box}
-    body{font-family:Inter,sans-serif;background:radial-gradient(1200px 600px at 70% -10%,#1c2a4d 0%,transparent 60%),linear-gradient(180deg,var(--bg),var(--bg2));color:var(--text);overflow-x:hidden}
-    .display{font-family:'Space Grotesk',sans-serif}
-    .glass{background:rgba(17,24,39,.5);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.08)}
-    .core{width:220px;height:220px;border-radius:999px;background:radial-gradient(circle at 30% 30%,#7cf0db, #4769ff 45%, #12182a 75%);box-shadow:0 0 80px rgba(93,228,199,.25)}
-    .module{position:absolute;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);font-size:12px;color:#dbe8ff}
-    .btn{background:var(--accent);color:#051016;font-weight:700}
-    .btn:hover{filter:brightness(1.06)}
+    :root {
+      --bg: #090d16;
+      --bg-soft: #11172a;
+      --text: #eaf0ff;
+      --muted: #9aabc9;
+      --blue: #57a8ff;
+      --violet: #9a7bff;
+      --gold: #f3c37a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, sans-serif;
+      color: var(--text);
+      background: radial-gradient(1200px 700px at 75% -10%, rgba(87,168,255,.22), transparent 60%),
+                  radial-gradient(900px 600px at -10% 20%, rgba(154,123,255,.20), transparent 55%),
+                  linear-gradient(180deg, #070a12, #0d1220 40%, #0a0f1b 100%);
+      overflow-x: hidden;
+    }
+    .display { font-family: 'Space Grotesk', sans-serif; }
+    .glass {
+      background: rgba(18, 26, 44, 0.55);
+      border: 1px solid rgba(255,255,255,.10);
+      backdrop-filter: blur(10px);
+    }
+    .section-dark { background: transparent; }
+    .section-light {
+      background: linear-gradient(180deg, #f5f7fb 0%, #e9edf6 100%);
+      color: #0f1423;
+    }
+    .btn-primary {
+      background: linear-gradient(120deg, var(--blue), var(--violet));
+      color: #fff;
+      font-weight: 700;
+      border: 0;
+    }
+    .btn-primary:hover { filter: brightness(1.07); }
+    .btn-ghost {
+      border: 1px solid rgba(255,255,255,.24);
+      color: #dce7ff;
+    }
+    .hero-core {
+      width: 250px;
+      height: 250px;
+      border-radius: 999px;
+      position: relative;
+      background: radial-gradient(circle at 30% 25%, #8ed0ff, #467dff 42%, #8f69ff 72%, #1a2240 100%);
+      box-shadow: 0 0 90px rgba(87,168,255,.35), 0 0 180px rgba(154,123,255,.25);
+    }
+    .core-ring {
+      position: absolute;
+      inset: -26px;
+      border-radius: 999px;
+      border: 1px dashed rgba(255,255,255,.25);
+    }
+    .floating {
+      position: absolute;
+      font-size: 12px;
+      letter-spacing: .02em;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.08);
+      color: #eef4ff;
+      white-space: nowrap;
+    }
+    .mode-card.active {
+      border-color: rgba(87,168,255,.85);
+      box-shadow: 0 0 0 1px rgba(87,168,255,.5) inset;
+    }
+    .transform-stage {
+      min-height: 360px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.15);
+      background: radial-gradient(700px 260px at 80% 10%, rgba(87,168,255,.25), transparent 60%),
+                  linear-gradient(180deg, rgba(16,23,40,.92), rgba(10,15,28,.92));
+      position: relative;
+      overflow: hidden;
+    }
+    .grid-overlay {
+      position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px);
+      background-size: 24px 24px;
+      opacity: .18;
+      pointer-events: none;
+    }
+    .proof-pill {
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 13px;
+      color: #dce7ff;
+    }
   </style>
 </head>
 <body>
-  <header class="fixed top-0 w-full z-50 border-b border-white/10 bg-[#080b12]/80 backdrop-blur">
+  <header class="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-[#080c15]/75 backdrop-blur">
     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
       <a href="#" class="display text-lg font-bold tracking-wide">VENTUS</a>
       <nav class="flex items-center gap-6 text-sm text-slate-300">
-        <a href="#modes" class="hover:text-white">Modes</a>
-        <a href="#proof" class="hover:text-white">Proof</a>
+        <a href="#transformation" class="hover:text-white">Transformation</a>
+        <a href="#industries" class="hover:text-white">Industries</a>
         <a href="packs.html" class="hover:text-white">Packs</a>
-        <a href="explore.html" class="hover:text-white">Explorer</a>
-        <a href="booking.html" class="btn px-4 py-2 rounded-full">Book a Call</a>
+        <a href="booking.html" class="btn-primary px-4 py-2 rounded-full">Get the System</a>
       </nav>
     </div>
   </header>
 
   <main class="pt-28">
-    <section class="min-h-[88vh] max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
+    <!-- HERO -->
+    <section class="section-dark min-h-[92vh] max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-14 items-center">
       <div>
-        <p class="text-xs tracking-[0.3em] uppercase text-teal-300 mb-6">Prompt Engineering Firm</p>
-        <h1 class="display text-5xl md:text-7xl font-bold leading-tight mb-6">Turn AI Into <span class="text-teal-300">Whatever You Need</span></h1>
-        <p class="text-lg text-slate-300 mb-8 max-w-xl">Ventus creates modular .md frameworks that transform AI into expert systems: design studios, software architects, automation operators, business advisors, and research engines.</p>
+        <p class="text-xs uppercase tracking-[0.3em] text-cyan-300 mb-6">Cinematic Product Reveal</p>
+        <h1 class="display text-5xl md:text-7xl font-bold leading-tight mb-6">Turn AI Into <span class="text-cyan-300">Whatever You Need</span></h1>
+        <p class="text-lg text-slate-300 max-w-xl mb-9">Ventus builds modular prompts and .md frameworks that transform AI into design studios, app architects, automation operators, business advisors, and research engines.</p>
         <div class="flex flex-wrap gap-4">
-          <a href="packs.html" class="btn px-7 py-4 rounded-full">Explore the System</a>
-          <a href="#plan" class="px-7 py-4 rounded-full border border-white/20 hover:border-teal-300">See the Plan</a>
+          <a href="#transformation" class="btn-primary px-7 py-4 rounded-full">Explore the System</a>
+          <a href="packs.html" class="btn-ghost px-7 py-4 rounded-full">View Prompt Packs</a>
         </div>
       </div>
-      <div class="relative h-[420px] flex items-center justify-center">
-        <div class="core" id="core"></div>
-        <span class="module" style="top:10%;left:10%">Design Studio</span>
-        <span class="module" style="top:18%;right:8%">App Architect</span>
-        <span class="module" style="bottom:20%;left:8%">Automation Operator</span>
-        <span class="module" style="bottom:14%;right:12%">Sales Strategist</span>
-        <span class="module" style="top:48%;left:-2%">Research Engine</span>
-        <span class="module" style="top:52%;right:-2%">Content Studio</span>
+      <div class="relative h-[470px] flex items-center justify-center">
+        <div class="hero-core" id="core">
+          <div class="core-ring"></div>
+          <div class="core-ring" style="inset:-50px;opacity:.5"></div>
+        </div>
+        <span class="floating" style="top:8%;left:5%">Design Studio</span>
+        <span class="floating" style="top:12%;right:6%">App Architect</span>
+        <span class="floating" style="top:42%;right:-2%">Automation Operator</span>
+        <span class="floating" style="bottom:15%;right:8%">Research Engine</span>
+        <span class="floating" style="bottom:8%;left:8%">CEO Assistant</span>
+        <span class="floating" style="top:44%;left:-1%">Content Studio</span>
       </div>
     </section>
 
+    <!-- PROBLEM -->
     <section class="max-w-6xl mx-auto px-6 py-24">
-      <div class="glass rounded-3xl p-10">
-        <h2 class="display text-4xl font-bold mb-4">AI is powerful. Without structure, it produces average.</h2>
-        <p class="text-slate-300 text-lg">Generic output. Inconsistent quality. Unpredictable behavior. Ventus adds a system layer so your AI behaves like a repeatable specialist team.</p>
+      <div class="glass rounded-3xl p-10 md:p-14">
+        <h2 class="display text-4xl md:text-5xl font-bold mb-4">AI is powerful. Without structure, it produces average work.</h2>
+        <p class="text-slate-300 text-lg">Generic outputs. Inconsistent quality. Unpredictable behavior. Ventus gives AI structured expertise so results stay sharp, repeatable, and production-ready.</p>
       </div>
     </section>
 
-    <section id="plan" class="max-w-6xl mx-auto px-6 py-20">
-      <h3 class="display text-4xl font-bold mb-12">How it works</h3>
+    <!-- GUIDE + PLAN -->
+    <section class="max-w-6xl mx-auto px-6 py-8">
+      <h3 class="display text-4xl font-bold mb-10">From prompts to expert systems in 3 steps</h3>
       <div class="grid md:grid-cols-3 gap-6">
-        <div class="glass rounded-2xl p-6"><p class="text-teal-300 mb-2">01</p><h4 class="font-bold text-xl mb-2">Install Frameworks</h4><p class="text-slate-300">Load modular .md files that define role, behavior, quality, and output format.</p></div>
-        <div class="glass rounded-2xl p-6"><p class="text-teal-300 mb-2">02</p><h4 class="font-bold text-xl mb-2">Activate Modes</h4><p class="text-slate-300">Switch into specialized systems for design, product, automation, strategy, and research.</p></div>
-        <div class="glass rounded-2xl p-6"><p class="text-teal-300 mb-2">03</p><h4 class="font-bold text-xl mb-2">Generate Expert Output</h4><p class="text-slate-300">Produce premium deliverables with consistent quality and clear execution logic.</p></div>
+        <article class="glass rounded-2xl p-6"><p class="text-cyan-300 mb-2">01</p><h4 class="font-bold text-xl mb-2">Install Frameworks</h4><p class="text-slate-300">Load modular .md files that define role, constraints, tone, and execution standards.</p></article>
+        <article class="glass rounded-2xl p-6"><p class="text-cyan-300 mb-2">02</p><h4 class="font-bold text-xl mb-2">Activate Modes</h4><p class="text-slate-300">Switch into specialized systems: design, app architecture, automation, strategy, and research.</p></article>
+        <article class="glass rounded-2xl p-6"><p class="text-cyan-300 mb-2">03</p><h4 class="font-bold text-xl mb-2">Generate Expert Output</h4><p class="text-slate-300">Produce deliverables that feel like a full specialist team, not a generic assistant.</p></article>
       </div>
     </section>
 
-    <section id="modes" class="max-w-7xl mx-auto px-6 py-20">
-      <h3 class="display text-4xl font-bold mb-12">Transformation Modes</h3>
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-        <div class="glass rounded-2xl p-6"><h4 class="font-bold mb-2">Design Studio Mode</h4><p class="text-slate-300 text-sm">Cinematic web/app concepts, premium hierarchy, conversion-focused layouts.</p></div>
-        <div class="glass rounded-2xl p-6"><h4 class="font-bold mb-2">App Architect Mode</h4><p class="text-slate-300 text-sm">Feature architecture, UX flow maps, implementation-ready specs.</p></div>
-        <div class="glass rounded-2xl p-6"><h4 class="font-bold mb-2">Automation Operator Mode</h4><p class="text-slate-300 text-sm">Process design, task orchestration, execution loops and handoffs.</p></div>
-        <div class="glass rounded-2xl p-6"><h4 class="font-bold mb-2">Sales Strategist Mode</h4><p class="text-slate-300 text-sm">Offer positioning, conversion messaging, outreach scripts.</p></div>
-        <div class="glass rounded-2xl p-6"><h4 class="font-bold mb-2">Research Engine Mode</h4><p class="text-slate-300 text-sm">Structured analysis, insight synthesis, decision support outputs.</p></div>
-        <div class="glass rounded-2xl p-6"><h4 class="font-bold mb-2">Content Studio Mode</h4><p class="text-slate-300 text-sm">Editorial systems, channel-specific messaging, campaign-ready content.</p></div>
+    <!-- TRANSFORMATION VISUALIZER -->
+    <section id="transformation" class="max-w-7xl mx-auto px-6 py-24">
+      <div class="flex flex-wrap items-end justify-between gap-6 mb-10">
+        <div>
+          <p class="text-xs uppercase tracking-[0.3em] text-cyan-300 mb-3">Transformation Visualizer</p>
+          <h3 class="display text-4xl md:text-5xl font-bold">Watch AI become a specialized system</h3>
+        </div>
+      </div>
+
+      <div class="grid lg:grid-cols-5 gap-6">
+        <div class="lg:col-span-2 grid gap-3" id="modeList">
+          <button class="mode-card active glass text-left rounded-xl p-4" data-mode="design"><strong>Design Studio Mode</strong><p class="text-sm text-slate-300 mt-1">Transforms into a premium design engine.</p></button>
+          <button class="mode-card glass text-left rounded-xl p-4" data-mode="app"><strong>App Architect Mode</strong><p class="text-sm text-slate-300 mt-1">Builds product structure and app logic.</p></button>
+          <button class="mode-card glass text-left rounded-xl p-4" data-mode="auto"><strong>Automation Operator Mode</strong><p class="text-sm text-slate-300 mt-1">Creates workflow systems and ops loops.</p></button>
+          <button class="mode-card glass text-left rounded-xl p-4" data-mode="research"><strong>Research Engine Mode</strong><p class="text-sm text-slate-300 mt-1">Converts data into usable strategic insight.</p></button>
+          <button class="mode-card glass text-left rounded-xl p-4" data-mode="ceo"><strong>CEO Assistant Mode</strong><p class="text-sm text-slate-300 mt-1">Daily priorities, decisions, and operator briefs.</p></button>
+        </div>
+        <div class="lg:col-span-3 transform-stage p-6" id="stage">
+          <div class="grid-overlay"></div>
+          <div class="relative z-10">
+            <p class="text-cyan-300 text-sm mb-2" id="modeTag">DESIGN STUDIO MODE</p>
+            <h4 class="display text-3xl font-bold mb-3" id="modeTitle">Interface transforms into a premium design engine.</h4>
+            <p class="text-slate-300 mb-6" id="modeBody">Generates cinematic web concepts, layout systems, hierarchy, motion notes, and conversion-first copy.</p>
+            <div class="flex flex-wrap gap-2" id="modePills">
+              <span class="proof-pill">Hero concepts</span>
+              <span class="proof-pill">Color systems</span>
+              <span class="proof-pill">Motion choreography</span>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <section id="proof" class="max-w-6xl mx-auto px-6 py-24">
-      <div class="glass rounded-3xl p-10">
-        <p class="text-teal-300 text-sm mb-3">Proof</p>
-        <h3 class="display text-4xl font-bold mb-4">This site was built using the same prompt system.</h3>
-        <p class="text-slate-300 mb-8">Websites generated. Apps designed. Automations planned. Systems shipped. Ventus frameworks are built for real output, not inspiration theater.</p>
-        <div class="flex flex-wrap gap-4">
-          <a href="packs.html" class="btn px-6 py-3 rounded-full">Get the Prompt System</a>
-          <a href="explore.html" class="px-6 py-3 rounded-full border border-white/20 hover:border-teal-300">Try Design Explorer</a>
+    <!-- INDUSTRY EXAMPLES -->
+    <section id="industries" class="section-light py-24">
+      <div class="max-w-7xl mx-auto px-6">
+        <h3 class="display text-4xl md:text-5xl font-bold mb-12">Built for real operators across industries</h3>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <article class="rounded-2xl border border-slate-300 bg-white p-6"><h4 class="font-bold text-xl mb-2">Automotive</h4><p class="text-slate-700 text-sm">AI Role: Service advisor expert<br>Result: inspection scripts + ethical upsell frameworks</p></article>
+          <article class="rounded-2xl border border-slate-300 bg-white p-6"><h4 class="font-bold text-xl mb-2">Real Estate</h4><p class="text-slate-700 text-sm">AI Role: Listing strategist<br>Result: listing copy + follow-up campaign system</p></article>
+          <article class="rounded-2xl border border-slate-300 bg-white p-6"><h4 class="font-bold text-xl mb-2">Startup Founders</h4><p class="text-slate-700 text-sm">AI Role: Product + GTM advisor<br>Result: launch plans + execution roadmaps</p></article>
+          <article class="rounded-2xl border border-slate-300 bg-white p-6"><h4 class="font-bold text-xl mb-2">Marketing Agencies</h4><p class="text-slate-700 text-sm">AI Role: Campaign system builder<br>Result: scalable creative + client delivery SOPs</p></article>
+          <article class="rounded-2xl border border-slate-300 bg-white p-6"><h4 class="font-bold text-xl mb-2">Content Creators</h4><p class="text-slate-700 text-sm">AI Role: Content studio<br>Result: multi-platform editorial and repurposing workflows</p></article>
+          <article class="rounded-2xl border border-slate-300 bg-white p-6"><h4 class="font-bold text-xl mb-2">Developers</h4><p class="text-slate-700 text-sm">AI Role: App architect<br>Result: implementation-ready specs and coding plans</p></article>
+        </div>
+      </div>
+    </section>
+
+    <!-- SHOWCASE + PROOF -->
+    <section class="max-w-7xl mx-auto px-6 py-24">
+      <h3 class="display text-4xl font-bold mb-10">What this system can produce</h3>
+      <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
+        <div class="glass rounded-xl p-5">Websites</div>
+        <div class="glass rounded-xl p-5">Apps</div>
+        <div class="glass rounded-xl p-5">Automation Workflows</div>
+        <div class="glass rounded-xl p-5">Research Systems</div>
+        <div class="glass rounded-xl p-5">AI Operators</div>
+      </div>
+      <div class="glass rounded-2xl p-8">
+        <p class="text-cyan-300 text-sm mb-2">Subtle Proof</p>
+        <p class="display text-3xl font-bold mb-2">This entire website was created using the same prompt framework.</p>
+        <p class="text-slate-300">The system is the product and the proof.</p>
+      </div>
+    </section>
+
+    <!-- FINAL CTA -->
+    <section class="max-w-6xl mx-auto px-6 pb-24">
+      <div class="glass rounded-3xl p-10 md:p-14 text-center">
+        <h3 class="display text-5xl font-bold mb-4">Build Your Own AI Systems</h3>
+        <p class="text-slate-300 text-lg mb-8">Transform AI into your design team, research lab, or automation engine.</p>
+        <div class="flex flex-wrap justify-center gap-4">
+          <a href="packs.html" class="btn-primary px-8 py-4 rounded-full">Get the Prompt System</a>
+          <a href="booking.html" class="btn-ghost px-8 py-4 rounded-full">Book a Strategy Call</a>
         </div>
       </div>
     </section>
   </main>
 
-  <footer class="py-10 border-t border-white/10">
-    <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row gap-4 items-center justify-between text-sm text-slate-400">
+  <footer class="border-t border-white/10 py-8">
+    <div class="max-w-7xl mx-auto px-6 text-sm text-slate-400 flex flex-col md:flex-row justify-between gap-4">
       <p>© 2026 Ventus Systems</p>
-      <div class="flex gap-5">
+      <div class="flex gap-6">
         <a href="packs.html" class="hover:text-white">Packs</a>
-        <a href="booking.html" class="hover:text-white">Book</a>
+        <a href="explore.html" class="hover:text-white">Explorer</a>
         <a href="mailto:automations@ventusys.com" class="hover:text-white">automations@ventusys.com</a>
       </div>
     </div>
@@ -113,9 +256,69 @@
 
   <script>
     gsap.registerPlugin(ScrollTrigger);
-    gsap.to('#core',{scale:1.06,duration:2.4,yoyo:true,repeat:-1,ease:'sine.inOut'});
-    gsap.utils.toArray('.glass').forEach((el)=>{
-      gsap.from(el,{opacity:0,y:36,duration:.6,scrollTrigger:{trigger:el,start:'top 85%'}})
+    gsap.to('#core', { scale: 1.06, duration: 2.2, yoyo: true, repeat: -1, ease: 'sine.inOut' });
+    gsap.from('.floating', { opacity: 0, y: 20, stagger: 0.08, duration: 0.55 });
+    gsap.utils.toArray('section .glass, section h3, section h2').forEach((el) => {
+      gsap.from(el, {
+        opacity: 0,
+        y: 28,
+        duration: 0.55,
+        scrollTrigger: { trigger: el, start: 'top 85%' }
+      });
+    });
+
+    const modeData = {
+      design: {
+        tag: 'DESIGN STUDIO MODE',
+        title: 'Interface transforms into a premium design engine.',
+        body: 'Generates cinematic web concepts, layout systems, hierarchy, motion notes, and conversion-first copy.',
+        pills: ['Hero concepts', 'Color systems', 'Motion choreography']
+      },
+      app: {
+        tag: 'APP ARCHITECT MODE',
+        title: 'AI shifts into product architect behavior.',
+        body: 'Builds app flows, information architecture, feature maps, and implementation-ready planning.',
+        pills: ['User flows', 'Feature specs', 'Execution plan']
+      },
+      auto: {
+        tag: 'AUTOMATION OPERATOR MODE',
+        title: 'System assembles process and workflow logic.',
+        body: 'Creates SOPs, automation loops, and operational handoff systems for repeatable execution.',
+        pills: ['SOPs', 'Task orchestration', 'Handoff rules']
+      },
+      research: {
+        tag: 'RESEARCH ENGINE MODE',
+        title: 'Data transforms into structured insight.',
+        body: 'Synthesizes sources into decision-ready research with clear recommendations.',
+        pills: ['Source synthesis', 'Insight extraction', 'Decision briefs']
+      },
+      ceo: {
+        tag: 'CEO ASSISTANT MODE',
+        title: 'AI becomes a daily executive operator.',
+        body: 'Delivers priority alignment, blocker tracking, and concise strategic briefing workflows.',
+        pills: ['Morning brief', 'Decision filter', 'EOD recap']
+      }
+    };
+
+    const stage = document.getElementById('stage');
+    const modeTag = document.getElementById('modeTag');
+    const modeTitle = document.getElementById('modeTitle');
+    const modeBody = document.getElementById('modeBody');
+    const modePills = document.getElementById('modePills');
+
+    document.querySelectorAll('.mode-card').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.mode-card').forEach(x => x.classList.remove('active'));
+        btn.classList.add('active');
+        const d = modeData[btn.dataset.mode];
+        gsap.to(stage, { opacity: 0.35, duration: 0.2, onComplete: () => {
+          modeTag.textContent = d.tag;
+          modeTitle.textContent = d.title;
+          modeBody.textContent = d.body;
+          modePills.innerHTML = d.pills.map(p => `<span class="proof-pill">${p}</span>`).join('');
+          gsap.to(stage, { opacity: 1, duration: 0.35 });
+        }});
+      });
     });
   </script>
 </body>
