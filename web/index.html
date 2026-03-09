@@ -3,160 +3,171 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ventus — Transform AI Into Expert Systems</title>
-  <meta name="description" content="Ventus builds modular prompt and .md systems that turn AI into specialized expert operators." />
+  <title>Ventus — Build Your Own AI Systems</title>
+  <meta name="description" content="Ventus creates modular prompt frameworks and .md systems that transform AI into specialized expert tools." />
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
   <style>
-    :root{--bg:#070a12;--bg2:#0d1324;--text:#edf3ff;--muted:#9badce;--blue:#4ea8ff;--violet:#8b78ff;--gold:#f0c27a}
+    :root{--bg:#070b13;--bg2:#0f1728;--text:#ecf2ff;--muted:#9cb0d2;--blue:#56a8ff;--violet:#8b78ff;--gold:#efc17c}
     *{box-sizing:border-box}
     html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,sans-serif;overflow-x:hidden}
     .display{font-family:'Space Grotesk',sans-serif}
-    .noise:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:radial-gradient(rgba(255,255,255,.04) 1px, transparent 1px);background-size:3px 3px;opacity:.12;z-index:1}
-    .bg-aurora{position:fixed;inset:-20%;z-index:-1;filter:blur(40px);background:
-      radial-gradient(600px 320px at 20% 18%,rgba(78,168,255,.25),transparent 60%),
-      radial-gradient(700px 380px at 85% 14%,rgba(139,120,255,.24),transparent 62%),
-      radial-gradient(500px 260px at 50% 80%,rgba(240,194,122,.17),transparent 60%)}
-    .glass{background:rgba(15,22,38,.58);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.12)}
-    .hero-core{width:290px;height:290px;border-radius:999px;position:relative;
-      background:radial-gradient(circle at 32% 28%,#a8dcff,#4f8dff 38%,#8f73ff 70%,#151f37 100%);
-      box-shadow:0 0 120px rgba(78,168,255,.38),0 0 220px rgba(139,120,255,.24)}
-    .ring{position:absolute;inset:-28px;border-radius:999px;border:1px dashed rgba(255,255,255,.28)}
-    .ring2{position:absolute;inset:-58px;border-radius:999px;border:1px solid rgba(255,255,255,.12)}
-    .module{position:absolute;padding:9px 14px;border-radius:999px;font-size:12px;letter-spacing:.02em;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.07)}
-    .btn-primary{background:linear-gradient(120deg,var(--blue),var(--violet));color:#fff;font-weight:700}
-    .btn-primary:hover{filter:brightness(1.08)}
-    .btn-ghost{border:1px solid rgba(255,255,255,.22);color:#dbe8ff}
-    .clip-line{overflow:hidden}
-    .clip-line span{display:block;transform:translateY(110%)}
-    .sticky-wrap{position:relative;height:220vh}
-    .sticky-panel{position:sticky;top:90px;height:76vh;border-radius:24px;overflow:hidden}
-    .mode-card{transition:.3s;border:1px solid rgba(255,255,255,.16)}
-    .mode-card.active{border-color:rgba(78,168,255,.8);box-shadow:0 0 0 1px rgba(78,168,255,.45) inset}
-    .tilt{transform-style:preserve-3d;transition:transform .35s ease}
+    .aurora{position:fixed;inset:-20%;z-index:-1;filter:blur(50px);background:
+      radial-gradient(700px 320px at 20% 14%,rgba(86,168,255,.25),transparent 60%),
+      radial-gradient(800px 400px at 84% 8%,rgba(139,120,255,.24),transparent 60%),
+      radial-gradient(600px 280px at 50% 85%,rgba(239,193,124,.16),transparent 58%)}
+    .glass{background:rgba(16,24,42,.58);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(10px)}
+    .hero-core{width:280px;height:280px;border-radius:999px;position:relative;background:radial-gradient(circle at 30% 24%,#a9ddff,#4a87ff 40%,#8f72ff 72%,#141d35);box-shadow:0 0 120px rgba(86,168,255,.35),0 0 200px rgba(139,120,255,.2)}
+    .ring{position:absolute;inset:-24px;border-radius:999px;border:1px dashed rgba(255,255,255,.25)}
+    .module{position:absolute;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);font-size:12px;white-space:nowrap}
+    .btn{background:linear-gradient(120deg,var(--blue),var(--violet));color:#fff;font-weight:700}
+    .btn:hover{filter:brightness(1.07)}
+    .btn2{border:1px solid rgba(255,255,255,.22);color:#dbe8ff}
+    .clip{overflow:hidden}.clip span{display:block;transform:translateY(110%)}
+    .mode-card{transition:.25s;border:1px solid rgba(255,255,255,.16)}
+    .mode-card.active{border-color:rgba(86,168,255,.9);box-shadow:0 0 0 1px rgba(86,168,255,.4) inset}
+    .stage{min-height:340px;border:1px solid rgba(255,255,255,.15);border-radius:20px;position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(18,27,47,.94),rgba(10,15,28,.95))}
+    .gridfx{position:absolute;inset:0;opacity:.2;background-image:linear-gradient(rgba(255,255,255,.1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.1) 1px,transparent 1px);background-size:22px 22px}
     .pill{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:8px 12px;font-size:13px}
-    .section-light{background:linear-gradient(180deg,#f3f6fb,#e8edf7);color:#0f1423}
-    .marquee{white-space:nowrap;overflow:hidden}
-    .marquee span{display:inline-block;padding-right:40px;animation:marq 24s linear infinite}
-    @keyframes marq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-    #preloader{position:fixed;inset:0;background:#05070d;z-index:100;display:grid;place-items:center}
-    #preloader p{letter-spacing:.35em;color:#7e8eac;font-size:12px;text-transform:uppercase}
+    .light{background:linear-gradient(180deg,#f4f7fc,#e9edf7);color:#0f1424}
+    #pre{position:fixed;inset:0;background:#060910;display:grid;place-items:center;z-index:100}#pre p{font-size:12px;letter-spacing:.3em;color:#8090ad;text-transform:uppercase}
   </style>
 </head>
-<body class="noise">
-  <div class="bg-aurora"></div>
-  <div id="preloader"><p>Ventus System Initializing</p></div>
+<body>
+  <div class="aurora"></div>
+  <div id="pre"><p>Ventus System Initializing</p></div>
 
-  <header class="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-[#090d17]/70 backdrop-blur">
+  <header class="fixed top-0 left-0 right-0 z-50 bg-[#0a0f1a]/75 backdrop-blur border-b border-white/10">
     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
       <a class="display font-bold tracking-wide">VENTUS</a>
       <nav class="flex items-center gap-6 text-sm text-slate-300">
         <a href="#transformation" class="hover:text-white">Transformation</a>
-        <a href="#proof" class="hover:text-white">Proof</a>
+        <a href="#collections" class="hover:text-white">Collections</a>
         <a href="packs.html" class="hover:text-white">Packs</a>
-        <a href="booking.html" class="btn-primary px-4 py-2 rounded-full">Get the System</a>
+        <a href="booking.html" class="btn px-4 py-2 rounded-full">Get the System</a>
       </nav>
     </div>
   </header>
 
   <main class="pt-28">
-    <section class="min-h-[94vh] max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
+    <!-- Scene 1 -->
+    <section class="min-h-[92vh] max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
       <div>
-        <p class="text-xs uppercase tracking-[0.35em] text-cyan-300 mb-6 opacity-0 hero-tag">Flagship Product Reveal</p>
+        <p class="text-xs uppercase tracking-[0.35em] text-cyan-300 mb-6 opacity-0 hero-tag">Scene 1 — AI Potential</p>
         <h1 class="display text-5xl md:text-7xl font-bold leading-[1.02] mb-6">
-          <div class="clip-line"><span>Turn AI Into</span></div>
-          <div class="clip-line"><span>Whatever</span></div>
-          <div class="clip-line"><span class="text-cyan-300">You Need</span></div>
+          <div class="clip"><span>AI Can Do</span></div>
+          <div class="clip"><span>Almost</span></div>
+          <div class="clip"><span class="text-cyan-300">Anything.</span></div>
         </h1>
-        <p class="text-lg text-slate-300 max-w-xl mb-9 opacity-0 hero-copy">Modular prompt and .md frameworks that transform AI into design studios, app architects, automation operators, sales strategists, and research engines.</p>
+        <p class="text-lg text-slate-300 max-w-xl mb-8 opacity-0 hero-copy">Ventus creates modular prompt frameworks and .md systems that transform AI into specialized expert tools.</p>
         <div class="flex flex-wrap gap-4 opacity-0 hero-cta">
-          <a href="#transformation" class="btn-primary px-7 py-4 rounded-full">Explore the System</a>
-          <a href="packs.html" class="btn-ghost px-7 py-4 rounded-full">View Prompt Packs</a>
+          <a href="#problem" class="btn px-7 py-4 rounded-full">Explore the System</a>
+          <a href="packs.html" class="btn2 px-7 py-4 rounded-full">View Prompt Packs</a>
         </div>
       </div>
-      <div class="relative h-[500px] grid place-items-center">
-        <div class="hero-core" id="core">
-          <div class="ring"></div>
-          <div class="ring2"></div>
-        </div>
-        <span class="module" style="top:7%;left:2%">Design Studio</span>
-        <span class="module" style="top:13%;right:6%">App Architect</span>
-        <span class="module" style="top:43%;right:-2%">Automation Operator</span>
-        <span class="module" style="bottom:16%;right:7%">Sales Strategist</span>
+      <div class="relative h-[470px] grid place-items-center">
+        <div class="hero-core" id="core"><div class="ring"></div></div>
+        <span class="module" style="top:8%;left:4%">Startup Builder</span>
+        <span class="module" style="top:13%;right:6%">Creative Studio</span>
+        <span class="module" style="top:42%;right:-2%">Automation Operator</span>
+        <span class="module" style="bottom:17%;right:8%">Strategy Advisor</span>
         <span class="module" style="bottom:8%;left:7%">Research Engine</span>
-        <span class="module" style="top:44%;left:-1%">CEO Assistant</span>
       </div>
     </section>
 
-    <section class="max-w-6xl mx-auto px-6 py-20">
-      <div class="glass rounded-3xl p-10 md:p-14 tilt" id="problem-card">
-        <h2 class="display text-4xl md:text-5xl font-bold mb-4">AI is powerful. Without structure, it produces average work.</h2>
-        <p class="text-slate-300 text-lg">Generic outputs. Inconsistent quality. Unpredictable behavior. Ventus gives AI a system layer — role, behavior, quality gates, and execution logic.</p>
-      </div>
-    </section>
-
-    <section id="transformation" class="sticky-wrap max-w-7xl mx-auto px-6">
-      <div class="sticky-panel glass p-6 md:p-10">
-        <div class="grid lg:grid-cols-5 gap-6 h-full">
-          <div class="lg:col-span-2 space-y-3">
-            <h3 class="display text-3xl font-bold mb-2">Transformation Visualizer</h3>
-            <button class="mode-card active w-full rounded-xl p-4 text-left" data-mode="design"><strong>Design Studio Mode</strong><p class="text-sm text-slate-300 mt-1">AI morphs into a premium design engine.</p></button>
-            <button class="mode-card w-full rounded-xl p-4 text-left" data-mode="app"><strong>App Architect Mode</strong><p class="text-sm text-slate-300 mt-1">From ideas to product structure.</p></button>
-            <button class="mode-card w-full rounded-xl p-4 text-left" data-mode="ops"><strong>Automation Operator</strong><p class="text-sm text-slate-300 mt-1">Workflows, handoffs, and SOP systems.</p></button>
-            <button class="mode-card w-full rounded-xl p-4 text-left" data-mode="research"><strong>Research Engine</strong><p class="text-sm text-slate-300 mt-1">Structured insight extraction.</p></button>
-            <button class="mode-card w-full rounded-xl p-4 text-left" data-mode="ceo"><strong>CEO Assistant</strong><p class="text-sm text-slate-300 mt-1">Daily strategic operator mode.</p></button>
-          </div>
-          <div class="lg:col-span-3 rounded-2xl border border-white/15 p-6 relative overflow-hidden" id="stage">
-            <div class="absolute inset-0 opacity-25" style="background-image:linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px);background-size:22px 22px"></div>
-            <div class="relative z-10">
-              <p class="text-cyan-300 text-sm mb-2" id="modeTag">DESIGN STUDIO MODE</p>
-              <h4 class="display text-3xl font-bold mb-3" id="modeTitle">AI transforms into a cinematic design system generator.</h4>
-              <p class="text-slate-300 mb-6" id="modeBody">Creates launch-page concepts, copy architecture, color systems, and conversion-focused UI structure.</p>
-              <div class="flex flex-wrap gap-2" id="modePills">
-                <span class="pill">Hero concepts</span><span class="pill">Typography systems</span><span class="pill">Motion choreography</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section-light py-24">
-      <div class="max-w-7xl mx-auto px-6">
-        <h3 class="display text-4xl md:text-5xl font-bold mb-10">Industry example systems</h3>
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <article class="rounded-2xl border border-slate-300 bg-white p-6"><h4 class="font-bold text-xl mb-2">Automotive</h4><p class="text-slate-700">Role: Service Advisor Expert<br>Result: Inspection scripts + customer explainers</p></article>
-          <article class="rounded-2xl border border-slate-300 bg-white p-6"><h4 class="font-bold text-xl mb-2">Real Estate</h4><p class="text-slate-700">Role: Listing Strategist<br>Result: Listing copy + follow-up system</p></article>
-          <article class="rounded-2xl border border-slate-300 bg-white p-6"><h4 class="font-bold text-xl mb-2">Founders</h4><p class="text-slate-700">Role: Product + GTM Advisor<br>Result: Launch roadmap + decision engine</p></article>
-          <article class="rounded-2xl border border-slate-300 bg-white p-6"><h4 class="font-bold text-xl mb-2">Agencies</h4><p class="text-slate-700">Role: Delivery Operator<br>Result: Repeatable creative + SOPs</p></article>
-          <article class="rounded-2xl border border-slate-300 bg-white p-6"><h4 class="font-bold text-xl mb-2">Creators</h4><p class="text-slate-700">Role: Content Studio<br>Result: Editorial cadence + repurposing</p></article>
-          <article class="rounded-2xl border border-slate-300 bg-white p-6"><h4 class="font-bold text-xl mb-2">Developers</h4><p class="text-slate-700">Role: App Architect<br>Result: Build-ready specs + sequencing</p></article>
-        </div>
-      </div>
-    </section>
-
-    <section id="proof" class="max-w-7xl mx-auto px-6 py-24">
-      <div class="marquee text-slate-400 mb-8"><span>WEBSITES • APPS • AUTOMATION WORKFLOWS • RESEARCH SYSTEMS • AI OPERATORS • WEBSITES • APPS • AUTOMATION WORKFLOWS • RESEARCH SYSTEMS • AI OPERATORS •</span></div>
+    <!-- Scene 2 -->
+    <section id="problem" class="max-w-6xl mx-auto px-6 py-22">
       <div class="glass rounded-3xl p-10 md:p-14">
-        <p class="text-cyan-300 text-sm mb-2">Proof of Concept</p>
-        <h3 class="display text-4xl md:text-5xl font-bold mb-4">This entire website was created using the same prompt framework.</h3>
-        <p class="text-slate-300 text-lg">The system is not theory. It's an operating layer for real output.</p>
+        <p class="text-cyan-300 text-sm mb-2">Scene 2 — The Problem</p>
+        <h2 class="display text-4xl md:text-5xl font-bold mb-4">Without structure, AI output is inconsistent and generic.</h2>
+        <p class="text-slate-300 text-lg">Power without architecture creates noise. Ventus introduces modular constraints and role logic so AI becomes predictable, specialized, and useful.</p>
       </div>
     </section>
 
-    <section class="max-w-6xl mx-auto px-6 pb-24">
-      <div class="glass rounded-3xl p-10 md:p-14 text-center">
-        <h3 class="display text-5xl font-bold mb-4">Build Your Own AI Systems</h3>
-        <p class="text-slate-300 text-lg mb-8">Transform AI into your design team, research lab, or automation engine.</p>
-        <div class="flex flex-wrap justify-center gap-4">
-          <a href="packs.html" class="btn-primary px-8 py-4 rounded-full">Get the Prompt System</a>
-          <a href="booking.html" class="btn-ghost px-8 py-4 rounded-full">Book a Strategy Call</a>
+    <!-- Scene 3/4 -->
+    <section id="transformation" class="max-w-7xl mx-auto px-6 py-22">
+      <p class="text-cyan-300 text-sm mb-2">Scene 3 & 4 — Structure + Transformation</p>
+      <h3 class="display text-4xl md:text-5xl font-bold mb-10">Structure Unlocks Capability</h3>
+      <div class="grid lg:grid-cols-5 gap-6">
+        <div class="lg:col-span-2 grid gap-3">
+          <button class="mode-card active rounded-xl p-4 text-left" data-mode="startup"><strong>Startup Builder</strong><p class="text-sm text-slate-300 mt-1">Launch architecture + GTM sequencing.</p></button>
+          <button class="mode-card rounded-xl p-4 text-left" data-mode="ops"><strong>Automation Operator</strong><p class="text-sm text-slate-300 mt-1">Workflow and SOP execution systems.</p></button>
+          <button class="mode-card rounded-xl p-4 text-left" data-mode="research"><strong>Research Engine</strong><p class="text-sm text-slate-300 mt-1">Insight extraction and synthesis.</p></button>
+          <button class="mode-card rounded-xl p-4 text-left" data-mode="creative"><strong>Creative Studio</strong><p class="text-sm text-slate-300 mt-1">Design direction and concept generation.</p></button>
+          <button class="mode-card rounded-xl p-4 text-left" data-mode="strategy"><strong>Strategy Advisor</strong><p class="text-sm text-slate-300 mt-1">Positioning and decision frameworks.</p></button>
         </div>
+        <div class="lg:col-span-3 stage p-6" id="stage">
+          <div class="gridfx"></div>
+          <div class="relative z-10">
+            <p class="text-cyan-300 text-sm mb-2" id="tag">STARTUP BUILDER MODE</p>
+            <h4 class="display text-3xl font-bold mb-3" id="title">AI transforms into a startup launch engine.</h4>
+            <p class="text-slate-300 mb-6" id="body">From offer clarity to launch sequencing, this mode structures AI output into practical startup execution plans.</p>
+            <div class="flex flex-wrap gap-2" id="pills"><span class="pill">Offer design</span><span class="pill">Launch plan</span><span class="pill">Execution map</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Scene 5 -->
+    <section class="max-w-7xl mx-auto px-6 py-22">
+      <p class="text-cyan-300 text-sm mb-2">Scene 5 — Real Outputs</p>
+      <h3 class="display text-4xl font-bold mb-8">What these systems can create</h3>
+      <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div class="glass rounded-xl p-5">Websites</div>
+        <div class="glass rounded-xl p-5">Apps</div>
+        <div class="glass rounded-xl p-5">Automation Systems</div>
+        <div class="glass rounded-xl p-5">Research Insights</div>
+        <div class="glass rounded-xl p-5">Content Engines</div>
+      </div>
+    </section>
+
+    <!-- Scene 6 -->
+    <section id="collections" class="light py-24">
+      <div class="max-w-7xl mx-auto px-6">
+        <p class="text-blue-700 text-sm mb-2">Scene 6 — Collections</p>
+        <h3 class="display text-4xl md:text-5xl font-bold mb-10">Prompt Framework Collections</h3>
+        <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <article class="bg-white rounded-xl border border-slate-300 p-5"><h4 class="font-bold">Builder Collection</h4><p class="text-slate-700 text-sm mt-2">Product and launch systems.</p></article>
+          <article class="bg-white rounded-xl border border-slate-300 p-5"><h4 class="font-bold">Operator Collection</h4><p class="text-slate-700 text-sm mt-2">Workflow and execution systems.</p></article>
+          <article class="bg-white rounded-xl border border-slate-300 p-5"><h4 class="font-bold">Creator Collection</h4><p class="text-slate-700 text-sm mt-2">Design and content systems.</p></article>
+          <article class="bg-white rounded-xl border border-slate-300 p-5"><h4 class="font-bold">Research Collection</h4><p class="text-slate-700 text-sm mt-2">Analysis and synthesis systems.</p></article>
+          <article class="bg-white rounded-xl border border-slate-300 p-5"><h4 class="font-bold">Strategy Collection</h4><p class="text-slate-700 text-sm mt-2">Positioning and decision systems.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Scene 7 -->
+    <section class="max-w-6xl mx-auto px-6 py-22">
+      <div class="glass rounded-3xl p-10 md:p-14">
+        <p class="text-cyan-300 text-sm mb-2">Scene 7 — Service Offering</p>
+        <h3 class="display text-4xl font-bold mb-4">Ventus can configure and maintain your AI systems.</h3>
+        <p class="text-slate-300 mb-8">If you want implementation done right and maintained over time, Ventus runs the setup and keeps your collections optimized.</p>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="rounded-xl border border-white/20 p-6"><p class="text-sm text-slate-300">AI System Setup</p><p class="display text-4xl font-bold">$1500</p><p class="text-slate-300 text-sm">one-time</p></div>
+          <div class="rounded-xl border border-white/20 p-6"><p class="text-sm text-slate-300">AI System Management</p><p class="display text-4xl font-bold">$500</p><p class="text-slate-300 text-sm">per month</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Scene 8 -->
+    <section class="max-w-6xl mx-auto px-6 py-16">
+      <div class="glass rounded-2xl p-8">
+        <p class="text-cyan-300 text-sm mb-2">Scene 8 — Proof</p>
+        <p class="display text-3xl font-bold">“This entire site was created using the same prompt framework system you receive.”</p>
+      </div>
+    </section>
+
+    <!-- Scene 9 -->
+    <section class="max-w-6xl mx-auto px-6 pb-24 pt-10">
+      <div class="glass rounded-3xl p-10 md:p-14 text-center">
+        <h3 class="display text-5xl font-bold mb-4">Turn AI Into Your Expert Team</h3>
+        <p class="text-slate-300 text-lg mb-8">Prompt frameworks that transform AI into powerful specialized systems.</p>
+        <a href="packs.html" class="btn px-8 py-4 rounded-full">Explore the Collections</a>
       </div>
     </section>
   </main>
@@ -171,39 +182,29 @@
   <script>
     gsap.registerPlugin(ScrollTrigger);
     const lenis = new Lenis({duration:1.1});
-    function raf(t){lenis.raf(t);requestAnimationFrame(raf)}requestAnimationFrame(raf);
-
+    const raf=t=>{lenis.raf(t);requestAnimationFrame(raf)};requestAnimationFrame(raf);
     window.addEventListener('load',()=>{
-      gsap.to('#preloader',{opacity:0,duration:.5,delay:.3,onComplete:()=>document.getElementById('preloader').remove()});
-      gsap.to('.clip-line span',{y:0,stagger:.1,duration:.7,ease:'power3.out'});
-      gsap.to('.hero-tag,.hero-copy,.hero-cta',{opacity:1,y:0,stagger:.12,duration:.6,delay:.4});
+      gsap.to('#pre',{opacity:0,duration:.5,delay:.25,onComplete:()=>document.getElementById('pre').remove()});
+      gsap.to('.clip span',{y:0,stagger:.1,duration:.7,ease:'power3.out'});
+      gsap.to('.hero-tag,.hero-copy,.hero-cta',{opacity:1,y:0,stagger:.1,duration:.55,delay:.35});
     });
-
     gsap.to('#core',{scale:1.06,duration:2.2,yoyo:true,repeat:-1,ease:'sine.inOut'});
-    gsap.to('.ring',{rotate:360,duration:20,repeat:-1,ease:'none'});
-    gsap.to('.ring2',{rotate:-360,duration:28,repeat:-1,ease:'none'});
-    gsap.to('.module',{y:'random(-8,8)',x:'random(-8,8)',duration:2.2,stagger:.08,repeat:-1,yoyo:true,ease:'sine.inOut'});
+    gsap.to('.ring',{rotate:360,duration:22,repeat:-1,ease:'none'});
+    gsap.to('.module',{x:'random(-8,8)',y:'random(-8,8)',duration:2.4,stagger:.08,repeat:-1,yoyo:true,ease:'sine.inOut'});
+    gsap.utils.toArray('.glass, .light article').forEach(el=>gsap.from(el,{opacity:0,y:28,duration:.55,scrollTrigger:{trigger:el,start:'top 85%'}}));
 
-    gsap.utils.toArray('.glass, .section-light article, .marquee').forEach(el=>{
-      gsap.from(el,{opacity:0,y:30,duration:.55,scrollTrigger:{trigger:el,start:'top 85%'}})
-    });
-
-    const map={
-      design:{tag:'DESIGN STUDIO MODE',title:'AI transforms into a cinematic design system generator.',body:'Creates launch-page concepts, copy architecture, color systems, and conversion-focused UI.',pills:['Hero concepts','Typography systems','Motion choreography']},
-      app:{tag:'APP ARCHITECT MODE',title:'AI shifts into product architecture and flow planning.',body:'Turns raw ideas into feature maps, app structure, and implementation sequencing.',pills:['User flow maps','Feature hierarchy','Build plan']},
-      ops:{tag:'AUTOMATION OPERATOR MODE',title:'AI assembles workflow logic into executable systems.',body:'Builds SOPs, process loops, handoff logic, and operational accountability frameworks.',pills:['SOP templates','Handoff rules','Execution loops']},
-      research:{tag:'RESEARCH ENGINE MODE',title:'AI becomes a structured analysis machine.',body:'Synthesizes sources into actionable insights and decision-ready output.',pills:['Source synthesis','Insight reports','Decision briefs']},
-      ceo:{tag:'CEO ASSISTANT MODE',title:'AI acts like a sharp executive operator.',body:'Prioritization, blocker tracking, and strategic daily brief generation.',pills:['Morning brief','Decision filters','EOD recap']}
+    const data={
+      startup:{tag:'STARTUP BUILDER MODE',title:'AI transforms into a startup launch engine.',body:'From offer clarity to launch sequencing, this mode structures AI output into practical startup execution plans.',p:['Offer design','Launch plan','Execution map']},
+      ops:{tag:'AUTOMATION OPERATOR MODE',title:'AI assembles operational systems.',body:'Builds SOPs, handoff logic, and workflow automation loops for reliable execution.',p:['SOPs','Handoffs','Automation loops']},
+      research:{tag:'RESEARCH ENGINE MODE',title:'AI converts sources into insight.',body:'Synthesizes data into concise intelligence and decision-ready reports.',p:['Source synthesis','Insight briefs','Decision support']},
+      creative:{tag:'CREATIVE STUDIO MODE',title:'AI becomes a concept and design system.',body:'Generates high-end creative direction, visual systems, and campaign concepts.',p:['Art direction','Visual systems','Campaign concepts']},
+      strategy:{tag:'STRATEGY ADVISOR MODE',title:'AI operates as a strategic brain.',body:'Creates positioning, offer architecture, and tactical next moves.',p:['Positioning','Offer strategy','Decision filters']}
     };
-    const tag=document.getElementById('modeTag');const title=document.getElementById('modeTitle');const body=document.getElementById('modeBody');const pills=document.getElementById('modePills');const stage=document.getElementById('stage');
-    document.querySelectorAll('.mode-card').forEach(btn=>btn.addEventListener('click',()=>{
-      document.querySelectorAll('.mode-card').forEach(x=>x.classList.remove('active'));btn.classList.add('active');const d=map[btn.dataset.mode];
-      gsap.to(stage,{opacity:.35,duration:.2,onComplete:()=>{tag.textContent=d.tag;title.textContent=d.title;body.textContent=d.body;pills.innerHTML=d.pills.map(p=>`<span class='pill'>${p}</span>`).join('');gsap.to(stage,{opacity:1,duration:.35});}})
+    const tag=document.getElementById('tag'),title=document.getElementById('title'),body=document.getElementById('body'),pills=document.getElementById('pills'),stage=document.getElementById('stage');
+    document.querySelectorAll('.mode-card').forEach(b=>b.addEventListener('click',()=>{
+      document.querySelectorAll('.mode-card').forEach(x=>x.classList.remove('active'));b.classList.add('active');const d=data[b.dataset.mode];
+      gsap.to(stage,{opacity:.35,duration:.2,onComplete:()=>{tag.textContent=d.tag;title.textContent=d.title;body.textContent=d.body;pills.innerHTML=d.p.map(x=>`<span class='pill'>${x}</span>`).join('');gsap.to(stage,{opacity:1,duration:.35});}})
     }));
-
-    const tilt=document.getElementById('problem-card');
-    tilt.addEventListener('mousemove',(e)=>{const r=tilt.getBoundingClientRect();const x=(e.clientX-r.left)/r.width-.5;const y=(e.clientY-r.top)/r.height-.5;tilt.style.transform=`rotateY(${x*4}deg) rotateX(${y*-4}deg)`});
-    tilt.addEventListener('mouseleave',()=>tilt.style.transform='rotateY(0) rotateX(0)');
   </script>
 </body>
 </html>
