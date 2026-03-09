@@ -12,25 +12,22 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet"/>
   <style>
-    :root{--bg:#f7f8fa;--text:#111318;--muted:#5e6673;--line:#e7eaf0;--card:#ffffff;--blue:#3a6ff7;--violet:#7a5af8;--dark:#0e1320}
+    :root{--bg:#f7f8fa;--text:#111318;--muted:#5e6673;--line:#e7eaf0;--card:#fff;--blue:#3a6ff7;--violet:#7a5af8;--dark:#0e1320}
     *{box-sizing:border-box} html,body{margin:0;font-family:Inter,sans-serif;background:var(--bg);color:var(--text)}
-    .display{font-family:'Space Grotesk',sans-serif}
-    .container{max-width:1160px;margin:0 auto;padding:0 24px}
-    .hero-dark{background:radial-gradient(1000px 400px at 80% -10%,rgba(122,90,248,.25),transparent 60%),linear-gradient(180deg,#111827,#0e1320);color:#eef3ff}
-    .glass{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(8px)}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:16px}
-    .btn{background:linear-gradient(120deg,var(--blue),var(--violet));color:#fff;font-weight:700}
-    .btn2{border:1px solid #cdd6e7;color:#1f2937}
-    .dot{width:8px;height:8px;border-radius:999px;background:var(--blue)}
+    .display{font-family:'Space Grotesk',sans-serif}.container{max-width:1160px;margin:0 auto;padding:0 24px}
+    .hero-dark{background:radial-gradient(900px 360px at 80% -10%,rgba(122,90,248,.25),transparent 60%),linear-gradient(180deg,#111827,#0e1320);color:#eef3ff}
+    .glass{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(8px)}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:16px}.btn{background:linear-gradient(120deg,var(--blue),var(--violet));color:#fff;font-weight:700}
+    .btn2{border:1px solid #cdd6e7;color:#1f2937}.dot{width:8px;height:8px;border-radius:999px;background:var(--blue)}
     .fade-up{opacity:0;transform:translateY(20px)}
   </style>
 </head>
 <body>
   <header class="sticky top-0 z-50 bg-white/85 backdrop-blur border-b border-[var(--line)]">
     <div class="container py-4 flex items-center justify-between">
-      <a class="display font-bold tracking-wide">VENTUS</a>
+      <a class="display font-bold tracking-wide" href="#">VENTUS</a>
       <nav class="hidden md:flex items-center gap-6 text-sm text-slate-600">
-        <a href="#problem">Problem</a><a href="#collections">Collections</a><a href="packs.html">Packs</a>
+        <a href="#problem">Problem</a><a href="#collections">Collections</a><a href="#service">Service</a><a href="packs.html">Packs</a>
         <a href="booking.html" class="btn px-4 py-2 rounded-full">Get the System</a>
       </nav>
     </div>
@@ -39,22 +36,22 @@
   <section class="hero-dark py-24 md:py-32">
     <div class="container grid lg:grid-cols-2 gap-14 items-center">
       <div>
-        <p class="text-xs uppercase tracking-[.28em] text-cyan-300 mb-5">Structured Intelligence</p>
+        <p class="text-xs uppercase tracking-[.28em] text-cyan-300 mb-5">Ventus Prompt Systems</p>
         <h1 class="display text-5xl md:text-7xl leading-[1.02] mb-6">Turn AI Into the Tool You Actually Need</h1>
-        <p class="text-lg text-slate-300 max-w-xl mb-8">Prompt frameworks that give AI structure, clarity, and expertise.</p>
+        <p class="text-lg text-slate-300 max-w-xl mb-8">Ventus creates structured prompt frameworks and modular .md systems that transform AI into specialized experts for design, strategy, operations, research, and content execution.</p>
         <div class="flex flex-wrap gap-3">
           <a href="#collections" class="btn px-7 py-4 rounded-full">Explore the Collections</a>
           <a href="packs.html" class="glass px-7 py-4 rounded-full">See Prompt Packs</a>
         </div>
       </div>
       <div class="glass rounded-2xl p-6">
-        <p class="text-sm text-slate-300 mb-4">System Diagram</p>
+        <p class="text-sm text-slate-300 mb-4">Mode Examples</p>
         <div class="grid grid-cols-2 gap-3 text-sm">
-          <div class="glass rounded-xl p-3">Research Assistant</div>
-          <div class="glass rounded-xl p-3">Creative Studio</div>
+          <div class="glass rounded-xl p-3">Design Studio</div>
+          <div class="glass rounded-xl p-3">App Architect</div>
           <div class="glass rounded-xl p-3">Automation Operator</div>
           <div class="glass rounded-xl p-3">Strategy Advisor</div>
-          <div class="glass rounded-xl p-3 col-span-2">Knowledge Engine</div>
+          <div class="glass rounded-xl p-3 col-span-2">Research Engine</div>
         </div>
       </div>
     </div>
@@ -64,7 +61,7 @@
     <div class="container">
       <div class="card p-8 md:p-12 fade-up">
         <h2 class="display text-4xl md:text-5xl mb-4">AI is powerful. But without structure, it’s inconsistent.</h2>
-        <p class="text-lg text-[var(--muted)]">One great result, then three generic ones. The issue isn’t intelligence. It’s architecture.</p>
+        <p class="text-lg text-[var(--muted)]">Most teams are not blocked by model capability — they’re blocked by random prompts, unclear instruction layers, and no repeatable system. One strong output. Three generic ones. Then chaos.</p>
       </div>
     </div>
   </section>
@@ -74,14 +71,14 @@
       <div class="card p-8 fade-up">
         <p class="text-sm text-[var(--blue)] mb-2">The Guide</p>
         <h3 class="display text-3xl mb-3">Ventus gives AI a professional operating system.</h3>
-        <p class="text-[var(--muted)]">Role logic, behavior rules, output standards, and workflow structure — all modular and reusable.</p>
+        <p class="text-[var(--muted)]">Each framework defines role, behavior, quality standards, and output structure so your AI behaves like a specialist teammate instead of a generic assistant.</p>
       </div>
       <div class="card p-8 fade-up">
         <p class="text-sm text-[var(--blue)] mb-2">The Plan</p>
         <ol class="space-y-3 text-[var(--muted)]">
-          <li><span class="dot inline-block mr-2"></span>Choose a Collection</li>
-          <li><span class="dot inline-block mr-2"></span>Install the prompt frameworks</li>
-          <li><span class="dot inline-block mr-2"></span>Turn AI into a specialized expert</li>
+          <li><span class="dot inline-block mr-2"></span>Choose a Collection aligned to your workflow</li>
+          <li><span class="dot inline-block mr-2"></span>Install the framework files (.md)</li>
+          <li><span class="dot inline-block mr-2"></span>Run AI in expert mode with repeatable output</li>
         </ol>
       </div>
     </div>
@@ -89,7 +86,8 @@
 
   <section class="py-20">
     <div class="container">
-      <h3 class="display text-4xl mb-8">Transformation Examples</h3>
+      <h3 class="display text-4xl mb-3">Transformation in practice</h3>
+      <p class="text-[var(--muted)] mb-8 max-w-2xl">One model, multiple specialized systems. Switch based on the job and keep quality consistent.</p>
       <div class="grid md:grid-cols-5 gap-4">
         <div class="card p-5 fade-up">Research Assistant</div>
         <div class="card p-5 fade-up">Creative Studio</div>
@@ -102,26 +100,28 @@
 
   <section id="collections" class="py-20 bg-white border-y border-[var(--line)]">
     <div class="container">
-      <h3 class="display text-4xl mb-10">Collections</h3>
+      <h3 class="display text-4xl mb-3">Collections</h3>
+      <p class="text-[var(--muted)] mb-10 max-w-2xl">Each Collection contains structured prompt systems designed for a specific type of outcome, from product building to operations and strategy.</p>
       <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div class="card p-5 fade-up"><h4 class="font-bold">Builder</h4><p class="text-sm text-[var(--muted)] mt-2">Create, plan, ship.</p></div>
-        <div class="card p-5 fade-up"><h4 class="font-bold">Operator</h4><p class="text-sm text-[var(--muted)] mt-2">Run systems cleanly.</p></div>
-        <div class="card p-5 fade-up"><h4 class="font-bold">Creator</h4><p class="text-sm text-[var(--muted)] mt-2">Design + content flow.</p></div>
-        <div class="card p-5 fade-up"><h4 class="font-bold">Research</h4><p class="text-sm text-[var(--muted)] mt-2">Analyze and decide.</p></div>
-        <div class="card p-5 fade-up"><h4 class="font-bold">Strategy</h4><p class="text-sm text-[var(--muted)] mt-2">Position and execute.</p></div>
+        <div class="card p-5 fade-up"><h4 class="font-bold">Builder</h4><p class="text-sm text-[var(--muted)] mt-2">Create, plan, and ship faster.</p></div>
+        <div class="card p-5 fade-up"><h4 class="font-bold">Operator</h4><p class="text-sm text-[var(--muted)] mt-2">Run workflows with clean execution.</p></div>
+        <div class="card p-5 fade-up"><h4 class="font-bold">Creator</h4><p class="text-sm text-[var(--muted)] mt-2">Design and content systems.</p></div>
+        <div class="card p-5 fade-up"><h4 class="font-bold">Research</h4><p class="text-sm text-[var(--muted)] mt-2">Analyze, synthesize, decide.</p></div>
+        <div class="card p-5 fade-up"><h4 class="font-bold">Strategy</h4><p class="text-sm text-[var(--muted)] mt-2">Positioning and next-best actions.</p></div>
       </div>
+      <div class="mt-8"><a href="packs.html" class="btn px-6 py-3 rounded-full inline-block">View All Packs</a></div>
     </div>
   </section>
 
-  <section class="py-20">
+  <section id="service" class="py-20">
     <div class="container">
       <div class="card p-8 md:p-12 fade-up">
         <p class="text-sm text-[var(--blue)] mb-3">Optional Service</p>
-        <h3 class="display text-4xl mb-4">Want us to set it up for you?</h3>
-        <p class="text-[var(--muted)] mb-8">Ventus configures and maintains your collections around your workflow.</p>
+        <h3 class="display text-4xl mb-4">Want Ventus to set up and maintain your AI system?</h3>
+        <p class="text-[var(--muted)] mb-8 max-w-2xl">If you want this fully configured in OpenClaw or an equivalent stack, Ventus can implement your Collections, tailor them to your workflow, and maintain system quality over time.</p>
         <div class="grid md:grid-cols-2 gap-4">
-          <div class="card p-6"><p class="text-sm text-[var(--muted)]">AI Setup</p><p class="display text-4xl">$1500</p><p class="text-sm text-[var(--muted)]">one-time</p></div>
-          <div class="card p-6"><p class="text-sm text-[var(--muted)]">AI Management</p><p class="display text-4xl">$500</p><p class="text-sm text-[var(--muted)]">per month</p></div>
+          <div class="card p-6"><p class="text-sm text-[var(--muted)]">AI System Setup</p><p class="display text-4xl">$1500</p><p class="text-sm text-[var(--muted)]">one-time</p></div>
+          <div class="card p-6"><p class="text-sm text-[var(--muted)]">AI System Management</p><p class="display text-4xl">$500</p><p class="text-sm text-[var(--muted)]">per month</p></div>
         </div>
       </div>
     </div>
@@ -155,7 +155,6 @@
 
   <script>
     gsap.registerPlugin(ScrollTrigger);
-    new Lenis({duration:1.05});
     gsap.utils.toArray('.fade-up').forEach(el=>gsap.fromTo(el,{opacity:0,y:18},{opacity:1,y:0,duration:.55,scrollTrigger:{trigger:el,start:'top 88%'}}));
     gsap.from('.hero-dark h1, .hero-dark p, .hero-dark a',{opacity:0,y:18,stagger:.08,duration:.6,delay:.15});
   </script>
