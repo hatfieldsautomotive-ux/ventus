@@ -1,292 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Book a Call | Ventus</title>
-  <meta name="description" content="Book your free consultation or Design Day with Ventus. Let's talk about your project.">
-  
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI System Setup | Ventus</title>
+  <meta name="description" content="Book a free strategy call or start your Ventus AI System Setup for $1500." />
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { font-family: 'Inter', system-ui, sans-serif; background: #000; color: #fff; }
-    .gradient-text { background: linear-gradient(135deg, #fff 0%, #f97316 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .glass-card { background: rgba(255,255,255,0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); }
-    .glow-btn { transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-    .glow-btn:hover { transform: scale(1.02); box-shadow: 0 20px 60px -20px rgba(249, 115, 22, 0.4); }
-    .option-card { transition: all 0.3s; border: 1px solid rgba(255,255,255,0.1); }
-    .option-card:hover { border-color: rgba(249, 115, 53, 0.5); }
-    .option-card.selected { border-color: rgba(249, 115, 53, 0.8); background: rgba(249, 115, 53, 0.05); }
+    :root{--bg:#050505;--surface:#0b0b0b;--surface2:#111;--line:#232323;--text:#f5f5f5;--muted:#9a9a9a;--accent:#f97316;--accent2:#a855f7}
+    *{box-sizing:border-box} html,body{margin:0;font-family:Inter,sans-serif;background:var(--bg);color:var(--text)}
+    .card{background:linear-gradient(180deg,var(--surface),var(--surface2));border:1px solid var(--line)}
+    .selected{border-color:rgba(249,115,22,.7);box-shadow:0 0 0 1px rgba(249,115,22,.45) inset}
+    .btn{background:linear-gradient(120deg,var(--accent),#fb923c);color:#120b05;font-weight:800}
+    .btn2{background:linear-gradient(120deg,var(--accent2),#c084fc);color:white;font-weight:800}
   </style>
 </head>
-<body class="min-h-screen">
-  <!-- Navigation -->
-  <nav class="py-6 px-8">
-    <div class="max-w-7xl mx-auto flex items-center justify-between">
-      <a href="index.html" class="text-sm tracking-[0.3em] uppercase font-medium">Ventus</a>
-      <div class="flex items-center gap-6">
-        <a href="index.html" class="text-sm text-neutral-400 hover:text-white transition-colors">← Back to Home</a>
-      </div>
+<body>
+  <nav class="py-6 px-8 border-b border-white/10">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <a href="index.html" class="text-sm tracking-[0.3em] uppercase font-semibold">Ventus</a>
+      <a href="index.html" class="text-sm text-neutral-400 hover:text-white">← Back to Home</a>
     </div>
   </nav>
 
-  <!-- Hero Section -->
-  <section class="py-16 px-8">
-    <div class="max-w-3xl mx-auto text-center">
-      <p class="text-orange-500 text-xs uppercase tracking-[0.3em] mb-4">Let's Talk</p>
-      <h1 class="text-4xl md:text-6xl font-black mb-6">
-        Book Your<br>
-        <span class="gradient-text">Design Day</span>
-      </h1>
-      <p class="text-xl text-neutral-400 mb-8">
-        Choose an option below and let's get started on your project.
-      </p>
+  <section class="py-14 px-8 text-center">
+    <p class="text-orange-500 text-xs tracking-[0.3em] uppercase mb-4">Ventus Systems</p>
+    <h1 class="text-4xl md:text-6xl font-black mb-4">Book Your <span class="text-orange-400">AI System Setup</span></h1>
+    <p class="text-neutral-400 text-lg max-w-3xl mx-auto">Choose your path: free strategy call, or start your full system setup. We only offer monthly management to clients we set up.</p>
+  </section>
+
+  <section class="px-8 pb-8">
+    <div class="max-w-5xl mx-auto grid md:grid-cols-2 gap-6">
+      <button id="option-call" onclick="selectOption('call')" class="card rounded-3xl p-8 text-left selected">
+        <p class="text-green-400 text-sm font-medium mb-1">Free</p>
+        <h2 class="text-2xl font-bold mb-4">Strategy Call</h2>
+        <p class="text-neutral-400 mb-5">30-minute call to map your workflow, required collections, and rollout approach.</p>
+        <ul class="text-sm text-neutral-500 space-y-2">
+          <li>✓ Project and workflow discovery</li>
+          <li>✓ Collection recommendation</li>
+          <li>✓ Implementation roadmap</li>
+        </ul>
+      </button>
+
+      <button id="option-setup" onclick="selectOption('setup')" class="card rounded-3xl p-8 text-left">
+        <p class="text-purple-400 text-sm font-medium mb-1">$1500</p>
+        <h2 class="text-2xl font-bold mb-4">AI System Setup</h2>
+        <p class="text-neutral-400 mb-5">Complete setup of your prompt system, collection configuration, and workflow integration.</p>
+        <ul class="text-sm text-neutral-500 space-y-2">
+          <li>✓ Collection install + configuration</li>
+          <li>✓ Workflow-specific tuning</li>
+          <li>✓ Quality and output standards</li>
+        </ul>
+      </button>
     </div>
   </section>
 
-  <!-- Booking Options -->
-  <section class="py-8 px-8">
-    <div class="max-w-4xl mx-auto">
-      <!-- Options Grid -->
-      <div class="grid md:grid-cols-2 gap-6 mb-12">
-        <!-- Free Consultation -->
-        <div id="option-consultation" onclick="selectOption('consultation')" class="option-card cursor-pointer p-8 rounded-3xl">
-          <div class="flex items-center gap-4 mb-6">
-            <div class="w-14 h-14 bg-orange-500/20 rounded-2xl flex items-center justify-center">
-              <svg class="w-7 h-7 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-              </svg>
-            </div>
-            <div>
-              <p class="text-sm text-green-400 font-medium">Free</p>
-              <h3 class="text-2xl font-bold">Consultation Call</h3>
-            </div>
+  <section class="px-8 pb-16">
+    <div class="max-w-5xl mx-auto">
+      <div id="call-form" class="card rounded-3xl p-8">
+        <h3 class="text-2xl font-bold mb-6">Request Your Free Strategy Call</h3>
+        <form id="strategyForm" onsubmit="submitStrategy(event)">
+          <div class="grid md:grid-cols-2 gap-4 mb-4">
+            <input required name="name" placeholder="Your name" class="w-full px-4 py-4 bg-neutral-900 border border-neutral-800 rounded-xl"/>
+            <input required type="email" name="email" placeholder="Your email" class="w-full px-4 py-4 bg-neutral-900 border border-neutral-800 rounded-xl"/>
           </div>
-          <p class="text-neutral-400 mb-6">
-            30-minute call to discuss your project, goals, and how we can help. No pressure, no obligation.
-          </p>
-          <ul class="space-y-2 text-sm text-neutral-500">
-            <li class="flex items-center gap-2">
-              <span class="text-green-400">✓</span> Project discovery
-            </li>
-            <li class="flex items-center gap-2">
-              <span class="text-green-400">✓</span> Scope & timeline
-            </li>
-            <li class="flex items-center gap-2">
-              <span class="text-green-400">✓</span> Honest assessment
-            </li>
-          </ul>
-        </div>
+          <input name="company" placeholder="Company name" class="w-full px-4 py-4 bg-neutral-900 border border-neutral-800 rounded-xl mb-4"/>
+          <textarea required name="message" rows="4" placeholder="Tell us about your AI goals, current tools, and what you want automated..." class="w-full px-4 py-4 bg-neutral-900 border border-neutral-800 rounded-xl mb-6"></textarea>
+          <input type="hidden" name="_subject" value="Ventus Strategy Call Request"/>
+          <button class="btn w-full py-4 rounded-xl text-lg">Request Strategy Call</button>
+        </form>
+      </div>
 
-        <!-- Design Day -->
-        <div id="option-design-day" onclick="selectOption('design-day')" class="option-card cursor-pointer p-8 rounded-3xl">
-          <div class="flex items-center gap-4 mb-6">
-            <div class="w-14 h-14 bg-purple-500/20 rounded-2xl flex items-center justify-center">
-              <svg class="w-7 h-7 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-              </svg>
-            </div>
-            <div>
-              <p class="text-sm text-purple-400 font-medium">$500</p>
-              <h3 class="text-2xl font-bold">Design Day</h3>
-            </div>
+      <div id="setup-form" class="card rounded-3xl p-8 hidden">
+        <h3 class="text-2xl font-bold mb-2">Start AI System Setup</h3>
+        <p class="text-neutral-400 mb-6">Complete this intake, then continue to Stripe to pay <strong>$1500</strong>.</p>
+        <form id="setupForm" onsubmit="submitSetup(event)">
+          <div class="grid md:grid-cols-2 gap-4 mb-4">
+            <input required name="name" placeholder="Your name" class="w-full px-4 py-4 bg-neutral-900 border border-neutral-800 rounded-xl"/>
+            <input required type="email" name="email" placeholder="Your email" class="w-full px-4 py-4 bg-neutral-900 border border-neutral-800 rounded-xl"/>
           </div>
-          <p class="text-neutral-400 mb-6">
-            One full day of focused design work. You get 3 refined concepts and interactive prototypes.
-          </p>
-          <ul class="space-y-2 text-sm text-neutral-500">
-            <li class="flex items-center gap-2">
-              <span class="text-purple-400">✓</span> 8 hours design work
-            </li>
-            <li class="flex items-center gap-2">
-              <span class="text-purple-400">✓</span> 3 concept directions
-            </li>
-            <li class="flex items-center gap-2">
-              <span class="text-purple-400">✓</span> Interactive prototypes
-            </li>
-            <li class="flex items-center gap-2">
-              <span class="text-purple-400">✓</span> 1 revision round
-            </li>
-          </ul>
-        </div>
+          <input required name="company" placeholder="Company name" class="w-full px-4 py-4 bg-neutral-900 border border-neutral-800 rounded-xl mb-4"/>
+          <input name="website" placeholder="Website URL (optional)" class="w-full px-4 py-4 bg-neutral-900 border border-neutral-800 rounded-xl mb-4"/>
+          <textarea required name="details" rows="5" placeholder="Project details: team size, tools in use (OpenClaw or equivalent), top workflows to systemize, launch timeline..." class="w-full px-4 py-4 bg-neutral-900 border border-neutral-800 rounded-xl mb-6"></textarea>
+          <input type="hidden" name="_subject" value="Ventus AI System Setup Intake"/>
+          <button class="btn2 w-full py-4 rounded-xl text-lg">Submit Intake + Continue to Payment</button>
+        </form>
       </div>
 
-      <!-- Consultation Form -->
-      <div id="consultation-form-container" class="hidden">
-        <div class="glass-card rounded-3xl p-8">
-          <h3 class="text-2xl font-bold mb-6">Request Your Free Consultation</h3>
-          
-          <form id="consultation-form" onsubmit="submitConsultation(event)">
-            <div class="grid md:grid-cols-2 gap-4 mb-4">
-              <input type="text" name="name" placeholder="Your name" required
-                     class="w-full px-4 py-4 bg-neutral-900 border border-neutral-800 rounded-xl text-white focus:border-orange-500 focus:outline-none placeholder:text-neutral-600">
-              <input type="email" name="email" placeholder="Your email" required
-                     class="w-full px-4 py-4 bg-neutral-900 border border-neutral-800 rounded-xl text-white focus:border-orange-500 focus:outline-none placeholder:text-neutral-600">
-            </div>
-            
-            <input type="text" name="company" placeholder="Company name (optional)"
-                   class="w-full px-4 py-4 bg-neutral-900 border border-neutral-800 rounded-xl text-white focus:border-orange-500 focus:outline-none placeholder:text-neutral-600 mb-4">
-            
-            <textarea name="message" rows="4" placeholder="Tell us about your project, goals, or what you're looking for..." required
-                      class="w-full px-4 py-4 bg-neutral-900 border border-neutral-800 rounded-xl text-white focus:border-orange-500 focus:outline-none resize-none placeholder:text-neutral-600 mb-6"></textarea>
-            
-            <input type="hidden" name="_subject" value="New Consultation Request - Ventus">
-            
-            <button type="submit" class="glow-btn w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-4 rounded-xl font-bold text-lg">
-              Request Consultation
-            </button>
-          </form>
-        </div>
+      <div id="setup-success" class="card rounded-3xl p-8 hidden text-center">
+        <h3 class="text-2xl font-bold mb-2">Intake Received</h3>
+        <p class="text-neutral-400 mb-6">Next step: complete payment to lock your setup slot.</p>
+        <a href="https://buy.stripe.com/eVqbJ06g5fqv2Xm6ltffy04" target="_blank" class="btn2 inline-block px-8 py-4 rounded-xl">Pay $1500 in Stripe →</a>
+        <p class="text-neutral-500 text-sm mt-4">After setup completion, $500/month management is available to setup clients only.</p>
       </div>
-
-      <!-- Design Day Form -->
-      <div id="design-day-form-container" class="hidden">
-        <div class="glass-card rounded-3xl p-8">
-          <h3 class="text-2xl font-bold mb-6">Book Your Design Day</h3>
-          
-          <form id="design-day-form" onsubmit="submitDesignDay(event)">
-            <div class="p-4 bg-purple-500/10 border border-purple-500/30 rounded-xl mb-6">
-              <p class="text-sm text-neutral-400">
-                <strong class="text-white">$500</strong> — 8 hours of design work, 3 concepts, interactive prototypes.
-                Payment required to confirm your booking.
-              </p>
-            </div>
-            
-            <div class="grid md:grid-cols-2 gap-4 mb-4">
-              <input type="text" name="name" placeholder="Your name" required
-                     class="w-full px-4 py-4 bg-neutral-900 border border-neutral-800 rounded-xl text-white focus:border-purple-500 focus:outline-none placeholder:text-neutral-600">
-              <input type="email" name="email" placeholder="Your email" required
-                     class="w-full px-4 py-4 bg-neutral-900 border border-neutral-800 rounded-xl text-white focus:border-purple-500 focus:outline-none placeholder:text-neutral-600">
-            </div>
-            
-            <input type="text" name="company" placeholder="Company name"
-                   class="w-full px-4 py-4 bg-neutral-900 border border-neutral-800 rounded-xl text-white focus:border-purple-500 focus:outline-none placeholder:text-neutral-600 mb-4">
-            
-            <input type="url" name="website" placeholder="Current website (if you have one)"
-                   class="w-full px-4 py-4 bg-neutral-900 border border-neutral-800 rounded-xl text-white focus:border-purple-500 focus:outline-none placeholder:text-neutral-600 mb-4">
-            
-            <textarea name="notes" rows="4" placeholder="Project details, timeline, or anything else we should know..."
-                      class="w-full px-4 py-4 bg-neutral-900 border border-neutral-800 rounded-xl text-white focus:border-purple-500 focus:outline-none resize-none placeholder:text-neutral-600 mb-6"></textarea>
-            
-            <input type="hidden" name="_subject" value="New Design Day Booking - Ventus">
-            
-            <div class="grid md:grid-cols-2 gap-4">
-              <button type="submit" class="glow-btn bg-gradient-to-r from-purple-500 to-purple-600 text-white py-4 rounded-xl font-bold text-lg">
-                Continue to Payment
-              </button>
-              
-              <a href="https://calendar.app.google/pN5fk4kG9t5EFCAF6" target="_blank" 
-                 class="text-center py-4 border border-neutral-700 rounded-xl text-neutral-400 hover:border-neutral-500 hover:text-white transition-colors">
-                Or Schedule Directly →
-              </a>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <!-- Success Messages -->
-      <div id="consultation-success" class="hidden glass-card rounded-3xl p-8 text-center">
-        <div class="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-          <svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-          </svg>
-        </div>
-        <h3 class="text-2xl font-bold mb-2">Request Received!</h3>
-        <p class="text-neutral-400">We'll be in touch within 24 hours to schedule your call.</p>
-      </div>
-
-      <div id="design-day-success" class="hidden glass-card rounded-3xl p-8 text-center">
-        <div class="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-          <svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-          </svg>
-        </div>
-        <h3 class="text-2xl font-bold mb-2">Almost There!</h3>
-        <p class="text-neutral-400 mb-6">Complete your payment to lock in your Design Day.</p>
-        
-        <a id="stripe-link" href="https://buy.stripe.com/4gMcN433Tcej0Pe39hffy00" target="_blank"
-           class="glow-btn inline-block bg-gradient-to-r from-purple-500 to-purple-600 text-white px-8 py-4 rounded-xl font-bold">
-          Pay $500 to Confirm →
-        </a>
-      </div>
-
     </div>
   </section>
 
-  <!-- Footer -->
-  <footer class="py-12 px-8 border-t border-white/5 mt-16">
-    <div class="max-w-7xl mx-auto text-center">
-      <p class="text-neutral-500 text-sm">Questions? Email us at <a href="mailto:hello@ventusys.com" class="text-neutral-400 hover:text-white">hello@ventusys.com</a></p>
-    </div>
+  <footer class="py-10 px-8 border-t border-white/10 text-center text-sm text-neutral-500">
+    Questions? <a href="mailto:automations@ventusys.com" class="text-neutral-300">automations@ventusys.com</a>
   </footer>
 
   <script>
-    lucide.createIcons();
+    function selectOption(opt){
+      document.getElementById('option-call').classList.remove('selected');
+      document.getElementById('option-setup').classList.remove('selected');
+      document.getElementById('call-form').classList.add('hidden');
+      document.getElementById('setup-form').classList.add('hidden');
+      document.getElementById('setup-success').classList.add('hidden');
 
-    function selectOption(option) {
-      // Reset selections
-      document.querySelectorAll('.option-card').forEach(card => card.classList.remove('selected'));
-      
-      // Hide all forms
-      document.getElementById('consultation-form-container').classList.add('hidden');
-      document.getElementById('design-day-form-container').classList.add('hidden');
-      document.getElementById('consultation-success').classList.add('hidden');
-      document.getElementById('design-day-success').classList.add('hidden');
-      
-      // Show selected
-      if (option === 'consultation') {
-        document.getElementById('option-consultation').classList.add('selected');
-        document.getElementById('consultation-form-container').classList.remove('hidden');
-      } else {
-        document.getElementById('option-design-day').classList.add('selected');
-        document.getElementById('design-day-form-container').classList.remove('hidden');
+      if(opt==='call'){
+        document.getElementById('option-call').classList.add('selected');
+        document.getElementById('call-form').classList.remove('hidden');
+      }else{
+        document.getElementById('option-setup').classList.add('selected');
+        document.getElementById('setup-form').classList.remove('hidden');
       }
-      
-      // Scroll to form
-      document.getElementById(option === 'consultation' ? 'consultation-form-container' : 'design-day-form-container')
-        .scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    function submitConsultation(e) {
+    function submitStrategy(e){
       e.preventDefault();
-      const form = e.target;
-      const formData = new FormData(form);
-      
-      fetch('https://formspree.io/f/mlgwyodd', {
-        method: 'POST',
-        body: formData,
-        headers: { 'Accept': 'application/json' }
-      }).then(response => {
-        if (response.ok) {
-          form.classList.add('hidden');
-          document.getElementById('consultation-success').classList.remove('hidden');
-        }
-      });
+      const fd = new FormData(e.target);
+      fetch('https://formspree.io/f/mlgwyodd',{method:'POST',body:fd,headers:{'Accept':'application/json'}})
+      .then(()=>{alert('Strategy call request sent. We will follow up shortly.');e.target.reset();})
+      .catch(()=>alert('Could not submit. Please email automations@ventusys.com'));
     }
 
-    function submitDesignDay(e) {
+    function submitSetup(e){
       e.preventDefault();
-      const form = e.target;
-      const formData = new FormData(form);
-      const email = formData.get('email');
-      
-      fetch('https://formspree.io/f/mlgwyodd', {
-        method: 'POST',
-        body: formData,
-        headers: { 'Accept': 'application/json' }
-      }).then(response => {
-        if (response.ok) {
-          form.classList.add('hidden');
-          document.getElementById('design-day-success').classList.remove('hidden');
-          // Update Stripe link with prefilled email
-          document.getElementById('stripe-link').href = 
-            `https://buy.stripe.com/4gMcN433Tcej0Pe39hffy00?prefilled_email=${encodeURIComponent(email)}`;
-        }
-      });
+      const fd = new FormData(e.target);
+      fetch('https://formspree.io/f/mlgwyodd',{method:'POST',body:fd,headers:{'Accept':'application/json'}})
+      .then(()=>{
+        document.getElementById('setup-form').classList.add('hidden');
+        document.getElementById('setup-success').classList.remove('hidden');
+        document.getElementById('setup-success').scrollIntoView({behavior:'smooth'});
+      })
+      .catch(()=>alert('Could not submit. Please email automations@ventusys.com'));
     }
   </script>
 </body>
