@@ -245,7 +245,20 @@ Sequence:
 
 ---
 
-## 12) Final Standard
+## 12) Prompt Refinement + Pack Raid Protocol
+
+For every live execution cycle:
+1. Log objections from real prospects
+2. Update offer prompts/copy to neutralize top objections
+3. Pull winning structures from other Ventus packs (sales, creator, research, ops)
+4. Re-test within 48 hours
+5. Keep only changes that improve close/conversion metrics
+
+This collection is a living operating system, not static content.
+
+---
+
+## 13) Final Standard
 
 This framework is only successful if it produces:
 - real clients
