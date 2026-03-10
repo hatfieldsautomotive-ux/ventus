@@ -11,7 +11,8 @@ Updated: 2026-03-10
 - project-manager
 - customer-success
 - recruiting-operator
-- **hubspot-revops-architect** (new)
+- hubspot-revops-architect
+- **stripe-revenue-ops** (new)
 
 ### Sales / Growth
 - sales-strategist
@@ -33,7 +34,9 @@ Updated: 2026-03-10
 - due-diligence
 - policy-compliance
 - learning-accelerator
-- **n8n-automation-architect** (new)
+- n8n-automation-architect
+- **airtable-ops** (new)
+- **webflow-build-system** (new)
 
 ### Ecommerce
 - automotive-expert
