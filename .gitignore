@@ -1,0 +1,8 @@
+# Local secrets (never commit)
+.secrets/
+*.env
+.env*
+
+# Local runtime artifacts
+node_modules/
+data/
