@@ -11,7 +11,7 @@
   <div class="max-w-xl w-full border border-white/10 rounded-2xl p-8 bg-white/5 text-center">
     <h1 class="text-3xl font-bold mb-3">Payment confirmed</h1>
     <p class="text-neutral-400 mb-6" id="status">Verifying your purchase and preparing download...</p>
-    <a id="dl" class="hidden inline-block bg-orange-500 text-black font-bold px-6 py-3 rounded-xl" href="#">Download Your Collection</a>
+    <div id="downloads" class="hidden space-y-3 mb-2"></div>
     <div class="mt-6 text-sm text-neutral-500"><a href="packs.html" class="underline">Back to Collections</a></div>
   </div>
   <script>
@@ -19,16 +19,25 @@
     const session_id = p.get('session_id');
     const product = p.get('product');
     const status = document.getElementById('status');
-    const dl = document.getElementById('dl');
+    const downloadsEl = document.getElementById('downloads');
 
     async function run(){
       try {
-        const r = await fetch(`/api/checkout-complete?session_id=${encodeURIComponent(session_id)}&product=${encodeURIComponent(product)}`);
+        const qs = new URLSearchParams({ session_id });
+        if (product) qs.set('product', product);
+        const r = await fetch(`/api/checkout-complete?${qs.toString()}`);
         const data = await r.json();
-        if(data?.downloadUrl){
-          status.textContent = 'Ready. Click below to download your collection.';
-          dl.href = data.downloadUrl;
-          dl.classList.remove('hidden');
+
+        const links = Array.isArray(data?.downloads)
+          ? data.downloads
+          : (data?.downloadUrl ? [{ product: data.product || product || 'collection', downloadUrl: data.downloadUrl }] : []);
+
+        if(links.length){
+          status.textContent = links.length > 1
+            ? 'Ready. Download your collections below.'
+            : 'Ready. Download your collection below.';
+          downloadsEl.innerHTML = links.map((d)=>`<a class="block bg-orange-500 text-black font-bold px-6 py-3 rounded-xl" href="${d.downloadUrl}">Download ${d.product}</a>`).join('');
+          downloadsEl.classList.remove('hidden');
         } else {
           status.textContent = 'Could not verify payment. Please contact automations@ventusys.com';
         }

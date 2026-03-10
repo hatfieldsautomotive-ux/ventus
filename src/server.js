@@ -101,6 +101,38 @@ function issueToken(email, product, cb) {
   );
 }
 
+function issueTokenAsync(email, product) {
+  return new Promise((resolve, reject) => {
+    issueToken(email, product, (err, token) => {
+      if (err) return reject(err);
+      resolve(token);
+    });
+  });
+}
+
+function getOrigin(req) {
+  const host = req.get('host');
+  const inferredOrigin = host ? `https://${host}` : null;
+  return process.env.PUBLIC_BASE_URL || inferredOrigin || `${req.protocol}://${host}`;
+}
+
+function buildLineItem(product) {
+  const cfg = CHECKOUT_PRODUCTS[product];
+  if (!cfg) return null;
+
+  const priceId = STRIPE_PRICE_MAP?.[product]?.priceId;
+  if (priceId) return { price: priceId, quantity: 1 };
+
+  return {
+    price_data: {
+      currency: 'usd',
+      unit_amount: cfg.amount,
+      product_data: { name: cfg.name }
+    },
+    quantity: 1
+  };
+}
+
 // Free download gate: simple email capture then redirect
 app.post('/api/free-signup', (req, res) => {
   const { email, source = 'kitt-sidekick' } = req.body;
@@ -139,24 +171,13 @@ app.get('/buy/:product', async (req, res) => {
   if (!cfg) return res.status(404).send('Unknown product');
 
   try {
-    const host = req.get('host');
-    const inferredOrigin = host ? `https://${host}` : null;
-    const origin = process.env.PUBLIC_BASE_URL || inferredOrigin || `${req.protocol}://${host}`;
-    const priceId = STRIPE_PRICE_MAP?.[product]?.priceId;
-    const lineItem = priceId
-      ? { price: priceId, quantity: 1 }
-      : {
-          price_data: {
-            currency: 'usd',
-            unit_amount: cfg.amount,
-            product_data: { name: cfg.name }
-          },
-          quantity: 1
-        };
+    const origin = getOrigin(req);
+    const lineItem = buildLineItem(product);
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       line_items: [lineItem],
+      metadata: { products: product },
       success_url: `${origin}/paid-success.html?session_id={CHECKOUT_SESSION_ID}&product=${product}`,
       cancel_url: `${origin}/packs.html`
     });
@@ -173,25 +194,77 @@ app.get('/buy/:product', async (req, res) => {
   }
 });
 
-// Verify checkout session and issue one-time download token
+// Cart checkout endpoint (multi-pack)
+app.post('/api/create-checkout', async (req, res) => {
+  if (!stripe) return res.status(500).json({ error: 'Stripe not configured' });
+
+  const rawProducts = Array.isArray(req.body?.products) ? req.body.products : [];
+  const products = [...new Set(rawProducts.map((p) => String(p || '').trim()))]
+    .filter((p) => p && CHECKOUT_PRODUCTS[p]);
+
+  if (!products.length) return res.status(400).json({ error: 'No valid products' });
+
+  try {
+    const lineItems = products.map((p) => buildLineItem(p));
+    const origin = getOrigin(req);
+
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      line_items: lineItems,
+      metadata: { products: products.join(',') },
+      success_url: `${origin}/paid-success.html?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/packs.html`
+    });
+
+    return res.json({ ok: true, url: session.url });
+  } catch (e) {
+    console.error('[stripe] cart checkout create failed', {
+      products,
+      type: e?.type,
+      code: e?.code,
+      message: e?.message
+    });
+    return res.status(500).json({ error: 'Could not create checkout session' });
+  }
+});
+
+// Verify checkout session and issue one-time download token(s)
 app.get('/api/checkout-complete', async (req, res) => {
   if (!stripe) return res.status(500).json({ error: 'Stripe not configured' });
   const { session_id, product } = req.query;
-  if (!session_id || !product) return res.status(400).json({ error: 'Missing params' });
-
-  const cfg = CHECKOUT_PRODUCTS[product];
-  if (!cfg) return res.status(400).json({ error: 'Invalid product' });
+  if (!session_id) return res.status(400).json({ error: 'Missing session_id' });
 
   try {
     const session = await stripe.checkout.sessions.retrieve(session_id);
     if (session.payment_status !== 'paid') return res.status(402).json({ error: 'Payment not completed' });
-    if (session.amount_total !== cfg.amount) return res.status(400).json({ error: 'Amount mismatch' });
+
+    let products = [];
+    if (product) {
+      const p = String(product);
+      if (!CHECKOUT_PRODUCTS[p]) return res.status(400).json({ error: 'Invalid product' });
+      products = [p];
+    } else if (session.metadata?.products) {
+      products = session.metadata.products
+        .split(',')
+        .map((p) => p.trim())
+        .filter((p) => p && CHECKOUT_PRODUCTS[p]);
+    }
+
+    if (!products.length) return res.status(400).json({ error: 'No products found for session' });
 
     const email = session.customer_details?.email || '';
-    issueToken(email, product, (err, token) => {
-      if (err) return res.status(500).json({ error: 'Token issue failed' });
-      return res.json({ ok: true, downloadUrl: `/api/download/${product}?token=${token}` });
-    });
+    const downloads = [];
+
+    for (const p of products) {
+      const token = await issueTokenAsync(email, p);
+      downloads.push({ product: p, downloadUrl: `/api/download/${p}?token=${token}` });
+    }
+
+    if (downloads.length === 1) {
+      return res.json({ ok: true, product: downloads[0].product, downloadUrl: downloads[0].downloadUrl, downloads });
+    }
+
+    return res.json({ ok: true, downloads });
   } catch (e) {
     return res.status(500).json({ error: 'Verification failed' });
   }

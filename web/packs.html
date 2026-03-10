@@ -42,7 +42,14 @@
       <div class="mb-5 flex flex-wrap gap-2 text-xs">
         <span class="badge">Released</span><span class="badge">Category Grouped</span><span class="badge">StoryBrand Copy</span>
       </div>
-      <div id="categoryFilters" class="mb-8 flex flex-wrap gap-2"></div>
+      <div id="categoryFilters" class="mb-5 flex flex-wrap gap-2"></div>
+      <div id="cartBar" class="card p-4 mb-8 flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
+        <p class="text-sm" style="color:var(--muted)"><span id="cartCount">0</span> collections selected</p>
+        <div class="flex gap-2">
+          <button id="clearCart" class="btn2" type="button">Clear</button>
+          <button id="checkoutCart" class="btn" type="button">Checkout Selected</button>
+        </div>
+      </div>
       <div id="grouped" class="space-y-10"></div>
     </div>
   </section>
@@ -130,8 +137,27 @@
 
     const filters = document.getElementById('categoryFilters');
     const grouped = document.getElementById('grouped');
+    const cartCount = document.getElementById('cartCount');
+    const checkoutCart = document.getElementById('checkoutCart');
+    const clearCart = document.getElementById('clearCart');
 
     let activeCategory = 'All';
+    let cart = new Set(JSON.parse(localStorage.getItem('ventusCart') || '[]'));
+
+    function saveCart() {
+      localStorage.setItem('ventusCart', JSON.stringify([...cart]));
+      cartCount.textContent = String(cart.size);
+      checkoutCart.disabled = cart.size === 0;
+      checkoutCart.style.opacity = cart.size === 0 ? '.5' : '1';
+      checkoutCart.style.pointerEvents = cart.size === 0 ? 'none' : 'auto';
+    }
+
+    function toggleCart(slug) {
+      if (cart.has(slug)) cart.delete(slug);
+      else cart.add(slug);
+      saveCart();
+      render();
+    }
 
     const categories = ['All', ...orderedCategories.filter(c => offers.some(o => o.category === c))];
     categories.forEach(cat => {
@@ -155,6 +181,28 @@
       filters.appendChild(b);
     });
 
+    clearCart.onclick = () => {
+      cart = new Set();
+      saveCart();
+      render();
+    };
+
+    checkoutCart.onclick = async () => {
+      if (!cart.size) return;
+      try {
+        const r = await fetch('/api/create-checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ products: [...cart] })
+        });
+        const data = await r.json();
+        if (data?.url) location.href = data.url;
+        else alert(data?.error || 'Could not create checkout');
+      } catch (e) {
+        alert('Could not create checkout');
+      }
+    };
+
     function render(){
       grouped.innerHTML = '';
 
@@ -174,6 +222,7 @@
 
         const cards = section.querySelector('.grid');
         items.forEach(o => {
+          const inCart = cart.has(o.slug);
           const d = document.createElement('article');
           d.className = 'card p-5';
           d.innerHTML = `
@@ -188,7 +237,9 @@
               <p class="text-xs" style="color:var(--muted)">Instant delivery</p>
             </div>
             ${o.status === 'Released'
-              ? `<a class="btn w-full" href="${o.free ? '#free' : o.cta}">${o.free ? 'Unlock Free Pack' : 'Pay Link - Buy Now'}</a>`
+              ? (o.free
+                ? `<a class="btn w-full" href="#free">Unlock Free Pack</a>`
+                : `<div class="grid grid-cols-2 gap-2"><button class="btn2 w-full cart-toggle" data-slug="${o.slug}">${inCart ? 'Remove' : 'Add to Cart'}</button><a class="btn w-full" href="${o.cta}">Buy Now</a></div>`)
               : `<a class="btn2 w-full" href="packs/${o.slug}/README.md" target="_blank">View Draft Details</a>`
             }
           `;
@@ -207,8 +258,13 @@
             .then(r=>r.json()).then(d=>{ if(d.downloadUrl) location.href=d.downloadUrl; else alert('Could not generate download'); });
         }
       });
+
+      document.querySelectorAll('.cart-toggle').forEach(btn => {
+        btn.onclick = () => toggleCart(btn.dataset.slug);
+      });
     }
 
+    saveCart();
     render();
   </script>
 </body>
