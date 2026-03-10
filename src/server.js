@@ -85,7 +85,8 @@ const CHECKOUT_PRODUCTS = {
   'hubspot-revops-architect': { name: 'Ventus HubSpot RevOps Architect Collection', amount: 10900 },
   'airtable-ops': { name: 'Ventus Airtable Ops Collection', amount: 9900 },
   'webflow-build-system': { name: 'Ventus Webflow Build System Collection', amount: 10900 },
-  'stripe-revenue-ops': { name: 'Ventus Stripe Revenue Ops Collection', amount: 11900 }
+  'stripe-revenue-ops': { name: 'Ventus Stripe Revenue Ops Collection', amount: 11900 },
+  'profit-validation-sprint': { name: 'Ventus Profit Opportunity Validation Sprint', amount: 150000 }
 };
 
 let STRIPE_PRICE_MAP = {};
