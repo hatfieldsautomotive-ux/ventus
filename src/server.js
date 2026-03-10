@@ -6,6 +6,7 @@ const sqlite3 = require('sqlite3').verbose();
 const Stripe = require('stripe');
 
 const app = express();
+app.set('trust proxy', true);
 const PORT = process.env.PORT || 3460;
 const WEB_DIR = path.join(__dirname, '..', 'web');
 const PRIVATE_DOWNLOADS = path.join(__dirname, '..', 'private-downloads');
@@ -128,7 +129,9 @@ app.get('/buy/:product', async (req, res) => {
   if (!cfg) return res.status(404).send('Unknown product');
 
   try {
-    const origin = `${req.protocol}://${req.get('host')}`;
+    const host = req.get('host');
+    const inferredOrigin = host ? `https://${host}` : null;
+    const origin = process.env.PUBLIC_BASE_URL || inferredOrigin || `${req.protocol}://${host}`;
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       line_items: [
