@@ -109,17 +109,12 @@
       <div class="container">
         <div class="card p-10 fade-up glow">
           <p class="text-sm mb-2" style="color:var(--accent)">Newsletter</p>
-          <h3 class="text-4xl font-extrabold mb-3">Get Ventus drops, playbooks, and launch updates</h3>
-          <p style="color:var(--muted)" class="mb-7">No API needed. Subscribers are captured directly in Beehiiv and stay in your publication list.</p>
-          <div class="card p-3">
-            <iframe src="https://embeds.beehiiv.com/73ab0160-a8c1-47bb-a157-599a0c458abe?slim=true"
-              data-test-id="beehiiv-embed"
-              height="52"
-              frameborder="0"
-              scrolling="no"
-              style="width:100%;margin:0;border-radius:12px;background:transparent;"></iframe>
-          </div>
-          <p class="text-xs mt-3" style="color:var(--muted)">By subscribing, you agree to receive Ventus newsletter updates.</p>
+          <h3 class="text-4xl font-extrabold mb-6">Get Ventus drops, playbooks, and launch updates</h3>
+          <form id="newsletterForm" class="card p-3 flex flex-col md:flex-row gap-3 md:items-center">
+            <input id="newsletterEmail" required type="email" placeholder="Your best email" class="w-full px-4 py-3 bg-black/40 border border-[#2b2b2b] rounded-xl outline-none"/>
+            <button class="btn" type="submit" style="padding:12px 20px;white-space:nowrap">Subscribe</button>
+          </form>
+          <p id="newsletterMsg" class="text-xs mt-3" style="color:var(--muted)">No spam. Practical updates only.</p>
         </div>
       </div>
     </section>
@@ -128,15 +123,16 @@
       <div class="container">
         <div class="card p-10 fade-up">
           <p class="text-sm mb-2" style="color:var(--accent)">Built System Offer</p>
-          <h3 class="text-4xl font-extrabold mb-3">Want Ventus to set it up and run it for you?</h3>
-          <p style="color:var(--muted)" class="mb-7">We configure and maintain your AI prompt system in OpenClaw or equivalent.</p>
-          <div class="grid md:grid-cols-2 gap-4">
-            <div class="card p-6"><p class="text-sm" style="color:var(--muted)">AI System Setup</p><p class="text-4xl font-black">$1500</p><p class="text-sm" style="color:var(--muted)">one-time</p></div>
-            <div class="card p-6"><p class="text-sm" style="color:var(--muted)">AI System Management</p><p class="text-4xl font-black">$500</p><p class="text-sm" style="color:var(--muted)">per month</p></div>
+          <h3 class="text-4xl font-extrabold mb-3">Need implementation, not just prompts?</h3>
+          <p style="color:var(--muted)" class="mb-7">We can design, install, and run your AI operating system with the same frameworks behind Ventus Collections.</p>
+          <div class="grid md:grid-cols-3 gap-4 mb-7">
+            <div class="card p-6"><p class="text-sm" style="color:var(--muted)">Collection Architecture</p><p class="text-lg font-bold mt-2">Role-based prompt systems</p><p class="text-sm mt-2" style="color:var(--muted)">Clear modules, repeatable outputs, less prompt chaos.</p></div>
+            <div class="card p-6"><p class="text-sm" style="color:var(--muted)">Workflow Automation</p><p class="text-lg font-bold mt-2">Automations + QA guardrails</p><p class="text-sm mt-2" style="color:var(--muted)">We connect your tools and enforce quality standards.</p></div>
+            <div class="card p-6"><p class="text-sm" style="color:var(--muted)">Operator Delivery</p><p class="text-lg font-bold mt-2">Built for your team context</p><p class="text-sm mt-2" style="color:var(--muted)">Custom implementation plus rollout support.</p></div>
           </div>
           <div class="mt-7 flex flex-wrap gap-3">
-            <a class="btn" href="booking.html">Book Setup Call</a>
-            <a class="btn-ghost" href="packs.html">Buy Collections Only</a>
+            <a class="btn" href="built-system.html">Learn More</a>
+            <a class="btn-ghost" href="booking.html">Book Setup Call</a>
           </div>
         </div>
       </div>
@@ -153,6 +149,34 @@
   <script>
     gsap.registerPlugin(ScrollTrigger);
     gsap.utils.toArray('.fade-up').forEach(el=>gsap.fromTo(el,{opacity:0,y:16},{opacity:1,y:0,duration:.5,scrollTrigger:{trigger:el,start:'top 88%'}}));
+
+    const newsletterForm = document.getElementById('newsletterForm');
+    const newsletterEmail = document.getElementById('newsletterEmail');
+    const newsletterMsg = document.getElementById('newsletterMsg');
+
+    newsletterForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = newsletterEmail.value.trim();
+      if (!email) return;
+
+      newsletterMsg.textContent = 'Submitting...';
+      try {
+        const r = await fetch('/api/free-signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, source: 'newsletter' })
+        });
+        const data = await r.json();
+        if (data?.ok) {
+          newsletterMsg.textContent = 'You are subscribed. Watch your inbox.';
+          newsletterEmail.value = '';
+        } else {
+          newsletterMsg.textContent = 'Could not subscribe right now. Try again in a minute.';
+        }
+      } catch {
+        newsletterMsg.textContent = 'Could not subscribe right now. Try again in a minute.';
+      }
+    });
   </script>
 </body>
 </html>

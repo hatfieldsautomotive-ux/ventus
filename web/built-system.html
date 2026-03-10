@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Built System | Ventus</title>
+  <meta name="description" content="How Ventus implements AI operating systems for teams: strategy, build, deployment, and support."/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#050505;--surface:#0b0b0b;--surface2:#111;--line:#232323;--text:#f5f5f5;--muted:#9a9a9a;--accent:#f97316}
+    html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,sans-serif}
+    .container{max-width:1140px;margin:0 auto;padding:0 24px}
+    .card{background:linear-gradient(180deg,var(--surface),var(--surface2));border:1px solid var(--line);border-radius:20px}
+    .btn{background:linear-gradient(120deg,var(--accent),#fb923c);color:#120b05;font-weight:800;border-radius:999px;padding:14px 24px;display:inline-block;text-decoration:none}
+    .btn2{border:1px solid #3a3a3a;color:#ddd;border-radius:999px;padding:14px 24px;display:inline-block;text-decoration:none}
+  </style>
+</head>
+<body>
+  <header class="sticky top-0 z-50 border-b" style="border-color:var(--line);background:rgba(5,5,5,.88);backdrop-filter:blur(8px)">
+    <div class="container py-4 flex items-center justify-between">
+      <a href="index.html" class="text-sm tracking-[0.35em] uppercase font-semibold">Ventus</a>
+      <nav class="hidden md:flex items-center gap-6 text-sm" style="color:var(--muted)">
+        <a href="index.html">Home</a>
+        <a href="packs.html">Collections</a>
+        <a href="booking.html" class="btn" style="padding:10px 18px">Book Setup Call</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="py-16">
+    <div class="container space-y-8">
+      <section class="card p-10">
+        <p class="text-sm mb-2" style="color:var(--accent)">Built System</p>
+        <h1 class="text-4xl md:text-5xl font-black mb-4">How Ventus builds your AI operating system</h1>
+        <p class="text-lg" style="color:var(--muted)">This is for teams that want implementation done right: strategy, setup, automations, and execution support.</p>
+      </section>
+
+      <section class="grid md:grid-cols-2 gap-4">
+        <div class="card p-8">
+          <p class="text-xs uppercase tracking-[.18em]" style="color:var(--accent)">Step 1</p>
+          <h3 class="text-2xl font-extrabold mt-2 mb-2">System Blueprint</h3>
+          <p style="color:var(--muted)">We map your workflows, bottlenecks, and outcomes, then design a role-based prompt architecture around your business.</p>
+        </div>
+        <div class="card p-8">
+          <p class="text-xs uppercase tracking-[.18em]" style="color:var(--accent)">Step 2</p>
+          <h3 class="text-2xl font-extrabold mt-2 mb-2">Build + Integration</h3>
+          <p style="color:var(--muted)">We implement collections, automations, and guardrails in your stack so the system is reliable and production-ready.</p>
+        </div>
+        <div class="card p-8">
+          <p class="text-xs uppercase tracking-[.18em]" style="color:var(--accent)">Step 3</p>
+          <h3 class="text-2xl font-extrabold mt-2 mb-2">Launch + QA</h3>
+          <p style="color:var(--muted)">We test real scenarios, tune prompts, and lock the workflows so your team gets consistent output quality.</p>
+        </div>
+        <div class="card p-8">
+          <p class="text-xs uppercase tracking-[.18em]" style="color:var(--accent)">Step 4</p>
+          <h3 class="text-2xl font-extrabold mt-2 mb-2">Ongoing Optimization</h3>
+          <p style="color:var(--muted)">You get a system that evolves with your operations, with continued refinement and support as your needs change.</p>
+        </div>
+      </section>
+
+      <section class="card p-10">
+        <p class="text-sm mb-3" style="color:var(--accent)">What you get</p>
+        <div class="grid md:grid-cols-3 gap-4">
+          <div><p class="font-bold">Prompt Modules</p><p class="text-sm mt-2" style="color:var(--muted)">Collection-grade role prompts and workflow files.</p></div>
+          <div><p class="font-bold">Automation Hooks</p><p class="text-sm mt-2" style="color:var(--muted)">n8n / API-ready automation points with clear handoffs.</p></div>
+          <div><p class="font-bold">Operator Playbooks</p><p class="text-sm mt-2" style="color:var(--muted)">Execution guides your team can actually follow.</p></div>
+        </div>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a class="btn" href="booking.html">Book Setup Call</a>
+          <a class="btn2" href="packs.html">Explore Collections</a>
+        </div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
