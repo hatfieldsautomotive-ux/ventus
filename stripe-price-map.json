@@ -1,0 +1,182 @@
+{
+  "elite-builder": {
+    "name": "Ventus Elite Builder Pack",
+    "amount": 7500,
+    "productId": "prod_U7i8672iAt6GG7",
+    "priceId": "price_1T9ShrCt0CUJY6TbE2uYkAJI"
+  },
+  "ceo-operator": {
+    "name": "Ventus CEO Operator Pack",
+    "amount": 9000,
+    "productId": "prod_U7i8hq1grW9ilp",
+    "priceId": "price_1T9ShsCt0CUJY6Tb7hchCrTM"
+  },
+  "automotive-expert": {
+    "name": "Ventus Automotive Expert Pack",
+    "amount": 5000,
+    "productId": "prod_U7i8rdqwZleaGF",
+    "priceId": "price_1T9ShtCt0CUJY6Tba09VCF0z"
+  },
+  "coo-systems": {
+    "name": "Ventus COO Systems Collection",
+    "amount": 7900,
+    "productId": "prod_U7i8V9Uz92OOON",
+    "priceId": "price_1T9ShtCt0CUJY6TbVZDBRLy0"
+  },
+  "sales-strategist": {
+    "name": "Ventus Sales Strategist Collection",
+    "amount": 7900,
+    "productId": "prod_U7i8Sp9abLgY9x",
+    "priceId": "price_1T9ShuCt0CUJY6TbfJEwN34Z"
+  },
+  "app-architect": {
+    "name": "Ventus App Architect Collection",
+    "amount": 8900,
+    "productId": "prod_U7i8E3s6km5YJd",
+    "priceId": "price_1T9ShvCt0CUJY6TbOY62tku4"
+  },
+  "content-studio": {
+    "name": "Ventus Content Studio Collection",
+    "amount": 7900,
+    "productId": "prod_U7i8WIeDCzs0Ho",
+    "priceId": "price_1T9ShwCt0CUJY6TbILS3hhK7"
+  },
+  "research-engine": {
+    "name": "Ventus Research Engine Collection",
+    "amount": 8900,
+    "productId": "prod_U7i8tJzqHHThFb",
+    "priceId": "price_1T9ShxCt0CUJY6TbWJt6WgAF"
+  },
+  "developer-copilot": {
+    "name": "Ventus Developer Copilot Collection",
+    "amount": 8900,
+    "productId": "prod_U7i8RcUEy4yIDW",
+    "priceId": "price_1T9ShxCt0CUJY6Tbxo23tUUt"
+  },
+  "landing-page-conversion": {
+    "name": "Ventus Landing Page Conversion Collection",
+    "amount": 8900,
+    "productId": "prod_U7i8C4FZ8a7O59",
+    "priceId": "price_1T9ShyCt0CUJY6TbouS4AJ0F"
+  },
+  "ai-agent-builder": {
+    "name": "Ventus AI Agent Builder Collection",
+    "amount": 9900,
+    "productId": "prod_U7i8sB9YuIG9DW",
+    "priceId": "price_1T9ShzCt0CUJY6Tb1NQxQsWn"
+  },
+  "prompt-qa": {
+    "name": "Ventus Prompt QA Collection",
+    "amount": 7900,
+    "productId": "prod_U7i8Q2qFYJoplq",
+    "priceId": "price_1T9ShzCt0CUJY6TbJCrg6NAv"
+  },
+  "market-intelligence": {
+    "name": "Ventus Market Intelligence Collection",
+    "amount": 8900,
+    "productId": "prod_U7i8qEVb1i1px7",
+    "priceId": "price_1T9Si0Ct0CUJY6TbWUzqt9n0"
+  },
+  "no-code-automation": {
+    "name": "Ventus No-Code Automation Collection",
+    "amount": 7900,
+    "productId": "prod_U7i8AXdL6FFM8l",
+    "priceId": "price_1T9Si1Ct0CUJY6TbP5WgQPe5"
+  },
+  "project-manager": {
+    "name": "Ventus Project Manager Collection",
+    "amount": 6900,
+    "productId": "prod_U7i8if9XCTh4lW",
+    "priceId": "price_1T9Si2Ct0CUJY6TbeVM2cq6j"
+  },
+  "executive-assistant": {
+    "name": "Ventus Executive Assistant Collection",
+    "amount": 6900,
+    "productId": "prod_U7i8AgLjAUbKqg",
+    "priceId": "price_1T9Si2Ct0CUJY6TbJGy6I6S1"
+  },
+  "customer-success": {
+    "name": "Ventus Customer Success Collection",
+    "amount": 6900,
+    "productId": "prod_U7i8ANzLEIl99K",
+    "priceId": "price_1T9Si3Ct0CUJY6Tb39dqQ9Qr"
+  },
+  "recruiting-operator": {
+    "name": "Ventus Recruiting Operator Collection",
+    "amount": 6900,
+    "productId": "prod_U7i8vARmfgwtaA",
+    "priceId": "price_1T9Si4Ct0CUJY6Tb4qUvzjfO"
+  },
+  "closer-call-scripts": {
+    "name": "Ventus Closer Call Scripts Collection",
+    "amount": 6900,
+    "productId": "prod_U7i8qUBkM4Xy1v",
+    "priceId": "price_1T9Si5Ct0CUJY6Tb5XYSsskG"
+  },
+  "linkedin-authority": {
+    "name": "Ventus LinkedIn Authority Collection",
+    "amount": 6900,
+    "productId": "prod_U7i8cNhvo09hBy",
+    "priceId": "price_1T9Si5Ct0CUJY6TbUFvNMrYT"
+  },
+  "youtube-growth": {
+    "name": "Ventus YouTube Growth Collection",
+    "amount": 7900,
+    "productId": "prod_U7i8PepPDYypaJ",
+    "priceId": "price_1T9Si6Ct0CUJY6TbCV89SkYC"
+  },
+  "newsletter-engine": {
+    "name": "Ventus Newsletter Engine Collection",
+    "amount": 6900,
+    "productId": "prod_U7i8F6vLah8rFC",
+    "priceId": "price_1T9Si7Ct0CUJY6Tb7w3r8Tcf"
+  },
+  "paid-ads-creative": {
+    "name": "Ventus Paid Ads Creative Collection",
+    "amount": 7900,
+    "productId": "prod_U7i8lgXr0jwrUg",
+    "priceId": "price_1T9Si7Ct0CUJY6TbWgJtIeCM"
+  },
+  "brand-voice": {
+    "name": "Ventus Brand Voice Collection",
+    "amount": 5900,
+    "productId": "prod_U7i89m34dmfOhj",
+    "priceId": "price_1T9Si8Ct0CUJY6Tbqat9AteQ"
+  },
+  "n8n-automation-architect": {
+    "name": "Ventus N8N Automation Architect Collection",
+    "amount": 9900,
+    "productId": "prod_U7i82IGdGCBad7",
+    "priceId": "price_1T9Si9Ct0CUJY6Tbt0e9db6Q"
+  },
+  "shopify-conversion-ops": {
+    "name": "Ventus Shopify Conversion Ops Collection",
+    "amount": 9900,
+    "productId": "prod_U7i8ACCtUv3Lwy",
+    "priceId": "price_1T9Si9Ct0CUJY6TbOVJ4u1yX"
+  },
+  "hubspot-revops-architect": {
+    "name": "Ventus HubSpot RevOps Architect Collection",
+    "amount": 10900,
+    "productId": "prod_U7i8xJXXgZwv8q",
+    "priceId": "price_1T9SiACt0CUJY6TbtbTVKuxv"
+  },
+  "airtable-ops": {
+    "name": "Ventus Airtable Ops Collection",
+    "amount": 9900,
+    "productId": "prod_U7i8eYnOscfz9Y",
+    "priceId": "price_1T9SiBCt0CUJY6Tb2J8Dr7LP"
+  },
+  "webflow-build-system": {
+    "name": "Ventus Webflow Build System Collection",
+    "amount": 10900,
+    "productId": "prod_U7i8E749RQUdg9",
+    "priceId": "price_1T9SiCCt0CUJY6TbXkEKAPRH"
+  },
+  "stripe-revenue-ops": {
+    "name": "Ventus Stripe Revenue Ops Collection",
+    "amount": 11900,
+    "productId": "prod_U7i84aHWFN7zfW",
+    "priceId": "price_1T9SiCCt0CUJY6TboPQD39rP"
+  }
+}

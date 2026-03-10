@@ -77,6 +77,16 @@ const CHECKOUT_PRODUCTS = {
   'stripe-revenue-ops': { name: 'Ventus Stripe Revenue Ops Collection', amount: 11900 }
 };
 
+let STRIPE_PRICE_MAP = {};
+try {
+  const priceMapPath = path.join(__dirname, '..', 'stripe-price-map.json');
+  if (fs.existsSync(priceMapPath)) {
+    STRIPE_PRICE_MAP = JSON.parse(fs.readFileSync(priceMapPath, 'utf8'));
+  }
+} catch (e) {
+  console.warn('[stripe] could not load stripe-price-map.json');
+}
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(WEB_DIR));
@@ -132,18 +142,21 @@ app.get('/buy/:product', async (req, res) => {
     const host = req.get('host');
     const inferredOrigin = host ? `https://${host}` : null;
     const origin = process.env.PUBLIC_BASE_URL || inferredOrigin || `${req.protocol}://${host}`;
-    const session = await stripe.checkout.sessions.create({
-      mode: 'payment',
-      line_items: [
-        {
+    const priceId = STRIPE_PRICE_MAP?.[product]?.priceId;
+    const lineItem = priceId
+      ? { price: priceId, quantity: 1 }
+      : {
           price_data: {
             currency: 'usd',
             unit_amount: cfg.amount,
             product_data: { name: cfg.name }
           },
           quantity: 1
-        }
-      ],
+        };
+
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      line_items: [lineItem],
       success_url: `${origin}/paid-success.html?session_id={CHECKOUT_SESSION_ID}&product=${product}`,
       cancel_url: `${origin}/packs.html`
     });
@@ -194,7 +207,8 @@ app.get('/api/health', (req, res) => res.json({
   status: 'ok',
   service: 'Ventus',
   stripeConfigured: !!stripe,
-  checkoutProducts: Object.keys(CHECKOUT_PRODUCTS).length
+  checkoutProducts: Object.keys(CHECKOUT_PRODUCTS).length,
+  mappedPrices: Object.keys(STRIPE_PRICE_MAP || {}).length
 }));
 app.get('*', (req, res) => res.sendFile(path.join(WEB_DIR, 'index.html')));
 
