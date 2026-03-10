@@ -4,6 +4,7 @@ const fs = require('fs');
 const crypto = require('crypto');
 const sqlite3 = require('sqlite3').verbose();
 const Stripe = require('stripe');
+const nodemailer = require('nodemailer');
 
 const app = express();
 app.set('trust proxy', true);
@@ -30,6 +31,13 @@ db.serialize(() => {
     token TEXT NOT NULL UNIQUE,
     expires_at DATETIME,
     used_at DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS fulfilled_sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id TEXT NOT NULL UNIQUE,
+    email TEXT,
+    products TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
 });
@@ -87,8 +95,14 @@ try {
   console.warn('[stripe] could not load stripe-price-map.json');
 }
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use((req, res, next) => {
+  if (req.path === '/api/stripe/webhook') return next();
+  return express.json()(req, res, next);
+});
+app.use((req, res, next) => {
+  if (req.path === '/api/stripe/webhook') return next();
+  return express.urlencoded({ extended: true })(req, res, next);
+});
 app.use(express.static(WEB_DIR));
 
 function issueToken(email, product, cb) {
@@ -131,6 +145,62 @@ function buildLineItem(product) {
     },
     quantity: 1
   };
+}
+
+const mailFrom = process.env.DOWNLOAD_EMAIL_FROM || 'automations@ventusys.com';
+const smtpHost = process.env.SMTP_HOST;
+const smtpPort = Number(process.env.SMTP_PORT || 587);
+const smtpUser = process.env.SMTP_USER;
+const smtpPass = process.env.SMTP_PASS;
+const smtpSecure = String(process.env.SMTP_SECURE || 'false').toLowerCase() === 'true';
+
+const mailer = (smtpHost && smtpUser && smtpPass)
+  ? nodemailer.createTransport({
+      host: smtpHost,
+      port: smtpPort,
+      secure: smtpSecure,
+      auth: { user: smtpUser, pass: smtpPass }
+    })
+  : null;
+
+async function sendDownloadsEmail(to, downloads, origin) {
+  if (!mailer || !to) return false;
+
+  const rows = downloads
+    .map((d) => `<li style="margin-bottom:8px;"><a href="${origin}${d.downloadUrl}">${d.product}</a></li>`)
+    .join('');
+
+  const html = `
+    <div style="font-family:Inter,Arial,sans-serif;line-height:1.5;color:#111;">
+      <h2>Your Ventus Collections are ready</h2>
+      <p>Thanks for your purchase. Use the secure links below to download your collection${downloads.length > 1 ? 's' : ''}:</p>
+      <ul>${rows}</ul>
+      <p>Note: each link is one-time use and expires in 7 days.</p>
+      <p>- Ventus Systems</p>
+    </div>
+  `;
+
+  await mailer.sendMail({
+    from: mailFrom,
+    to,
+    subject: 'Your Ventus download links',
+    html
+  });
+
+  return true;
+}
+
+function markSessionFulfilled(sessionId, email, products) {
+  return new Promise((resolve, reject) => {
+    db.run(
+      'INSERT OR IGNORE INTO fulfilled_sessions (session_id, email, products) VALUES (?, ?, ?)',
+      [sessionId, email || '', products.join(',')],
+      function done(err) {
+        if (err) return reject(err);
+        resolve(this.changes > 0);
+      }
+    );
+  });
 }
 
 // Free download gate: simple email capture then redirect
@@ -270,9 +340,52 @@ app.get('/api/checkout-complete', async (req, res) => {
   }
 });
 
-// Optional Stripe webhook for future email fulfillment
-app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), (req, res) => {
+// Stripe webhook: issue download tokens + optional email delivery
+app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   if (!stripe || !stripeWebhookSecret) return res.status(400).send('Stripe webhook not configured');
+
+  const signature = req.headers['stripe-signature'];
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(req.body, signature, stripeWebhookSecret);
+  } catch (err) {
+    console.error('[stripe] webhook signature verification failed', err?.message);
+    return res.status(400).send('Invalid signature');
+  }
+
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+    const sessionId = session.id;
+    const email = session.customer_details?.email || '';
+    const products = (session.metadata?.products || '')
+      .split(',')
+      .map((p) => p.trim())
+      .filter((p) => p && CHECKOUT_PRODUCTS[p]);
+
+    if (products.length) {
+      try {
+        const inserted = await markSessionFulfilled(sessionId, email, products);
+        if (inserted) {
+          const downloads = [];
+          for (const p of products) {
+            const token = await issueTokenAsync(email, p);
+            downloads.push({ product: p, downloadUrl: `/api/download/${p}?token=${token}` });
+          }
+
+          const origin = process.env.PUBLIC_BASE_URL || 'https://ventusys.com';
+          try {
+            await sendDownloadsEmail(email, downloads, origin);
+          } catch (mailErr) {
+            console.error('[mail] send failed', mailErr?.message);
+          }
+        }
+      } catch (err) {
+        console.error('[stripe] webhook fulfillment failed', err?.message);
+      }
+    }
+  }
+
   return res.json({ received: true });
 });
 
