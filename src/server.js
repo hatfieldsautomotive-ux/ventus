@@ -33,7 +33,7 @@ db.serialize(() => {
   )`);
 });
 
-const stripeSecret = process.env.STRIPE_SECRET_KEY;
+const stripeSecret = process.env.STRIPE_SECRET_KEY || process.env.STRIPE_API_KEY;
 const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 const stripe = stripeSecret ? new Stripe(stripeSecret) : null;
 
@@ -147,6 +147,12 @@ app.get('/buy/:product', async (req, res) => {
 
     return res.redirect(303, session.url);
   } catch (e) {
+    console.error('[stripe] checkout create failed', {
+      product,
+      type: e?.type,
+      code: e?.code,
+      message: e?.message
+    });
     return res.status(500).send('Could not create checkout session');
   }
 });
@@ -181,7 +187,12 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), (req,
   return res.json({ received: true });
 });
 
-app.get('/api/health', (req, res) => res.json({ status: 'ok', service: 'Ventus' }));
+app.get('/api/health', (req, res) => res.json({
+  status: 'ok',
+  service: 'Ventus',
+  stripeConfigured: !!stripe,
+  checkoutProducts: Object.keys(CHECKOUT_PRODUCTS).length
+}));
 app.get('*', (req, res) => res.sendFile(path.join(WEB_DIR, 'index.html')));
 
 app.listen(PORT, () => console.log(`🚀 Ventus on port ${PORT}`));
