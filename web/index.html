@@ -161,7 +161,7 @@
 
       newsletterMsg.textContent = 'Submitting...';
       try {
-        const r = await fetch('/api/free-signup', {
+        const r = await fetch('/api/newsletter-signup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, source: 'newsletter' })

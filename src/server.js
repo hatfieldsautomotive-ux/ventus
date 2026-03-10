@@ -46,6 +46,9 @@ const stripeSecret = process.env.STRIPE_SECRET_KEY || process.env.STRIPE_API_KEY
 const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 const stripe = stripeSecret ? new Stripe(stripeSecret) : null;
 
+const beehiivApiKey = process.env.BEEHIIV_API_KEY;
+const beehiivPublicationId = process.env.BEEHIIV_PUBLICATION_ID || '73ab0160-a8c1-47bb-a157-599a0c458abe';
+
 const PRODUCT_MAP = {
   'Ventus Elite Builder Pack': 'elite-builder',
   'Ventus CEO Operator Pack': 'ceo-operator',
@@ -203,12 +206,65 @@ function markSessionFulfilled(sessionId, email, products) {
   });
 }
 
-// Free download gate: simple email capture then redirect
-app.post('/api/free-signup', (req, res) => {
+async function subscribeToBeehiiv(email, source = 'ventus-site') {
+  if (!beehiivApiKey || !beehiivPublicationId) {
+    return { ok: false, reason: 'beehiiv_not_configured' };
+  }
+
+  const resp = await fetch(`https://api.beehiiv.com/v2/publications/${beehiivPublicationId}/subscriptions`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${beehiivApiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      email,
+      reactivate_existing: true,
+      send_welcome_email: true,
+      utm_source: source
+    })
+  });
+
+  if (resp.ok) return { ok: true };
+
+  const text = await resp.text();
+  const lower = text.toLowerCase();
+  if (resp.status === 409 || lower.includes('already') || lower.includes('exists')) {
+    return { ok: true, already: true };
+  }
+
+  return { ok: false, status: resp.status, error: text.slice(0, 500) };
+}
+
+// Newsletter signup -> Beehiiv + local backup
+app.post('/api/newsletter-signup', async (req, res) => {
+  const { email, source = 'newsletter' } = req.body;
+  if (!email || !email.includes('@')) return res.status(400).json({ error: 'Valid email required' });
+
+  const normalized = email.trim().toLowerCase();
+  const beehiiv = await subscribeToBeehiiv(normalized, source);
+  if (!beehiiv.ok) {
+    console.error('[beehiiv] subscribe failed', beehiiv);
+    return res.status(500).json({ error: 'Could not subscribe right now' });
+  }
+
+  db.run('INSERT INTO newsletter_signups (email, source) VALUES (?, ?)', [normalized, source], () => {
+    return res.json({ ok: true, provider: 'beehiiv' });
+  });
+});
+
+// Free download gate: email capture + Beehiiv signup + redirect
+app.post('/api/free-signup', async (req, res) => {
   const { email, source = 'kitt-sidekick' } = req.body;
   if (!email || !email.includes('@')) return res.status(400).json({ error: 'Valid email required' });
 
-  db.run('INSERT INTO newsletter_signups (email, source) VALUES (?, ?)', [email.trim().toLowerCase(), source], (err) => {
+  const normalized = email.trim().toLowerCase();
+  const beehiiv = await subscribeToBeehiiv(normalized, source);
+  if (!beehiiv.ok) {
+    console.error('[beehiiv] free-signup subscribe failed', beehiiv);
+  }
+
+  db.run('INSERT INTO newsletter_signups (email, source) VALUES (?, ?)', [normalized, source], (err) => {
     if (err) return res.status(500).json({ error: 'Could not save signup' });
     return res.json({ ok: true, downloadUrl: '/downloads/kitt-sidekick.zip' });
   });
@@ -394,7 +450,8 @@ app.get('/api/health', (req, res) => res.json({
   service: 'Ventus',
   stripeConfigured: !!stripe,
   checkoutProducts: Object.keys(CHECKOUT_PRODUCTS).length,
-  mappedPrices: Object.keys(STRIPE_PRICE_MAP || {}).length
+  mappedPrices: Object.keys(STRIPE_PRICE_MAP || {}).length,
+  beehiivConfigured: !!beehiivApiKey
 }));
 app.get('*', (req, res) => res.sendFile(path.join(WEB_DIR, 'index.html')));
 
