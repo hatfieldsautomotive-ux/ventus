@@ -67,7 +67,13 @@ const CHECKOUT_PRODUCTS = {
   'youtube-growth': { name: 'Ventus YouTube Growth Collection', amount: 7900 },
   'newsletter-engine': { name: 'Ventus Newsletter Engine Collection', amount: 6900 },
   'paid-ads-creative': { name: 'Ventus Paid Ads Creative Collection', amount: 7900 },
-  'brand-voice': { name: 'Ventus Brand Voice Collection', amount: 5900 }
+  'brand-voice': { name: 'Ventus Brand Voice Collection', amount: 5900 },
+  'n8n-automation-architect': { name: 'Ventus N8N Automation Architect Collection', amount: 9900 },
+  'shopify-conversion-ops': { name: 'Ventus Shopify Conversion Ops Collection', amount: 9900 },
+  'hubspot-revops-architect': { name: 'Ventus HubSpot RevOps Architect Collection', amount: 10900 },
+  'airtable-ops': { name: 'Ventus Airtable Ops Collection', amount: 9900 },
+  'webflow-build-system': { name: 'Ventus Webflow Build System Collection', amount: 10900 },
+  'stripe-revenue-ops': { name: 'Ventus Stripe Revenue Ops Collection', amount: 11900 }
 };
 
 app.use(express.json());
