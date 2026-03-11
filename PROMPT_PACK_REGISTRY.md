@@ -1,6 +1,6 @@
 # PROMPT_PACK_REGISTRY.md — Prompt Pack Index
 
-Updated: 2026-03-10
+Updated: 2026-03-11
 
 ## Released Collections
 
@@ -12,7 +12,9 @@ Updated: 2026-03-10
 - customer-success
 - recruiting-operator
 - hubspot-revops-architect
-- **stripe-revenue-ops** (new)
+- **stripe-revenue-ops**
+- **salesforce-admin-ops-architect** (new)
+- **notion-ops-system-builder** (new)
 
 ### Sales / Growth
 - sales-strategist
