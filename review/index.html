@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ventus — Prompt Systems That Actually Work</title>
+  <meta name="description" content="Ventus creates modular prompt frameworks and .md systems that transform AI into specialized expert tools."/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --bg:#050505;
+      --surface:#0b0b0b;
+      --surface-2:#111111;
+      --line:#232323;
+      --text:#f5f5f5;
+      --muted:#9a9a9a;
+      --accent:#f97316;
+      --accent-2:#a855f7;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,sans-serif}
+    .container{max-width:1140px;margin:0 auto;padding:0 24px}
+    .card{background:linear-gradient(180deg,var(--surface),var(--surface-2));border:1px solid var(--line);border-radius:20px}
+    .accent{color:var(--accent)}
+    .btn{background:linear-gradient(120deg,var(--accent),#fb923c);color:#120b05;font-weight:800;border-radius:999px;padding:14px 26px;display:inline-block;text-decoration:none}
+    .btn:hover{filter:brightness(1.08)}
+    .btn-ghost{border:1px solid #3a3a3a;color:#ddd;border-radius:999px;padding:14px 26px;display:inline-block;text-decoration:none}
+    .section{padding:86px 0}
+    .fade-up{opacity:0;transform:translateY(16px)}
+    .glow{box-shadow:0 0 0 1px rgba(249,115,22,.35) inset, 0 0 60px rgba(249,115,22,.12)}
+  </style>
+</head>
+<body>
+  <header class="sticky top-0 z-50 border-b" style="border-color:var(--line);background:rgba(5,5,5,.88);backdrop-filter:blur(8px)">
+    <div class="container py-4 flex items-center justify-between">
+      <a href="#" class="text-sm tracking-[0.35em] uppercase font-semibold">Ventus</a>
+      <nav class="hidden md:flex items-center gap-6 text-sm" style="color:var(--muted)">
+        <a href="#problem">Problem</a>
+        <a href="packs.html">Collections</a>
+        <a href="#service">Built System</a>
+        <a href="#proof">Proof</a>
+        <a href="booking.html" class="btn" style="padding:10px 18px">Get Started</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="section" style="padding-top:110px;padding-bottom:72px">
+      <div class="container text-center">
+        <p class="text-xs tracking-[0.28em] uppercase mb-5 fade-up" style="color:var(--accent)">Prompt Engineering Firm</p>
+        <h1 class="text-5xl md:text-7xl font-black leading-[1.03] max-w-4xl mx-auto mb-5 fade-up">Turn AI Into the Tool You <span class="accent">Actually Need</span></h1>
+        <p class="text-lg max-w-2xl mx-auto mb-9 fade-up" style="color:var(--muted)">Structured prompt frameworks and modular .md systems that transform AI into specialized expert operators.</p>
+        <div class="flex flex-wrap justify-center gap-3 fade-up">
+          <a class="btn" href="packs.html">Explore the Collections</a>
+          <a class="btn-ghost" href="#service">Get a Built System</a>
+        </div>
+      </div>
+    </section>
+
+
+    <section id="problem" class="section">
+      <div class="container">
+        <div class="card p-10 fade-up">
+          <p class="text-sm mb-2" style="color:var(--accent)">The Problem</p>
+          <h3 class="text-4xl md:text-5xl font-extrabold mb-4">AI is powerful. Without structure, results are average.</h3>
+          <p class="text-lg" style="color:var(--muted)">Random prompts create random quality. Ventus gives AI a structured system so output stays reliable, focused, and expert-level.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top:30px">
+      <div class="container grid md:grid-cols-3 gap-4">
+        <div class="card p-6 fade-up"><h4 class="font-bold mb-2">1. Choose Collection</h4><p style="color:var(--muted)">Builder, Operator, Creator, Research, or Strategy.</p></div>
+        <div class="card p-6 fade-up"><h4 class="font-bold mb-2">2. Install Framework</h4><p style="color:var(--muted)">Drop in the .md systems and role instructions.</p></div>
+        <div class="card p-6 fade-up"><h4 class="font-bold mb-2">3. Activate Expert Mode</h4><p style="color:var(--muted)">Run AI as a specialist, not a generalist.</p></div>
+      </div>
+    </section>
+
+    <section class="section" id="proof">
+      <div class="container">
+        <p class="text-sm mb-2" style="color:var(--accent)">Proof</p>
+        <h3 class="text-4xl font-extrabold mb-3">Our prompts designed these websites.</h3>
+        <p style="color:var(--muted)" class="mb-7">Real project outputs generated using the same framework architecture.</p>
+        <div class="grid md:grid-cols-2 gap-4">
+          <a href="https://ventusdetailshop.onrender.com" target="_blank" class="card overflow-hidden fade-up">
+            <div class="p-2 bg-black">
+              <img src="assets/proof/ventusdetailshop.jpg" alt="Ventus Detail Shop" class="w-full h-44 object-contain"/>
+            </div>
+            <div class="p-4"><p class="font-semibold">Ventus Detail Shop</p><p class="text-sm" style="color:var(--muted)">Cinematic auto-detailing experience.</p></div>
+          </a>
+          <a href="https://grind-beans.onrender.com" target="_blank" class="card overflow-hidden fade-up">
+            <div class="p-2 bg-black">
+              <img src="assets/proof/grindbeans.jpg" alt="Grind Beans" class="w-full h-44 object-contain"/>
+            </div>
+            <div class="p-4"><p class="font-semibold">Grind & Beans</p><p class="text-sm" style="color:var(--muted)">Premium coffee brand launch site.</p></div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section id="service" class="section">
+      <div class="container">
+        <div class="card p-10 fade-up">
+          <p class="text-sm mb-2" style="color:var(--accent)">Built System Offer</p>
+          <h3 class="text-4xl font-extrabold mb-3">Want Ventus to set it up and run it for you?</h3>
+          <p style="color:var(--muted)" class="mb-7">We configure and maintain your AI prompt system in OpenClaw or equivalent.</p>
+          <div class="grid md:grid-cols-2 gap-4">
+            <div class="card p-6"><p class="text-sm" style="color:var(--muted)">AI System Setup</p><p class="text-4xl font-black">$1500</p><p class="text-sm" style="color:var(--muted)">one-time</p></div>
+            <div class="card p-6"><p class="text-sm" style="color:var(--muted)">AI System Management</p><p class="text-4xl font-black">$500</p><p class="text-sm" style="color:var(--muted)">per month</p></div>
+          </div>
+          <div class="mt-7 flex flex-wrap gap-3">
+            <a class="btn" href="booking.html">Book Setup Call</a>
+            <a class="btn-ghost" href="packs.html">Buy Collections Only</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="py-8 border-t" style="border-color:var(--line)">
+    <div class="container flex flex-col md:flex-row gap-4 justify-between text-sm" style="color:var(--muted)">
+      <p>© 2026 Ventus Systems</p>
+      <div class="flex gap-6"><a href="packs.html">Collections</a><a href="booking.html">Book</a><a href="mailto:automations@ventusys.com">automations@ventusys.com</a></div>
+    </div>
+  </footer>
+
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+    gsap.utils.toArray('.fade-up').forEach(el=>gsap.fromTo(el,{opacity:0,y:16},{opacity:1,y:0,duration:.5,scrollTrigger:{trigger:el,start:'top 88%'}}));
+  </script>
+</body>
+</html>

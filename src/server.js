@@ -86,6 +86,8 @@ const CHECKOUT_PRODUCTS = {
   'airtable-ops': { name: 'Ventus Airtable Ops Collection', amount: 9900 },
   'webflow-build-system': { name: 'Ventus Webflow Build System Collection', amount: 10900 },
   'stripe-revenue-ops': { name: 'Ventus Stripe Revenue Ops Collection', amount: 11900 },
+  'salesforce-admin-ops-architect': { name: 'Ventus Salesforce Admin Ops Architect Collection', amount: 11900 },
+  'notion-ops-system-builder': { name: 'Ventus Notion Ops System Builder Collection', amount: 9900 },
   'profit-validation-sprint': { name: 'Ventus Profit Opportunity Validation Sprint', amount: 150000 }
 };
 

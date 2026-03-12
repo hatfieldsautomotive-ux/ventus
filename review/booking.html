@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI System Setup | Ventus</title>
+  <meta name="description" content="Book a free strategy call or start your Ventus AI System Setup for $1500." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#050505;--surface:#0b0b0b;--surface2:#111;--line:#232323;--text:#f5f5f5;--muted:#9a9a9a;--accent:#f97316;--accent2:#a855f7}
+    *{box-sizing:border-box} html,body{margin:0;font-family:Inter,sans-serif;background:var(--bg);color:var(--text)}
+    .card{background:linear-gradient(180deg,var(--surface),var(--surface2));border:1px solid var(--line)}
+    .selected{border-color:rgba(249,115,22,.7);box-shadow:0 0 0 1px rgba(249,115,22,.45) inset}
+    .btn{background:linear-gradient(120deg,var(--accent),#fb923c);color:#120b05;font-weight:800}
+    .btn2{background:linear-gradient(120deg,var(--accent2),#c084fc);color:white;font-weight:800}
+  </style>
+</head>
+<body>
+  <nav class="py-6 px-8 border-b border-white/10">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <a href="index.html" class="text-sm tracking-[0.3em] uppercase font-semibold">Ventus</a>
+      <a href="index.html" class="text-sm text-neutral-400 hover:text-white">← Back to Home</a>
+    </div>
+  </nav>
+
+  <section class="py-14 px-8 text-center">
+    <p class="text-orange-500 text-xs tracking-[0.3em] uppercase mb-4">Ventus Systems</p>
+    <h1 class="text-4xl md:text-6xl font-black mb-4">Book Your <span class="text-orange-400">AI System Setup</span></h1>
+    <p class="text-neutral-400 text-lg max-w-3xl mx-auto">Choose your path: free strategy call, or start your full system setup. We only offer monthly management to clients we set up.</p>
+  </section>
+
+  <section class="px-8 pb-8">
+    <div class="max-w-5xl mx-auto grid md:grid-cols-2 gap-6">
+      <button id="option-call" onclick="selectOption('call')" class="card rounded-3xl p-8 text-left selected">
+        <p class="text-green-400 text-sm font-medium mb-1">Free</p>
+        <h2 class="text-2xl font-bold mb-4">Strategy Call</h2>
+        <p class="text-neutral-400 mb-5">30-minute call to map your workflow, required collections, and rollout approach.</p>
+        <ul class="text-sm text-neutral-500 space-y-2">
+          <li>✓ Project and workflow discovery</li>
+          <li>✓ Collection recommendation</li>
+          <li>✓ Implementation roadmap</li>
+        </ul>
+      </button>
+
+      <button id="option-setup" onclick="selectOption('setup')" class="card rounded-3xl p-8 text-left">
+        <p class="text-purple-400 text-sm font-medium mb-1">$1500</p>
+        <h2 class="text-2xl font-bold mb-4">AI System Setup</h2>
+        <p class="text-neutral-400 mb-5">Complete setup of your prompt system, collection configuration, and workflow integration.</p>
+        <ul class="text-sm text-neutral-500 space-y-2">
+          <li>✓ Collection install + configuration</li>
+          <li>✓ Workflow-specific tuning</li>
+          <li>✓ Quality and output standards</li>
+        </ul>
+      </button>
+    </div>
+  </section>
+
+  <section class="px-8 pb-16">
+    <div class="max-w-5xl mx-auto">
+      <div id="call-form" class="card rounded-3xl p-8">
+        <h3 class="text-2xl font-bold mb-6">Request Your Free Strategy Call</h3>
+        <form id="strategyForm" onsubmit="submitStrategy(event)">
+          <div class="grid md:grid-cols-2 gap-4 mb-4">
+            <input required name="name" placeholder="Your name" class="w-full px-4 py-4 bg-neutral-900 border border-neutral-800 rounded-xl"/>
+            <input required type="email" name="email" placeholder="Your email" class="w-full px-4 py-4 bg-neutral-900 border border-neutral-800 rounded-xl"/>
+          </div>
+          <input name="company" placeholder="Company name" class="w-full px-4 py-4 bg-neutral-900 border border-neutral-800 rounded-xl mb-4"/>
+          <textarea required name="message" rows="4" placeholder="Tell us about your AI goals, current tools, and what you want automated..." class="w-full px-4 py-4 bg-neutral-900 border border-neutral-800 rounded-xl mb-6"></textarea>
+          <input type="hidden" name="_subject" value="Ventus Strategy Call Request"/>
+          <button class="btn w-full py-4 rounded-xl text-lg">Request Strategy Call</button>
+        </form>
+      </div>
+
+      <div id="setup-form" class="card rounded-3xl p-8 hidden">
+        <h3 class="text-2xl font-bold mb-2">Start AI System Setup</h3>
+        <p class="text-neutral-400 mb-6">Complete this intake, then continue to Stripe to pay <strong>$1500</strong>.</p>
+        <form id="setupForm" onsubmit="submitSetup(event)">
+          <div class="grid md:grid-cols-2 gap-4 mb-4">
+            <input required name="name" placeholder="Your name" class="w-full px-4 py-4 bg-neutral-900 border border-neutral-800 rounded-xl"/>
+            <input required type="email" name="email" placeholder="Your email" class="w-full px-4 py-4 bg-neutral-900 border border-neutral-800 rounded-xl"/>
+          </div>
+          <input required name="company" placeholder="Company name" class="w-full px-4 py-4 bg-neutral-900 border border-neutral-800 rounded-xl mb-4"/>
+          <input name="website" placeholder="Website URL (optional)" class="w-full px-4 py-4 bg-neutral-900 border border-neutral-800 rounded-xl mb-4"/>
+          <textarea required name="details" rows="5" placeholder="Project details: team size, tools in use (OpenClaw or equivalent), top workflows to systemize, launch timeline..." class="w-full px-4 py-4 bg-neutral-900 border border-neutral-800 rounded-xl mb-6"></textarea>
+          <input type="hidden" name="_subject" value="Ventus AI System Setup Intake"/>
+          <button class="btn2 w-full py-4 rounded-xl text-lg">Submit Intake + Continue to Payment</button>
+        </form>
+      </div>
+
+      <div id="setup-success" class="card rounded-3xl p-8 hidden text-center">
+        <h3 class="text-2xl font-bold mb-2">Intake Received</h3>
+        <p class="text-neutral-400 mb-6">Next step: complete payment to lock your setup slot.</p>
+        <a href="https://buy.stripe.com/eVqbJ06g5fqv2Xm6ltffy04" target="_blank" class="btn2 inline-block px-8 py-4 rounded-xl">Pay $1500 in Stripe →</a>
+        <p class="text-neutral-500 text-sm mt-4">After setup completion, $500/month management is available to setup clients only.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="py-10 px-8 border-t border-white/10 text-center text-sm text-neutral-500">
+    Questions? <a href="mailto:automations@ventusys.com" class="text-neutral-300">automations@ventusys.com</a>
+  </footer>
+
+  <script>
+    function selectOption(opt){
+      document.getElementById('option-call').classList.remove('selected');
+      document.getElementById('option-setup').classList.remove('selected');
+      document.getElementById('call-form').classList.add('hidden');
+      document.getElementById('setup-form').classList.add('hidden');
+      document.getElementById('setup-success').classList.add('hidden');
+
+      if(opt==='call'){
+        document.getElementById('option-call').classList.add('selected');
+        document.getElementById('call-form').classList.remove('hidden');
+      }else{
+        document.getElementById('option-setup').classList.add('selected');
+        document.getElementById('setup-form').classList.remove('hidden');
+      }
+    }
+
+    function submitStrategy(e){
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      fetch('https://formspree.io/f/mlgwyodd',{method:'POST',body:fd,headers:{'Accept':'application/json'}})
+      .then(()=>{alert('Strategy call request sent. We will follow up shortly.');e.target.reset();})
+      .catch(()=>alert('Could not submit. Please email automations@ventusys.com'));
+    }
+
+    function submitSetup(e){
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      fetch('https://formspree.io/f/mlgwyodd',{method:'POST',body:fd,headers:{'Accept':'application/json'}})
+      .then(()=>{
+        document.getElementById('setup-form').classList.add('hidden');
+        document.getElementById('setup-success').classList.remove('hidden');
+        document.getElementById('setup-success').scrollIntoView({behavior:'smooth'});
+      })
+      .catch(()=>alert('Could not submit. Please email automations@ventusys.com'));
+    }
+  </script>
+</body>
+</html>

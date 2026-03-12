@@ -178,5 +178,17 @@
     "amount": 11900,
     "productId": "prod_U7i84aHWFN7zfW",
     "priceId": "price_1T9SiCCt0CUJY6TboPQD39rP"
+  },
+  "salesforce-admin-ops-architect": {
+    "name": "Ventus Salesforce Admin Ops Architect Collection",
+    "amount": 11900,
+    "productId": "prod_U83gwiaUKeczpp",
+    "priceId": "price_1T9nZKCt0CUJY6Tb3Bwf1Ynq"
+  },
+  "notion-ops-system-builder": {
+    "name": "Ventus Notion Ops System Builder Collection",
+    "amount": 9900,
+    "productId": "prod_U83gzowJhUOyXz",
+    "priceId": "price_1T9nZLCt0CUJY6TbYRnN7peN"
   }
 }

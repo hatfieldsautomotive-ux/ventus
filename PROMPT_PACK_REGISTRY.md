@@ -1,6 +1,6 @@
 # PROMPT_PACK_REGISTRY.md — Prompt Pack Index
 
-Updated: 2026-03-11
+Updated: 2026-03-12
 
 ## Released Collections
 
@@ -39,6 +39,7 @@ Updated: 2026-03-11
 - n8n-automation-architect
 - **airtable-ops** (new)
 - **webflow-build-system** (new)
+- **n8n-reliability-automation-architect** (new)
 
 ### Ecommerce
 - automotive-expert
