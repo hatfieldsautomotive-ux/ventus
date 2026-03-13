@@ -10,13 +10,29 @@ Protocol followed:
 
 | Framework/Domain | AI Struggle Pattern | Pack Opportunity | Difficulty | Demand Signal | Score (25) |
 |---|---|---|---|---|---|
-| Zapier business automation ops | AI creates brittle multi-step Zaps with weak dedupe, poor retry behavior, and no task-cost governance | **Zapier Operations Architect** (Skill + Protocol + Pattern + Decision + Persona) | Advanced | Zapier reports customers running millions of workflows daily, while help/community channels show recurring held-run and throttle pain | **24** |
-| Make.com agentic automation | AI over-focuses on scenario assembly and misses confidence gates, fallback logic, and prompt-governance controls | **Make Agentic Automation Architect** (Skill + Protocol + Pattern + Decision + Persona) | Advanced | Make's 2026 AI-agent push increases adoption while teams still need production-safe architectures and operating discipline | **23** |
-| Microsoft Power Automate + Copilot agents | AI outputs generic flows without enterprise controls, connector governance, or human-approval boundaries | **Power Automate Agent Governance Architect** (Skill + Protocol + Pattern + Decision + Persona) | Advanced | Microsoft's agent-first Power Platform updates indicate rising enterprise demand for controllable low-code AI operations | **22** |
+| Zapier automation operations | AI outputs fragile happy-path zaps without dedupe, ownership, fallback, and task-cost governance | **Zapier Operations Architect** (Skill + Protocol + Pattern + Decision + Persona) | Advanced | Large installed base and frequent ops reliability pain in SMB/agency workflows | **23** |
+| Make.com agentic workflows | AI mishandles routers, iterators, error handlers, and replay-safe design | **Make Agentic Automation Architect** (Skill + Protocol + Pattern + Decision + Persona) | Advanced | Growing adoption among no-code and RevOps teams needing production reliability | **22** |
+| n8n production reliability | AI misses idempotency, dead-letter design, and observability in mission-critical flows | **n8n Reliability Automation Architect** (already released prior cycle) | Advanced | Strong open-source momentum and recurring production hardening demand | **24** |
 
 ## Market Evaluation Detail (1–5)
 
 ### 1) Zapier Operations Architect
+- Popularity: 5
+- AI Difficulty: 4
+- Developer Demand: 5
+- Monetization Potential: 4
+- Evergreen Value: 5
+- **Total: 23/25**
+
+### 2) Make Agentic Automation Architect
+- Popularity: 4
+- AI Difficulty: 5
+- Developer Demand: 4
+- Monetization Potential: 4
+- Evergreen Value: 5
+- **Total: 22/25**
+
+### 3) n8n Reliability Automation Architect (reference benchmark)
 - Popularity: 5
 - AI Difficulty: 5
 - Developer Demand: 5
@@ -24,36 +40,16 @@ Protocol followed:
 - Evergreen Value: 5
 - **Total: 24/25**
 
-### 2) Make Agentic Automation Architect
-- Popularity: 4
-- AI Difficulty: 5
-- Developer Demand: 5
-- Monetization Potential: 4
-- Evergreen Value: 5
-- **Total: 23/25**
-
-### 3) Power Automate Agent Governance Architect
-- Popularity: 5
-- AI Difficulty: 4
-- Developer Demand: 4
-- Monetization Potential: 4
-- Evergreen Value: 5
-- **Total: 22/25**
-
-## Sources Used (Demand Validation)
-- Zapier platform homepage (scale signal): https://zapier.com/
-- Zapier limits documentation (rate/volume constraints): https://help.zapier.com/hc/en-us/articles/8496181445261-Zap-limits
-- Zapier held runs troubleshooting: https://help.zapier.com/hc/en-us/articles/37454233721869-How-to-troubleshoot-held-Zap-or-step-runs
-- Make AI agents page: https://www.make.com/en/ai-agents
-- Make next-gen AI agents announcement: https://www.make.com/en/blog/announcing-next-generation-make-ai-agents
-- Make reflections + 2026 predictions: https://www.make.com/en/blog/2025-reflections-2026-predictions
-- Microsoft Power Platform: https://www.microsoft.com/en-us/power-platform
-- Microsoft agent-first enterprise update (2026): https://www.microsoft.com/en-us/power-platform/blog/2026/02/24/the-shift-reshaping-enterprise-applications/
-
 ## Build Decision Tonight
-Release-ready builds completed for top opportunities:
+Release-ready builds completed:
 1. zapier-operations-architect
 2. make-agentic-automation-architect
 
-Backlog candidate:
-3. power-automate-agent-governance-architect
+Carried benchmark reference:
+- n8n-reliability-automation-architect (released in prior cycle)
+
+## Demand Validation Sources
+- Zapier product/platform: https://zapier.com/
+- Make platform + product positioning: https://www.make.com/en/product
+- Make 2025 reflections / 2026 outlook: https://www.make.com/en/blog/2025-reflections-2026-predictions
+- n8n platform context (benchmark): https://n8n.io/
