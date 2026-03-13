@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Ventus Collections - 34 Offers</title>
+  <title>Ventus Collections - 36 Offers</title>
   <meta name="description" content="Ventus prompt collections marketplace."/>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -33,16 +33,24 @@
     <div class="container">
       <p class="text-xs tracking-[0.28em] uppercase mb-3" style="color:var(--accent)">Ventus Collections</p>
       <h1 class="text-5xl md:text-6xl font-black mb-3">Prompt Systems Built For Real Work</h1>
-      <p class="text-lg max-w-2xl mx-auto" style="color:var(--muted)">34 offers in active rollout. Buy released packs now. Draft packs are being built aggressively.</p>
+      <p class="text-lg max-w-2xl mx-auto" style="color:var(--muted)">36 offers in active rollout. Buy released packs now. Draft packs are being built aggressively.</p>
     </div>
   </section>
 
   <section class="pb-16">
     <div class="container">
-      <div class="mb-6 flex flex-wrap gap-2 text-xs">
-        <span class="badge">Released</span><span class="badge">Free</span><span class="badge">Draft</span><span class="badge">Testing</span>
+      <div class="mb-5 flex flex-wrap gap-2 text-xs">
+        <span class="badge">Released</span><span class="badge">Category Grouped</span><span class="badge">StoryBrand Copy</span>
       </div>
-      <div id="grid" class="grid md:grid-cols-2 lg:grid-cols-4 gap-5"></div>
+      <div id="categoryFilters" class="mb-5 flex flex-wrap gap-2"></div>
+      <div id="cartBar" class="card p-4 mb-8 flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
+        <p class="text-sm" style="color:var(--muted)"><span id="cartCount">0</span> collections selected</p>
+        <div class="flex gap-2">
+          <button id="clearCart" class="btn2" type="button">Clear</button>
+          <button id="checkoutCart" class="btn" type="button">Checkout Selected</button>
+        </div>
+      </div>
+      <div id="grouped" class="space-y-10"></div>
     </div>
   </section>
 
@@ -70,10 +78,10 @@
 
   <script>
     const offers = [
-      {name:'Ventus Elite Builder', slug:'elite-builder', category:'Design System', price:'$75', status:'Released', cta:'/buy/elite-builder', preview:'packs/elite-builder/README.md'},
-      {name:'CEO Operator Pack', slug:'ceo-operator', category:'Executive Operator', price:'$90', status:'Released', cta:'/buy/ceo-operator', preview:'packs/ceo-operator/README.md'},
-      {name:'Automotive Expert', slug:'automotive-expert', category:'Vertical Expert', price:'$50', status:'Released', cta:'/buy/automotive-expert', preview:'packs/automotive-expert/README.md'},
-      {name:'AI Sidekick (KITT-Inspired)', slug:'kitt-sidekick', category:'Free Bonus', price:'Free', status:'Released', cta:'#free', preview:'packs/kitt-sidekick/README.md', free:true},
+      {name:'Ventus Elite Builder', slug:'elite-builder', category:'Design System', price:'$75', status:'Released', cta:'/buy/elite-builder'},
+      {name:'CEO Operator Pack', slug:'ceo-operator', category:'Executive Operator', price:'$90', status:'Released', cta:'/buy/ceo-operator'},
+      {name:'Automotive Expert', slug:'automotive-expert', category:'Vertical Expert', price:'$50', status:'Released', cta:'/buy/automotive-expert'},
+      {name:'AI Sidekick (KITT-Inspired)', slug:'kitt-sidekick', category:'Free Bonus', price:'Free', status:'Released', cta:'#free', free:true},
 
       {name:'COO Systems',slug:'coo-systems',category:'Operator',price:'$79',status:'Released',cta:'/buy/coo-systems'},
       {name:'Sales Strategist',slug:'sales-strategist',category:'Sales',price:'$79',status:'Released',cta:'/buy/sales-strategist'},
@@ -98,6 +106,8 @@
       {name:'Market Intelligence',slug:'market-intelligence',category:'Research',price:'$89',status:'Released',cta:'/buy/market-intelligence'},
       {name:'N8N Automation Architect',slug:'n8n-automation-architect',category:'Automation',price:'$99',status:'Released',cta:'/buy/n8n-automation-architect'},
       {name:'n8n Reliability Automation Architect',slug:'n8n-reliability-automation-architect',category:'Automation',price:'$129',status:'Released',cta:'/buy/n8n-reliability-automation-architect'},
+      {name:'Zapier Operations Architect',slug:'zapier-operations-architect',category:'Automation',price:'$119',status:'Released',cta:'/buy/zapier-operations-architect'},
+      {name:'Make Agentic Automation Architect',slug:'make-agentic-automation-architect',category:'Automation',price:'$119',status:'Released',cta:'/buy/make-agentic-automation-architect'},
       {name:'Shopify Conversion Ops',slug:'shopify-conversion-ops',category:'Ecommerce',price:'$99',status:'Released',cta:'/buy/shopify-conversion-ops'},
       {name:'HubSpot RevOps Architect',slug:'hubspot-revops-architect',category:'RevOps',price:'$109',status:'Released',cta:'/buy/hubspot-revops-architect'},
       {name:'Airtable Ops',slug:'airtable-ops',category:'Automation',price:'$99',status:'Released',cta:'/buy/airtable-ops'},
@@ -107,35 +117,160 @@
       {name:'Notion Ops System Builder',slug:'notion-ops-system-builder',category:'Operator',price:'$99',status:'Released',cta:'/buy/notion-ops-system-builder'}
     ];
 
-    const grid = document.getElementById('grid');
-    offers.forEach(o => {
-      const d = document.createElement('article');
-      d.className = 'card p-5';
-      d.innerHTML = `
-        <div class="flex items-center justify-between mb-2">
-          <p class="text-xs uppercase tracking-[.18em]" style="color:#9a9a9a">${o.category}</p>
-          <span class="badge">${o.status}</span>
-        </div>
-        <h2 class="text-xl font-extrabold mb-2">${o.name}</h2>
-        <p class="text-2xl font-black mb-4">${o.price}</p>
-        ${o.status === 'Released'
-          ? `<a class="btn w-full" href="${o.free ? 'javascript:void(0)' : o.cta}">${o.free ? 'Unlock Free Pack' : 'Buy Collection'}</a>`
-          : `<a class="btn2 w-full" href="packs/${o.slug}/README.md" target="_blank">View Draft Details</a>`
-        }
-        <a class="btn2 w-full mt-3" href="${o.preview || ('packs/'+o.slug+'/README.md')}" target="_blank">Preview Files</a>
-      `;
-      grid.appendChild(d);
+    const categoryMeta = {
+      'Executive Operator': 'You are the leader under pressure. These systems help you prioritize, decide faster, and keep the team aligned without adding overhead.',
+      'Operator': 'When daily operations feel heavy, these collections give you repeatable workflows that reduce chaos and recover execution speed.',
+      'Sales': 'If your pipeline is inconsistent, these packs sharpen positioning, scripts, and follow-up so revenue conversations convert more often.',
+      'Marketing': 'Stop guessing what messaging works. These collections structure your offer, hook, and campaign flow so good work gets seen and bought.',
+      'Creator': 'Turn ideas into steady output. These systems help you ship content consistently without burning hours every week.',
+      'Builder': 'For teams shipping product fast: cleaner architecture, better handoffs, and fewer rebuild loops.',
+      'Automation': 'Eliminate repetitive manual work with automation systems that are practical to deploy and easy to maintain.',
+      'AI Dev': 'Build reliable AI workflows with stronger prompts, QA loops, and deployment-ready system structure.',
+      'Research': 'Make better calls with faster market insight, clear synthesis, and decision-ready research outputs.',
+      'Ecommerce': 'Improve conversion and retention with systems focused on storefront performance, ops, and buyer experience.',
+      'RevOps': 'Unify revenue operations across funnel, CRM, billing, and reporting so growth is measurable and predictable.',
+      'Design System': 'Launch premium assets faster with high-standard design systems and reusable creative direction.',
+      'Vertical Expert': 'Industry-specific systems built for your real-world constraints, language, and customer expectations.',
+      'Free Bonus': 'Get immediate value with a free starter collection and see how Ventus systems work in practice.'
+    };
+
+    const orderedCategories = [
+      'Executive Operator','Operator','Sales','Marketing','Creator','Builder','Automation','AI Dev','Research','Ecommerce','RevOps','Design System','Vertical Expert','Free Bonus'
+    ];
+
+    const buildStory = (offer) => `For teams tired of patchwork execution: ${offer.name} gives you a ready-to-run system so you can move from scattered effort to measurable progress.`;
+
+    const filters = document.getElementById('categoryFilters');
+    const grouped = document.getElementById('grouped');
+    const cartCount = document.getElementById('cartCount');
+    const checkoutCart = document.getElementById('checkoutCart');
+    const clearCart = document.getElementById('clearCart');
+
+    let activeCategory = 'All';
+    let cart = new Set(JSON.parse(localStorage.getItem('ventusCart') || '[]'));
+
+    function saveCart() {
+      localStorage.setItem('ventusCart', JSON.stringify([...cart]));
+      cartCount.textContent = String(cart.size);
+      checkoutCart.disabled = cart.size === 0;
+      checkoutCart.style.opacity = cart.size === 0 ? '.5' : '1';
+      checkoutCart.style.pointerEvents = cart.size === 0 ? 'none' : 'auto';
+    }
+
+    function toggleCart(slug) {
+      if (cart.has(slug)) cart.delete(slug);
+      else cart.add(slug);
+      saveCart();
+      render();
+    }
+
+    const categories = ['All', ...orderedCategories.filter(c => offers.some(o => o.category === c))];
+    categories.forEach(cat => {
+      const b = document.createElement('button');
+      b.textContent = cat;
+      b.className = 'badge';
+      b.style.cursor = 'pointer';
+      b.style.padding = '8px 12px';
+      b.style.borderColor = cat === 'All' ? 'var(--accent)' : '#333';
+      b.style.color = cat === 'All' ? '#fff' : '#aaa';
+      b.onclick = () => {
+        activeCategory = cat;
+        [...filters.children].forEach(btn => {
+          const on = btn.textContent === activeCategory;
+          btn.style.borderColor = on ? 'var(--accent)' : '#333';
+          btn.style.color = on ? '#fff' : '#aaa';
+          btn.style.background = on ? 'rgba(249,115,22,.15)' : 'transparent';
+        });
+        render();
+      };
+      filters.appendChild(b);
     });
 
-    // free gate behavior
-    document.querySelectorAll('a[href="#free"]').forEach(a=>{
-      a.addEventListener('click',()=>{
-        const email = prompt('Enter your email to unlock the free AI Sidekick pack:');
-        if(!email) return;
-        fetch('/api/free-signup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,source:'kitt-sidekick'})})
-          .then(r=>r.json()).then(d=>{ if(d.downloadUrl) location.href=d.downloadUrl; else alert('Could not generate download'); });
-      })
-    })
+    clearCart.onclick = () => {
+      cart = new Set();
+      saveCart();
+      render();
+    };
+
+    checkoutCart.onclick = async () => {
+      if (!cart.size) return;
+      try {
+        const r = await fetch('/api/create-checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ products: [...cart] })
+        });
+        const data = await r.json();
+        if (data?.url) location.href = data.url;
+        else alert(data?.error || 'Could not create checkout');
+      } catch (e) {
+        alert('Could not create checkout');
+      }
+    };
+
+    function render(){
+      grouped.innerHTML = '';
+
+      orderedCategories.forEach(category => {
+        const items = offers.filter(o => o.category === category && (activeCategory === 'All' || activeCategory === category));
+        if (!items.length) return;
+
+        const section = document.createElement('section');
+        section.className = 'space-y-4';
+        section.innerHTML = `
+          <div class="card p-5">
+            <p class="text-xs uppercase tracking-[0.2em] mb-2" style="color:var(--accent)">${category}</p>
+            <p class="text-sm" style="color:var(--muted)">${categoryMeta[category] || 'Collection systems built for practical, measurable outcomes.'}</p>
+          </div>
+          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+        `;
+
+        const cards = section.querySelector('.grid');
+        items.forEach(o => {
+          const inCart = cart.has(o.slug);
+          const d = document.createElement('article');
+          d.className = 'card p-5';
+          d.innerHTML = `
+            <div class="flex items-center justify-between mb-2">
+              <p class="text-xs uppercase tracking-[.18em]" style="color:#9a9a9a">${o.category}</p>
+              <span class="badge">${o.status}</span>
+            </div>
+            <h2 class="text-xl font-extrabold mb-2">${o.name}</h2>
+            <p class="text-sm mb-4" style="color:var(--muted)">${buildStory(o)}</p>
+            <div class="flex items-center justify-between mb-4">
+              <p class="text-2xl font-black">${o.price}</p>
+              <p class="text-xs" style="color:var(--muted)">Instant delivery</p>
+            </div>
+            ${o.status === 'Released'
+              ? (o.free
+                ? `<a class="btn w-full" href="#free">Unlock Free Pack</a>`
+                : `<div class="grid grid-cols-2 gap-2"><button class="btn2 w-full cart-toggle" data-slug="${o.slug}">${inCart ? 'Remove' : 'Add to Cart'}</button><a class="btn w-full" href="${o.cta}">Buy Now</a></div>`)
+              : `<a class="btn2 w-full" href="packs/${o.slug}/README.md" target="_blank">View Draft Details</a>`
+            }
+          `;
+          cards.appendChild(d);
+        });
+
+        grouped.appendChild(section);
+      });
+
+      document.querySelectorAll('a[href="#free"]').forEach(a=>{
+        a.onclick = (e)=>{
+          e.preventDefault();
+          const email = prompt('Enter your email to unlock the free AI Sidekick pack:');
+          if(!email) return;
+          fetch('/api/free-signup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,source:'kitt-sidekick'})})
+            .then(r=>r.json()).then(d=>{ if(d.downloadUrl) location.href=d.downloadUrl; else alert('Could not generate download'); });
+        }
+      });
+
+      document.querySelectorAll('.cart-toggle').forEach(btn => {
+        btn.onclick = () => toggleCart(btn.dataset.slug);
+      });
+    }
+
+    saveCart();
+    render();
   </script>
 </body>
 </html>
