@@ -10,44 +10,59 @@
     .card{background:#111;border:1px solid #2a2a2a;border-radius:12px}
     .field{background:#0a0a0a;border:1px solid #333;border-radius:8px;padding:8px 10px;color:#f5f5f5}
     .btn{background:#f97316;color:#170d06;border-radius:999px;padding:8px 14px;font-weight:700}
+    .btn-ghost{border:1px solid #444;color:#ddd;border-radius:999px;padding:8px 14px}
   </style>
 </head>
 <body>
   <main class="max-w-6xl mx-auto p-6">
     <h1 class="text-2xl font-bold mb-4">Ventus Admin - Underwriting Queue</h1>
-    <div class="card p-4 mb-4 flex gap-2 items-end">
-      <div>
-        <label class="text-xs text-zinc-400">Admin Key</label><br/>
-        <input id="adminKey" class="field w-80" type="password" placeholder="VENTUS_ADMIN_KEY"/>
-      </div>
-      <button id="loadBtn" class="btn">Load Applications</button>
-      <p id="msg" class="text-sm text-zinc-400"></p>
-    </div>
 
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm" id="tbl">
-        <thead class="text-zinc-400">
-          <tr>
-            <th class="text-left p-2">Business</th><th class="text-left p-2">Email</th><th class="text-left p-2">Plan</th>
-            <th class="text-left p-2">Verification</th><th class="text-left p-2">Underwriting</th><th class="text-left p-2">Membership</th>
-            <th class="text-left p-2">Decision</th>
-          </tr>
-        </thead>
-        <tbody id="rows"></tbody>
-      </table>
-    </div>
+    <section id="authCard" class="card p-4 mb-4">
+      <h2 class="font-semibold mb-3">Admin Login</h2>
+      <div class="grid md:grid-cols-2 gap-2">
+        <input id="email" class="field" type="email" placeholder="Admin email"/>
+        <input id="password" class="field" type="password" placeholder="Password"/>
+      </div>
+      <div class="mt-3 flex gap-2">
+        <button id="loginBtn" class="btn">Login</button>
+        <button id="bootstrapBtn" class="btn-ghost">Bootstrap First Admin</button>
+      </div>
+      <p id="msg" class="text-sm text-zinc-400 mt-2"></p>
+    </section>
+
+    <section id="dash" class="hidden">
+      <div class="card p-4 mb-4 flex justify-between items-center">
+        <p id="adminLine" class="text-sm text-zinc-300"></p>
+        <button id="logoutBtn" class="btn-ghost">Logout</button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm" id="tbl">
+          <thead class="text-zinc-400">
+            <tr>
+              <th class="text-left p-2">Business</th><th class="text-left p-2">Email</th><th class="text-left p-2">Plan</th>
+              <th class="text-left p-2">Verification</th><th class="text-left p-2">Underwriting</th><th class="text-left p-2">Membership</th>
+              <th class="text-left p-2">Decision</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </section>
   </main>
 
 <script>
 const msg = document.getElementById('msg');
 const rowsEl = document.getElementById('rows');
+const authCard = document.getElementById('authCard');
+const dash = document.getElementById('dash');
+const adminLine = document.getElementById('adminLine');
 
-async function load() {
-  const key = document.getElementById('adminKey').value.trim();
-  msg.textContent = 'Loading...';
-  const res = await fetch('/api/admin/applications', { headers: { 'x-admin-key': key } });
+async function loadApplications() {
+  const res = await fetch('/api/admin/applications');
   const json = await res.json();
   if (!res.ok || !json.ok) { msg.textContent = json.error || 'Failed'; return; }
+
   rowsEl.innerHTML = '';
   json.applications.forEach((a) => {
     const tr = document.createElement('tr');
@@ -70,12 +85,12 @@ async function load() {
       const approvedLimit = Number(tr.querySelector('.limit').value || 0);
       const r = await fetch('/api/admin/underwriting/decide', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-admin-key': key },
-        body: JSON.stringify({ userId: a.user_id, decision, approvedLimit, reason: 'Admin UI decision', reviewer: 'admin-ui' })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: a.user_id, decision, approvedLimit, reason: 'Admin UI decision' })
       });
       const j = await r.json();
       msg.textContent = r.ok && j.ok ? 'Saved.' : (j.error || 'Save failed');
-      if (r.ok && j.ok) load();
+      if (r.ok && j.ok) loadApplications();
     });
 
     rowsEl.appendChild(tr);
@@ -83,7 +98,54 @@ async function load() {
   msg.textContent = `Loaded ${json.applications.length} applications.`;
 }
 
-document.getElementById('loadBtn').addEventListener('click', load);
+async function refreshAuth() {
+  const res = await fetch('/api/admin/me');
+  if (!res.ok) {
+    authCard.classList.remove('hidden');
+    dash.classList.add('hidden');
+    return;
+  }
+  const json = await res.json();
+  authCard.classList.add('hidden');
+  dash.classList.remove('hidden');
+  adminLine.textContent = `Logged in as ${json.admin.email} (${json.admin.role})`;
+  loadApplications();
+}
+
+document.getElementById('loginBtn').addEventListener('click', async () => {
+  msg.textContent = 'Logging in...';
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const res = await fetch('/api/admin/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  });
+  const json = await res.json();
+  if (!res.ok || !json.ok) { msg.textContent = json.error || 'Login failed'; return; }
+  msg.textContent = '';
+  refreshAuth();
+});
+
+document.getElementById('bootstrapBtn').addEventListener('click', async () => {
+  msg.textContent = 'Creating first admin...';
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const res = await fetch('/api/admin/bootstrap', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  });
+  const json = await res.json();
+  msg.textContent = res.ok && json.ok ? 'Admin created. You can now login.' : (json.error || 'Bootstrap failed');
+});
+
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  await fetch('/api/admin/logout', { method: 'POST' });
+  refreshAuth();
+});
+
+refreshAuth();
 </script>
 </body>
 </html>

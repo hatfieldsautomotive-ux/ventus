@@ -146,6 +146,31 @@ db.serialize(() => {
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
+  runMigration(`CREATE TABLE IF NOT EXISTS admin_users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    password_salt TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT 'owner',
+    active INTEGER NOT NULL DEFAULT 1,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+  runMigration(`CREATE TABLE IF NOT EXISTS admin_sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    admin_user_id INTEGER NOT NULL,
+    token TEXT NOT NULL UNIQUE,
+    expires_at DATETIME NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+  runMigration(`CREATE TABLE IF NOT EXISTS admin_audit_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    admin_user_id INTEGER,
+    action TEXT NOT NULL,
+    target_type TEXT,
+    target_id TEXT,
+    payload_json TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
 });
 
 db.all("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name", (err, rows) => {
@@ -271,6 +296,16 @@ function clearSessionCookie(res) {
   res.setHeader('Set-Cookie', `ventus_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure ? '; Secure' : ''}`);
 }
 
+function setAdminSessionCookie(res, token) {
+  const secure = process.env.NODE_ENV === 'production';
+  res.setHeader('Set-Cookie', `ventus_admin_session=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000${secure ? '; Secure' : ''}`);
+}
+
+function clearAdminSessionCookie(res) {
+  const secure = process.env.NODE_ENV === 'production';
+  res.setHeader('Set-Cookie', `ventus_admin_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure ? '; Secure' : ''}`);
+}
+
 function dbGet(sql, params = []) {
   return new Promise((resolve, reject) => {
     db.get(sql, params, (err, row) => (err ? reject(err) : resolve(row)));
@@ -301,6 +336,24 @@ async function getAuthedUser(req) {
   if (!session) return null;
   if (new Date(session.expires_at) < new Date()) return null;
   return { userId: session.user_id, email: session.email };
+}
+
+async function getAuthedAdmin(req) {
+  const cookies = parseCookies(req);
+  const token = cookies.ventus_admin_session;
+  if (!token) return null;
+
+  const session = await dbGet(
+    `SELECT s.admin_user_id, s.expires_at, a.email, a.role, a.active
+     FROM admin_sessions s
+     JOIN admin_users a ON a.id = s.admin_user_id
+     WHERE s.token = ?`,
+    [token]
+  );
+  if (!session) return null;
+  if (!session.active) return null;
+  if (new Date(session.expires_at) < new Date()) return null;
+  return { adminUserId: session.admin_user_id, email: session.email, role: session.role };
 }
 
 function issueToken(email, product, cb) {
@@ -1089,19 +1142,80 @@ app.post('/api/member/verification/run', async (req, res) => {
   }
 });
 
-function requireAdmin(req, res) {
-  const adminKey = process.env.VENTUS_ADMIN_KEY || '';
-  const provided = req.get('x-admin-key') || '';
-  if (!adminKey || provided !== adminKey) {
+async function requireAdmin(req, res) {
+  const admin = await getAuthedAdmin(req);
+  if (!admin) {
     res.status(403).json({ ok: false, error: 'Forbidden' });
-    return false;
+    return null;
   }
-  return true;
+  return admin;
 }
+
+app.post('/api/admin/login', async (req, res) => {
+  try {
+    const email = String(req.body?.email || '').trim().toLowerCase();
+    const password = String(req.body?.password || '');
+    if (!email || !password) return res.status(400).json({ ok: false, error: 'Email and password required' });
+
+    const adminUser = await dbGet('SELECT * FROM admin_users WHERE email = ?', [email]);
+    if (!adminUser || !adminUser.active) return res.status(401).json({ ok: false, error: 'Invalid credentials' });
+
+    const valid = await verifyPassword(password, adminUser.password_salt, adminUser.password_hash);
+    if (!valid) return res.status(401).json({ ok: false, error: 'Invalid credentials' });
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString();
+    await dbRun('INSERT INTO admin_sessions (admin_user_id, token, expires_at) VALUES (?, ?, ?)', [adminUser.id, token, expiresAt]);
+    setAdminSessionCookie(res, token);
+    return res.json({ ok: true });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: 'Could not log in' });
+  }
+});
+
+app.post('/api/admin/logout', async (req, res) => {
+  try {
+    const cookies = parseCookies(req);
+    if (cookies.ventus_admin_session) {
+      await dbRun('DELETE FROM admin_sessions WHERE token = ?', [cookies.ventus_admin_session]);
+    }
+    clearAdminSessionCookie(res);
+    return res.json({ ok: true });
+  } catch {
+    clearAdminSessionCookie(res);
+    return res.json({ ok: true });
+  }
+});
+
+app.get('/api/admin/me', async (req, res) => {
+  const admin = await getAuthedAdmin(req);
+  if (!admin) return res.status(401).json({ ok: false, error: 'Not authenticated' });
+  return res.json({ ok: true, admin });
+});
+
+app.post('/api/admin/bootstrap', async (req, res) => {
+  try {
+    const existing = await dbGet('SELECT id FROM admin_users ORDER BY id ASC LIMIT 1');
+    if (existing) return res.status(409).json({ ok: false, error: 'Admin user already exists' });
+
+    const email = String(req.body?.email || '').trim().toLowerCase();
+    const password = String(req.body?.password || '');
+    if (!email || !password || password.length < 8) {
+      return res.status(400).json({ ok: false, error: 'Valid email and password (8+ chars) required' });
+    }
+
+    const pw = await hashPassword(password);
+    await dbRun('INSERT INTO admin_users (email, password_hash, password_salt, role, active) VALUES (?, ?, ?, ?, 1)', [email, pw.hash, pw.salt, 'owner']);
+    return res.json({ ok: true });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: 'Could not bootstrap admin' });
+  }
+});
 
 app.get('/api/admin/applications', async (req, res) => {
   try {
-    if (!requireAdmin(req, res)) return;
+    const admin = await requireAdmin(req, res);
+    if (!admin) return;
 
     const rows = await new Promise((resolve, reject) => {
       db.all(
@@ -1132,13 +1246,14 @@ app.get('/api/admin/applications', async (req, res) => {
 
 app.post('/api/admin/underwriting/decide', async (req, res) => {
   try {
-    if (!requireAdmin(req, res)) return;
+    const admin = await requireAdmin(req, res);
+    if (!admin) return;
 
     const userId = Number(req.body?.userId || 0);
     const decision = String(req.body?.decision || '').trim();
     const approvedLimit = Number(req.body?.approvedLimit || 0);
     const reason = String(req.body?.reason || '').trim() || 'Manual underwriting decision';
-    const reviewer = String(req.body?.reviewer || 'admin').trim();
+    const reviewer = admin.email || 'admin';
 
     if (!userId || !['approved', 'declined', 'pending'].includes(decision)) {
       return res.status(400).json({ ok: false, error: 'Invalid decision payload' });
@@ -1175,6 +1290,12 @@ app.post('/api/admin/underwriting/decide', async (req, res) => {
         [membership.id]
       );
     }
+
+    await dbRun(
+      `INSERT INTO admin_audit_log (admin_user_id, action, target_type, target_id, payload_json)
+       VALUES (?, 'underwriting_decision', 'user', ?, ?)`,
+      [admin.adminUserId, String(userId), JSON.stringify({ decision, approvedLimit, reason })]
+    );
 
     return res.json({ ok: true });
   } catch (error) {
