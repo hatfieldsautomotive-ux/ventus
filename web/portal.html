@@ -43,16 +43,18 @@
         <h2 class="text-xl font-bold mb-2">Membership Status</h2>
         <p id="membershipLine" class="text-zinc-300"></p>
         <p id="creditLine" class="text-zinc-300 mt-1"></p>
+        <button id="activateBtn" class="btn mt-3">Activate Membership ($500)</button>
       </div>
 
       <div class="card p-6">
         <h2 class="text-xl font-bold mb-2">Add-ons</h2>
-        <p class="text-zinc-400 mb-3">Purchase add-ons (placeholder checkout wiring in Phase 2).</p>
+        <p class="text-zinc-400 mb-3">Purchase add-ons from your member area.</p>
         <div class="grid md:grid-cols-3 gap-2 text-sm text-zinc-200">
-          <div class="card p-3">Social Posting Pack</div>
-          <div class="card p-3">Local SEO Boost</div>
-          <div class="card p-3">Landing Page Sprint</div>
+          <button class="card p-3 text-left addon-btn" data-addon="social-posting-pack">Social Posting Pack<br/><span class="text-zinc-400">$300</span></button>
+          <button class="card p-3 text-left addon-btn" data-addon="local-seo-boost">Local SEO Boost<br/><span class="text-zinc-400">$400</span></button>
+          <button class="card p-3 text-left addon-btn" data-addon="landing-page-sprint">Landing Page Sprint<br/><span class="text-zinc-400">$500</span></button>
         </div>
+        <p id="addonMsg" class="text-sm mt-3 text-zinc-400"></p>
       </div>
     </section>
   </main>
@@ -61,6 +63,7 @@
     const authCard = document.getElementById('authCard');
     const dashboard = document.getElementById('dashboard');
     const authMsg = document.getElementById('authMsg');
+    const addonMsg = document.getElementById('addonMsg');
 
     async function refresh() {
       const res = await fetch('/api/member/me');
@@ -99,6 +102,34 @@
     document.getElementById('logoutBtn').addEventListener('click', async () => {
       await fetch('/api/member/logout', { method: 'POST' });
       refresh();
+    });
+
+    document.getElementById('activateBtn').addEventListener('click', async () => {
+      const res = await fetch('/api/member/activate-membership-checkout', { method: 'POST' });
+      const json = await res.json();
+      if (!res.ok || !json.ok || !json.url) {
+        addonMsg.textContent = json.error || 'Could not start membership checkout.';
+        return;
+      }
+      window.location.href = json.url;
+    });
+
+    document.querySelectorAll('.addon-btn').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const addonKey = btn.getAttribute('data-addon');
+        addonMsg.textContent = 'Opening checkout...';
+        const res = await fetch('/api/member/addons/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ addonKey })
+        });
+        const json = await res.json();
+        if (!res.ok || !json.ok || !json.url) {
+          addonMsg.textContent = json.error || 'Could not start add-on checkout.';
+          return;
+        }
+        window.location.href = json.url;
+      });
     });
 
     refresh();

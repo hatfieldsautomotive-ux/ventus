@@ -95,6 +95,15 @@ db.serialize(() => {
     active_limit INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
+  db.run(`CREATE TABLE IF NOT EXISTS addon_purchases (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    addon_key TEXT NOT NULL,
+    amount_cents INTEGER NOT NULL,
+    stripe_session_id TEXT,
+    status TEXT NOT NULL DEFAULT 'paid',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
 });
 
 const stripeSecret = process.env.STRIPE_SECRET_KEY || process.env.STRIPE_API_KEY;
@@ -144,6 +153,17 @@ const CHECKOUT_PRODUCTS = {
   'salesforce-admin-ops-architect': { name: 'Ventus Salesforce Admin Ops Architect Collection', amount: 11900 },
   'notion-ops-system-builder': { name: 'Ventus Notion Ops System Builder Collection', amount: 9900 },
   'profit-validation-sprint': { name: 'Ventus Profit Opportunity Validation Sprint', amount: 150000 }
+};
+
+const PORTAL_ADDONS = {
+  'social-posting-pack': { name: 'Social Posting Pack', amount: 30000 },
+  'local-seo-boost': { name: 'Local SEO Boost', amount: 40000 },
+  'landing-page-sprint': { name: 'Landing Page Sprint', amount: 50000 }
+};
+
+const MEMBERSHIP_ACTIVATION = {
+  name: 'Ventus Studios Membership Activation',
+  amount: 50000
 };
 
 let STRIPE_PRICE_MAP = {};
@@ -644,30 +664,65 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
     const session = event.data.object;
     const sessionId = session.id;
     const email = session.customer_details?.email || '';
-    const products = (session.metadata?.products || '')
-      .split(',')
-      .map((p) => p.trim())
-      .filter((p) => p && CHECKOUT_PRODUCTS[p]);
+    const kind = session.metadata?.kind || 'download';
 
-    if (products.length) {
+    if (kind === 'membership_activation') {
       try {
-        const inserted = await markSessionFulfilled(sessionId, email, products);
-        if (inserted) {
-          const downloads = [];
-          for (const p of products) {
-            const token = await issueTokenAsync(email, p);
-            downloads.push({ product: p, downloadUrl: `/api/download/${p}?token=${token}` });
-          }
-
-          const origin = process.env.PUBLIC_BASE_URL || 'https://ventusys.com';
-          try {
-            await sendDownloadsEmail(email, downloads, origin);
-          } catch (mailErr) {
-            console.error('[mail] send failed', mailErr?.message);
-          }
+        const userId = Number(session.metadata?.user_id || 0);
+        if (userId) {
+          await dbRun(
+            `UPDATE business_memberships
+             SET membership_status = 'active',
+                 credit_limit_status = 'active',
+                 active_limit = approved_limit
+             WHERE user_id = ?`,
+            [userId]
+          );
         }
       } catch (err) {
-        console.error('[stripe] webhook fulfillment failed', err?.message);
+        console.error('[stripe] membership activation update failed', err?.message);
+      }
+    } else if (kind === 'addon_purchase') {
+      try {
+        const userId = Number(session.metadata?.user_id || 0);
+        const addonKey = String(session.metadata?.addon_key || '');
+        const addonAmount = Number(session.metadata?.addon_amount || 0);
+        if (userId && addonKey && addonAmount > 0) {
+          await dbRun(
+            `INSERT INTO addon_purchases (user_id, addon_key, amount_cents, stripe_session_id, status)
+             VALUES (?, ?, ?, ?, 'paid')`,
+            [userId, addonKey, addonAmount, sessionId]
+          );
+        }
+      } catch (err) {
+        console.error('[stripe] addon purchase save failed', err?.message);
+      }
+    } else {
+      const products = (session.metadata?.products || '')
+        .split(',')
+        .map((p) => p.trim())
+        .filter((p) => p && CHECKOUT_PRODUCTS[p]);
+
+      if (products.length) {
+        try {
+          const inserted = await markSessionFulfilled(sessionId, email, products);
+          if (inserted) {
+            const downloads = [];
+            for (const p of products) {
+              const token = await issueTokenAsync(email, p);
+              downloads.push({ product: p, downloadUrl: `/api/download/${p}?token=${token}` });
+            }
+
+            const origin = process.env.PUBLIC_BASE_URL || 'https://ventusys.com';
+            try {
+              await sendDownloadsEmail(email, downloads, origin);
+            } catch (mailErr) {
+              console.error('[mail] send failed', mailErr?.message);
+            }
+          }
+        } catch (err) {
+          console.error('[stripe] webhook fulfillment failed', err?.message);
+        }
       }
     }
   }
@@ -723,13 +778,93 @@ app.get('/api/member/me', async (req, res) => {
       [auth.userId]
     );
 
+    const addons = await new Promise((resolve, reject) => {
+      db.all('SELECT addon_key, amount_cents, created_at FROM addon_purchases WHERE user_id = ? ORDER BY id DESC LIMIT 20', [auth.userId], (err, rows) => {
+        if (err) return reject(err);
+        resolve(rows || []);
+      });
+    });
+
     return res.json({
       ok: true,
       user: { email: auth.email },
-      membership: membership || null
+      membership: membership || null,
+      addons
     });
   } catch (error) {
     return res.status(500).json({ ok: false, error: 'Could not load profile' });
+  }
+});
+
+app.get('/api/member/addons/catalog', async (_req, res) => {
+  return res.json({ ok: true, addons: PORTAL_ADDONS });
+});
+
+app.post('/api/member/activate-membership-checkout', async (req, res) => {
+  if (!stripe) return res.status(500).json({ ok: false, error: 'Stripe not configured' });
+  try {
+    const auth = await getAuthedUser(req);
+    if (!auth) return res.status(401).json({ ok: false, error: 'Not authenticated' });
+
+    const origin = getOrigin(req);
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      line_items: [{
+        price_data: {
+          currency: 'usd',
+          unit_amount: MEMBERSHIP_ACTIVATION.amount,
+          product_data: { name: MEMBERSHIP_ACTIVATION.name }
+        },
+        quantity: 1
+      }],
+      metadata: {
+        kind: 'membership_activation',
+        user_id: String(auth.userId)
+      },
+      success_url: `${origin}/portal.html?paid=1`,
+      cancel_url: `${origin}/portal.html?paid=0`
+    });
+
+    return res.json({ ok: true, url: session.url });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: 'Could not create checkout session' });
+  }
+});
+
+app.post('/api/member/addons/checkout', async (req, res) => {
+  if (!stripe) return res.status(500).json({ ok: false, error: 'Stripe not configured' });
+  const addonKey = String(req.body?.addonKey || '').trim();
+  const addon = PORTAL_ADDONS[addonKey];
+  if (!addon) return res.status(400).json({ ok: false, error: 'Invalid addon' });
+
+  try {
+    const auth = await getAuthedUser(req);
+    if (!auth) return res.status(401).json({ ok: false, error: 'Not authenticated' });
+
+    const origin = getOrigin(req);
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      line_items: [{
+        price_data: {
+          currency: 'usd',
+          unit_amount: addon.amount,
+          product_data: { name: `Ventus Add-on: ${addon.name}` }
+        },
+        quantity: 1
+      }],
+      metadata: {
+        kind: 'addon_purchase',
+        user_id: String(auth.userId),
+        addon_key: addonKey,
+        addon_amount: String(addon.amount)
+      },
+      success_url: `${origin}/portal.html?addon=1`,
+      cancel_url: `${origin}/portal.html?addon=0`
+    });
+
+    return res.json({ ok: true, url: session.url });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: 'Could not create addon checkout' });
   }
 });
 
