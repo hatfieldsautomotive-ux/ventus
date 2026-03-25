@@ -52,9 +52,9 @@ function isRepoLocalDb(targetPath) {
 }
 
 try {
-  ensureDbPathWritable(REQUESTED_DB_PATH);
+  ensureDbPathWritable(DB_PATH);
 } catch (err) {
-  console.warn(`[db] requested path not writable (${REQUESTED_DB_PATH}): ${err.code || err.message}`);
+  console.warn(`[db] requested path not writable (${DB_PATH}): ${err.code || err.message}`);
 
   const isProd = process.env.NODE_ENV === 'production';
   const userProvidedPath = !!(process.env.VENTUS_DB_PATH || process.env.DATABASE_PATH);
