@@ -9,7 +9,7 @@
 <section id="authCard" class="card p-4 mb-4">
   <h2 class="font-semibold mb-3">Admin Login</h2>
   <div class="grid md:grid-cols-2 gap-2"><input id="email" class="field" type="email" placeholder="Admin email"/><input id="password" class="field" type="password" placeholder="Password"/></div>
-  <div class="mt-3 flex gap-2"><button id="loginBtn" class="btn">Login</button><button id="bootstrapBtn" class="btn-ghost">Bootstrap First Admin</button></div>
+  <div class="mt-3 flex gap-2"><button id="loginBtn" class="btn">Login</button><button id="bootstrapBtn" class="btn-ghost">Create / Reset Admin</button></div>
   <p id="msg" class="text-sm text-zinc-400 mt-2"></p>
 </section>
 
@@ -94,7 +94,7 @@ document.getElementById('addTaskBtn').onclick=async()=>{if(!selectedAppId) retur
 async function refreshAuth(){const r=await fetch('/api/admin/me');if(!r.ok){authCard.classList.remove('hidden');dash.classList.add('hidden');return;}const j=await r.json();authCard.classList.add('hidden');dash.classList.remove('hidden');adminLine.textContent=`Logged in as ${j.admin.email} (${j.admin.role})`;loadApplications();}
 
 document.getElementById('loginBtn').onclick=async()=>{try{await api('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('email').value.trim(),password:document.getElementById('password').value})});msg.textContent='';refreshAuth();}catch(e){msg.textContent=e.message;}};
-document.getElementById('bootstrapBtn').onclick=async()=>{try{await api('/api/admin/bootstrap',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('email').value.trim(),password:document.getElementById('password').value})});msg.textContent='Admin created.';}catch(e){msg.textContent=e.message;}};
+document.getElementById('bootstrapBtn').onclick=async()=>{try{const r=await api('/api/admin/bootstrap',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('email').value.trim(),password:document.getElementById('password').value})});msg.textContent=r.reset?'Admin password reset. You can now login.':'Admin created.';}catch(e){msg.textContent=e.message;}};
 document.getElementById('logoutBtn').onclick=async()=>{await fetch('/api/admin/logout',{method:'POST'});refreshAuth();};
 refreshAuth();
 </script>

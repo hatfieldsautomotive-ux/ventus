@@ -1308,9 +1308,6 @@ app.get('/api/admin/me', async (req, res) => {
 
 app.post('/api/admin/bootstrap', async (req, res) => {
   try {
-    const existing = await dbGet('SELECT id FROM admin_users ORDER BY id ASC LIMIT 1');
-    if (existing) return res.status(409).json({ ok: false, error: 'Admin user already exists' });
-
     const email = String(req.body?.email || '').trim().toLowerCase();
     const password = String(req.body?.password || '');
     if (!email || !password || password.length < 8) {
@@ -1318,8 +1315,23 @@ app.post('/api/admin/bootstrap', async (req, res) => {
     }
 
     const pw = await hashPassword(password);
+    const existingEmail = await dbGet('SELECT id, email FROM admin_users WHERE email = ?', [email]);
+
+    if (existingEmail) {
+      await dbRun(
+        'UPDATE admin_users SET password_hash = ?, password_salt = ?, active = 1 WHERE id = ?',
+        [pw.hash, pw.salt, existingEmail.id]
+      );
+      return res.json({ ok: true, reset: true });
+    }
+
+    const firstAdmin = await dbGet('SELECT id, email FROM admin_users ORDER BY id ASC LIMIT 1');
+    if (firstAdmin) {
+      return res.status(409).json({ ok: false, error: `Admin exists (${firstAdmin.email}). Use that email to reset.` });
+    }
+
     await dbRun('INSERT INTO admin_users (email, password_hash, password_salt, role, active) VALUES (?, ?, ?, ?, 1)', [email, pw.hash, pw.salt, 'owner']);
-    return res.json({ ok: true });
+    return res.json({ ok: true, created: true });
   } catch (error) {
     return res.status(500).json({ ok: false, error: 'Could not bootstrap admin' });
   }
