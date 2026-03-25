@@ -40,6 +40,24 @@ db.serialize(() => {
     products TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
+  db.run(`CREATE TABLE IF NOT EXISTS studio_applications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    business_legal_name TEXT NOT NULL,
+    dba TEXT,
+    ein TEXT NOT NULL,
+    entity_type TEXT,
+    contact_name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    phone TEXT,
+    package_interest TEXT,
+    website_url TEXT,
+    monthly_revenue_band TEXT,
+    services_needed TEXT,
+    consent_terms INTEGER DEFAULT 0,
+    consent_reporting INTEGER DEFAULT 0,
+    raw_json TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
 });
 
 const stripeSecret = process.env.STRIPE_SECRET_KEY || process.env.STRIPE_API_KEY;
@@ -271,6 +289,56 @@ app.post('/api/free-signup', async (req, res) => {
     if (err) return res.status(500).json({ error: 'Could not save signup' });
     return res.json({ ok: true, downloadUrl: '/downloads/kitt-sidekick.zip' });
   });
+});
+
+app.post('/api/studio-application', (req, res) => {
+  const payload = req.body || {};
+  const required = ['businessLegalName', 'ein', 'contactName', 'email'];
+  for (const key of required) {
+    if (!String(payload[key] || '').trim()) {
+      return res.status(400).json({ ok: false, error: `Missing required field: ${key}` });
+    }
+  }
+
+  const normalizedEmail = String(payload.email || '').trim().toLowerCase();
+  if (!normalizedEmail.includes('@')) {
+    return res.status(400).json({ ok: false, error: 'Valid email required' });
+  }
+
+  const servicesNeeded = Array.isArray(payload.servicesNeeded)
+    ? payload.servicesNeeded.map((s) => String(s).trim()).filter(Boolean)
+    : [];
+
+  db.run(
+    `INSERT INTO studio_applications (
+      business_legal_name, dba, ein, entity_type, contact_name, email, phone,
+      package_interest, website_url, monthly_revenue_band, services_needed,
+      consent_terms, consent_reporting, raw_json
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      String(payload.businessLegalName || '').trim(),
+      String(payload.dba || '').trim(),
+      String(payload.ein || '').trim(),
+      String(payload.entityType || '').trim(),
+      String(payload.contactName || '').trim(),
+      normalizedEmail,
+      String(payload.phone || '').trim(),
+      String(payload.packageInterest || '').trim(),
+      String(payload.websiteUrl || '').trim(),
+      String(payload.monthlyRevenueBand || '').trim(),
+      servicesNeeded.join(','),
+      payload.consentTerms ? 1 : 0,
+      payload.consentReporting ? 1 : 0,
+      JSON.stringify(payload)
+    ],
+    function onInsert(err) {
+      if (err) {
+        console.error('[studio-application] insert failed', err.message);
+        return res.status(500).json({ ok: false, error: 'Could not submit application' });
+      }
+      return res.json({ ok: true, id: this.lastID });
+    }
+  );
 });
 
 // Paid download endpoint using issued token

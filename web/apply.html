@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ventus Studios - Application</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--bg:#050505;--surface:#0d0d0d;--line:#242424;--text:#f5f5f5;--muted:#a1a1a1;--accent:#f97316}
+    html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,sans-serif}
+    .card{background:linear-gradient(180deg,#0b0b0b,#111);border:1px solid var(--line);border-radius:18px}
+    .btn{background:linear-gradient(120deg,var(--accent),#fb923c);color:#160d07;font-weight:800;border-radius:999px;padding:12px 22px}
+    .btn-ghost{border:1px solid #383838;color:#ddd;border-radius:999px;padding:12px 22px}
+    .field{width:100%;background:#090909;border:1px solid #2b2b2b;border-radius:12px;padding:12px 14px;color:#f5f5f5}
+    .step{display:none}.step.active{display:block}
+  </style>
+</head>
+<body>
+  <main class="max-w-3xl mx-auto px-6 py-10">
+    <a href="/" class="text-sm" style="color:var(--muted)">← Back to homepage</a>
+    <div class="card p-8 mt-4">
+      <p class="text-xs uppercase tracking-[.2em]" style="color:var(--accent)">Ventus Studios Application</p>
+      <h1 class="text-3xl font-black mt-2">Start for as little as $500 upfront</h1>
+      <p class="mt-2 text-sm" style="color:var(--muted)">Complete this intake so we can scope your package and begin onboarding.</p>
+
+      <div class="mt-6 mb-6">
+        <div class="w-full h-2 rounded bg-zinc-800 overflow-hidden"><div id="progress" class="h-2 bg-orange-500" style="width:25%"></div></div>
+        <p id="stepLabel" class="text-xs mt-2" style="color:var(--muted)">Step 1 of 4</p>
+      </div>
+
+      <form id="applyForm" class="space-y-4">
+        <section class="step active" data-step="1">
+          <h2 class="font-bold mb-3">Business Information</h2>
+          <input class="field" name="businessLegalName" placeholder="Business Legal Name" required/>
+          <input class="field" name="dba" placeholder="DBA (optional)"/>
+          <input class="field" name="ein" placeholder="EIN (XX-XXXXXXX)" required/>
+          <select class="field" name="entityType">
+            <option value="">Entity Type</option><option>LLC</option><option>Corporation</option><option>Sole Proprietor</option><option>Partnership</option>
+          </select>
+        </section>
+
+        <section class="step" data-step="2">
+          <h2 class="font-bold mb-3">Owner / Contact</h2>
+          <input class="field" name="contactName" placeholder="Full Name" required/>
+          <input class="field" name="email" type="email" placeholder="Business Email" required/>
+          <input class="field" name="phone" placeholder="Phone"/>
+          <input class="field" name="websiteUrl" placeholder="Current Website (optional)"/>
+        </section>
+
+        <section class="step" data-step="3">
+          <h2 class="font-bold mb-3">Package & Services</h2>
+          <select class="field" name="packageInterest">
+            <option>Foundation</option><option>Growth</option><option>Authority</option>
+          </select>
+          <select class="field" name="monthlyRevenueBand">
+            <option value="">Monthly Revenue Band</option><option>$0-$10k</option><option>$10k-$25k</option><option>$25k-$50k</option><option>$50k+</option>
+          </select>
+          <div class="text-sm" style="color:var(--muted)">
+            <p class="mb-2">Add-on interests:</p>
+            <label class="block"><input type="checkbox" name="servicesNeeded" value="social-posting"/> Social posting</label>
+            <label class="block"><input type="checkbox" name="servicesNeeded" value="social-management"/> Social media management</label>
+            <label class="block"><input type="checkbox" name="servicesNeeded" value="local-seo"/> Local SEO</label>
+            <label class="block"><input type="checkbox" name="servicesNeeded" value="landing-pages"/> Additional landing pages</label>
+            <label class="block"><input type="checkbox" name="servicesNeeded" value="crm"/> CRM + pipeline setup</label>
+          </div>
+        </section>
+
+        <section class="step" data-step="4">
+          <h2 class="font-bold mb-3">Confirm & Submit</h2>
+          <p class="text-sm mb-3" style="color:var(--muted)">By submitting, you confirm the information is accurate and agree to review final service and reporting terms in your membership agreement.</p>
+          <label class="block text-sm"><input type="checkbox" name="consentTerms" required/> I agree to Ventus Studios membership and service terms.</label>
+          <label class="block text-sm"><input type="checkbox" name="consentReporting" required/> I understand reporting eligibility depends on active status and good standing.</label>
+          <p id="msg" class="text-sm mt-3" style="color:var(--muted)"></p>
+        </section>
+
+        <div class="flex gap-2 pt-3">
+          <button type="button" id="prevBtn" class="btn-ghost">Back</button>
+          <button type="button" id="nextBtn" class="btn">Continue</button>
+          <button type="submit" id="submitBtn" class="btn" style="display:none">Submit Application</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    const steps = [...document.querySelectorAll('.step')];
+    const progress = document.getElementById('progress');
+    const stepLabel = document.getElementById('stepLabel');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    const form = document.getElementById('applyForm');
+    const msg = document.getElementById('msg');
+    let current = 0;
+
+    function render() {
+      steps.forEach((s, i) => s.classList.toggle('active', i === current));
+      const pct = ((current + 1) / steps.length) * 100;
+      progress.style.width = pct + '%';
+      stepLabel.textContent = `Step ${current + 1} of ${steps.length}`;
+      prevBtn.style.visibility = current === 0 ? 'hidden' : 'visible';
+      const last = current === steps.length - 1;
+      nextBtn.style.display = last ? 'none' : 'inline-block';
+      submitBtn.style.display = last ? 'inline-block' : 'none';
+    }
+
+    nextBtn.addEventListener('click', () => { if (current < steps.length - 1) { current++; render(); } });
+    prevBtn.addEventListener('click', () => { if (current > 0) { current--; render(); } });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.textContent = 'Submitting application...';
+
+      const data = new FormData(form);
+      const servicesNeeded = data.getAll('servicesNeeded');
+      const payload = {
+        businessLegalName: data.get('businessLegalName'),
+        dba: data.get('dba'),
+        ein: data.get('ein'),
+        entityType: data.get('entityType'),
+        contactName: data.get('contactName'),
+        email: data.get('email'),
+        phone: data.get('phone'),
+        websiteUrl: data.get('websiteUrl'),
+        packageInterest: data.get('packageInterest'),
+        monthlyRevenueBand: data.get('monthlyRevenueBand'),
+        servicesNeeded,
+        consentTerms: data.get('consentTerms') === 'on',
+        consentReporting: data.get('consentReporting') === 'on'
+      };
+
+      try {
+        const res = await fetch('/api/studio-application', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (!res.ok || !json.ok) throw new Error(json.error || 'Submission failed');
+
+        msg.textContent = 'Application received. We will contact you shortly with next steps.';
+        form.reset();
+        current = 0;
+        render();
+      } catch (err) {
+        msg.textContent = err.message || 'Could not submit right now. Please try again.';
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>
