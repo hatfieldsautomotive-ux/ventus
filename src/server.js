@@ -171,6 +171,33 @@ db.serialize(() => {
     payload_json TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
+  runMigration(`CREATE TABLE IF NOT EXISTS application_workflow (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    application_id INTEGER NOT NULL UNIQUE,
+    user_id INTEGER,
+    status TEXT NOT NULL DEFAULT 'new',
+    assignee TEXT,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+  runMigration(`CREATE TABLE IF NOT EXISTS application_notes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    application_id INTEGER NOT NULL,
+    admin_user_id INTEGER,
+    note TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+  runMigration(`CREATE TABLE IF NOT EXISTS project_tasks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    application_id INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'todo',
+    assignee TEXT,
+    due_date TEXT,
+    created_by_admin_user_id INTEGER,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
 });
 
 db.all("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name", (err, rows) => {
@@ -618,6 +645,12 @@ app.post('/api/studio-application', async (req, res) => {
     await dbRun(
       `INSERT INTO underwriting_decisions (application_id, user_id, decision, approved_limit, reason, reviewer)
        VALUES (?, ?, 'pending', 0, 'Verification not completed', 'system')`,
+      [applicationId, user.id]
+    );
+
+    await dbRun(
+      `INSERT OR IGNORE INTO application_workflow (application_id, user_id, status, assignee)
+       VALUES (?, ?, 'new', 'unassigned')`,
       [applicationId, user.id]
     );
 
@@ -1222,7 +1255,10 @@ app.get('/api/admin/applications', async (req, res) => {
         `SELECT sa.id AS application_id, sa.business_legal_name, sa.email, sa.package_interest, sa.created_at,
                 bm.user_id, bm.membership_status, bm.credit_limit_status, bm.approved_limit, bm.active_limit,
                 vc.status AS verification_status, vc.score AS verification_score,
-                ud.decision AS underwriting_decision, ud.approved_limit AS underwriting_limit
+                ud.decision AS underwriting_decision, ud.approved_limit AS underwriting_limit,
+                aw.status AS workflow_status, aw.assignee AS workflow_assignee,
+                (SELECT COUNT(1) FROM application_notes n WHERE n.application_id = sa.id) AS notes_count,
+                (SELECT COUNT(1) FROM project_tasks t WHERE t.application_id = sa.id) AS tasks_count
          FROM studio_applications sa
          LEFT JOIN business_memberships bm ON bm.application_id = sa.id
          LEFT JOIN verification_checks vc ON vc.id = (
@@ -1231,6 +1267,7 @@ app.get('/api/admin/applications', async (req, res) => {
          LEFT JOIN underwriting_decisions ud ON ud.id = (
             SELECT id FROM underwriting_decisions u2 WHERE u2.application_id = sa.id ORDER BY id DESC LIMIT 1
          )
+         LEFT JOIN application_workflow aw ON aw.application_id = sa.id
          ORDER BY sa.id DESC
          LIMIT 200`,
         [],
@@ -1241,6 +1278,132 @@ app.get('/api/admin/applications', async (req, res) => {
     return res.json({ ok: true, applications: rows });
   } catch (error) {
     return res.status(500).json({ ok: false, error: 'Could not load applications' });
+  }
+});
+
+app.post('/api/admin/application/status', async (req, res) => {
+  try {
+    const admin = await requireAdmin(req, res);
+    if (!admin) return;
+
+    const applicationId = Number(req.body?.applicationId || 0);
+    const status = String(req.body?.status || '').trim();
+    const assignee = String(req.body?.assignee || 'unassigned').trim();
+    const validStatuses = ['new', 'verifying', 'needs-review', 'approved', 'declined', 'activated'];
+    if (!applicationId || !validStatuses.includes(status)) {
+      return res.status(400).json({ ok: false, error: 'Invalid status payload' });
+    }
+
+    const row = await dbGet('SELECT user_id FROM business_memberships WHERE application_id = ? ORDER BY id DESC LIMIT 1', [applicationId]);
+    await dbRun(
+      `INSERT INTO application_workflow (application_id, user_id, status, assignee, updated_at)
+       VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+       ON CONFLICT(application_id)
+       DO UPDATE SET status=excluded.status, assignee=excluded.assignee, updated_at=CURRENT_TIMESTAMP`,
+      [applicationId, row?.user_id || null, status, assignee]
+    );
+
+    await dbRun(
+      `INSERT INTO admin_audit_log (admin_user_id, action, target_type, target_id, payload_json)
+       VALUES (?, 'application_status', 'application', ?, ?)`,
+      [admin.adminUserId, String(applicationId), JSON.stringify({ status, assignee })]
+    );
+
+    return res.json({ ok: true });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: 'Could not update status' });
+  }
+});
+
+app.get('/api/admin/application/:id/notes', async (req, res) => {
+  try {
+    const admin = await requireAdmin(req, res);
+    if (!admin) return;
+    const applicationId = Number(req.params.id || 0);
+    const notes = await new Promise((resolve, reject) => {
+      db.all(
+        `SELECT n.id, n.note, n.created_at, a.email AS admin_email
+         FROM application_notes n
+         LEFT JOIN admin_users a ON a.id = n.admin_user_id
+         WHERE n.application_id = ?
+         ORDER BY n.id DESC LIMIT 100`,
+        [applicationId],
+        (err, rows) => (err ? reject(err) : resolve(rows || []))
+      );
+    });
+    return res.json({ ok: true, notes });
+  } catch {
+    return res.status(500).json({ ok: false, error: 'Could not load notes' });
+  }
+});
+
+app.post('/api/admin/application/note', async (req, res) => {
+  try {
+    const admin = await requireAdmin(req, res);
+    if (!admin) return;
+    const applicationId = Number(req.body?.applicationId || 0);
+    const note = String(req.body?.note || '').trim();
+    if (!applicationId || !note) return res.status(400).json({ ok: false, error: 'Invalid note payload' });
+
+    await dbRun('INSERT INTO application_notes (application_id, admin_user_id, note) VALUES (?, ?, ?)', [applicationId, admin.adminUserId, note]);
+    await dbRun(
+      `INSERT INTO admin_audit_log (admin_user_id, action, target_type, target_id, payload_json)
+       VALUES (?, 'application_note', 'application', ?, ?)`,
+      [admin.adminUserId, String(applicationId), JSON.stringify({ note })]
+    );
+    return res.json({ ok: true });
+  } catch {
+    return res.status(500).json({ ok: false, error: 'Could not save note' });
+  }
+});
+
+app.get('/api/admin/application/:id/tasks', async (req, res) => {
+  try {
+    const admin = await requireAdmin(req, res);
+    if (!admin) return;
+    const applicationId = Number(req.params.id || 0);
+    const tasks = await new Promise((resolve, reject) => {
+      db.all(
+        `SELECT id, title, status, assignee, due_date, created_at, updated_at
+         FROM project_tasks
+         WHERE application_id = ?
+         ORDER BY id DESC LIMIT 100`,
+        [applicationId],
+        (err, rows) => (err ? reject(err) : resolve(rows || []))
+      );
+    });
+    return res.json({ ok: true, tasks });
+  } catch {
+    return res.status(500).json({ ok: false, error: 'Could not load tasks' });
+  }
+});
+
+app.post('/api/admin/application/task', async (req, res) => {
+  try {
+    const admin = await requireAdmin(req, res);
+    if (!admin) return;
+    const applicationId = Number(req.body?.applicationId || 0);
+    const title = String(req.body?.title || '').trim();
+    const status = String(req.body?.status || 'todo').trim();
+    const assignee = String(req.body?.assignee || 'unassigned').trim();
+    const dueDate = String(req.body?.dueDate || '').trim();
+    if (!applicationId || !title) return res.status(400).json({ ok: false, error: 'Invalid task payload' });
+
+    await dbRun(
+      `INSERT INTO project_tasks (application_id, title, status, assignee, due_date, created_by_admin_user_id, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+      [applicationId, title, status, assignee, dueDate, admin.adminUserId]
+    );
+
+    await dbRun(
+      `INSERT INTO admin_audit_log (admin_user_id, action, target_type, target_id, payload_json)
+       VALUES (?, 'application_task', 'application', ?, ?)`,
+      [admin.adminUserId, String(applicationId), JSON.stringify({ title, status, assignee, dueDate })]
+    );
+
+    return res.json({ ok: true });
+  } catch {
+    return res.status(500).json({ ok: false, error: 'Could not create task' });
   }
 });
 
