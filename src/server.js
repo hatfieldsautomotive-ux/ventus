@@ -333,10 +333,16 @@ const stripeSecret = process.env.STRIPE_SECRET_KEY || process.env.STRIPE_API_KEY
 const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 const stripe = stripeSecret ? new Stripe(stripeSecret) : null;
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const supabaseEnabled = !!(supabaseUrl && supabaseAnonKey && supabaseServiceRoleKey);
+const supabaseUrl = String(process.env.SUPABASE_URL || '').trim();
+const supabaseAnonKey = String(process.env.SUPABASE_ANON_KEY || '').trim();
+const supabaseServiceRoleKey = String(process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
+const supabaseUrlValid = /^https?:\/\//i.test(supabaseUrl);
+const supabaseEnabled = !!(supabaseUrlValid && supabaseAnonKey && supabaseServiceRoleKey);
+
+if ((supabaseUrl || supabaseAnonKey || supabaseServiceRoleKey) && !supabaseEnabled) {
+  console.warn('[supabase] disabled: SUPABASE_URL must be a valid https URL and keys must be set. Falling back to SQLite mode.');
+}
+
 const supabaseAnon = supabaseEnabled ? createClient(supabaseUrl, supabaseAnonKey) : null;
 const supabaseAdmin = supabaseEnabled ? createClient(supabaseUrl, supabaseServiceRoleKey) : null;
 
