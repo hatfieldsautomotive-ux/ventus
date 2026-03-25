@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ventus Studios - Member Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    body{font-family:Inter,sans-serif;background:#050505;color:#f5f5f5}
+    .card{background:linear-gradient(180deg,#0b0b0b,#111);border:1px solid #242424;border-radius:16px}
+    .btn{background:#f97316;color:#1a0d03;font-weight:800;padding:10px 16px;border-radius:999px}
+    .btn-ghost{border:1px solid #3a3a3a;color:#ddd;padding:10px 16px;border-radius:999px}
+    .field{width:100%;background:#090909;border:1px solid #2b2b2b;border-radius:12px;padding:10px 12px;color:#f5f5f5}
+  </style>
+</head>
+<body>
+  <main class="max-w-4xl mx-auto p-6">
+    <h1 class="text-3xl font-black mb-4">Ventus Member Portal</h1>
+
+    <section id="authCard" class="card p-6 mb-6">
+      <h2 class="text-xl font-bold mb-3">Login</h2>
+      <div class="grid md:grid-cols-2 gap-3">
+        <input id="email" class="field" type="email" placeholder="Email"/>
+        <input id="password" class="field" type="password" placeholder="Password"/>
+      </div>
+      <div class="mt-3 flex gap-2">
+        <button id="loginBtn" class="btn">Login</button>
+      </div>
+      <p id="authMsg" class="text-sm mt-2 text-zinc-400"></p>
+    </section>
+
+    <section id="dashboard" class="hidden space-y-4">
+      <div class="card p-6">
+        <h2 class="text-xl font-bold mb-2">Account</h2>
+        <p id="userEmail" class="text-zinc-300"></p>
+        <button id="logoutBtn" class="btn-ghost mt-3">Logout</button>
+      </div>
+
+      <div class="card p-6">
+        <h2 class="text-xl font-bold mb-2">Membership Status</h2>
+        <p id="membershipLine" class="text-zinc-300"></p>
+        <p id="creditLine" class="text-zinc-300 mt-1"></p>
+      </div>
+
+      <div class="card p-6">
+        <h2 class="text-xl font-bold mb-2">Add-ons</h2>
+        <p class="text-zinc-400 mb-3">Purchase add-ons (placeholder checkout wiring in Phase 2).</p>
+        <div class="grid md:grid-cols-3 gap-2 text-sm text-zinc-200">
+          <div class="card p-3">Social Posting Pack</div>
+          <div class="card p-3">Local SEO Boost</div>
+          <div class="card p-3">Landing Page Sprint</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const authCard = document.getElementById('authCard');
+    const dashboard = document.getElementById('dashboard');
+    const authMsg = document.getElementById('authMsg');
+
+    async function refresh() {
+      const res = await fetch('/api/member/me');
+      if (!res.ok) {
+        authCard.classList.remove('hidden');
+        dashboard.classList.add('hidden');
+        return;
+      }
+      const data = await res.json();
+      authCard.classList.add('hidden');
+      dashboard.classList.remove('hidden');
+      document.getElementById('userEmail').textContent = `Logged in as ${data.user.email}`;
+      const m = data.membership || {};
+      document.getElementById('membershipLine').textContent = `Plan: ${m.plan || 'N/A'} | Membership: ${m.membership_status || 'pending'}`;
+      document.getElementById('creditLine').textContent = `Credit limit status: ${m.credit_limit_status || 'none'} | Approved: $${m.approved_limit || 0} | Active: $${m.active_limit || 0}`;
+    }
+
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+      authMsg.textContent = 'Logging in...';
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const res = await fetch('/api/member/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const json = await res.json();
+      if (!res.ok || !json.ok) {
+        authMsg.textContent = json.error || 'Login failed';
+        return;
+      }
+      authMsg.textContent = '';
+      refresh();
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await fetch('/api/member/logout', { method: 'POST' });
+      refresh();
+    });
+
+    refresh();
+  </script>
+</body>
+</html>

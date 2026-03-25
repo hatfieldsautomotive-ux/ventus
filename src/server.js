@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const sqlite3 = require('sqlite3').verbose();
 const Stripe = require('stripe');
 const nodemailer = require('nodemailer');
+const { promisify } = require('util');
 
 const app = express();
 app.set('trust proxy', true);
@@ -56,6 +57,42 @@ db.serialize(() => {
     consent_terms INTEGER DEFAULT 0,
     consent_reporting INTEGER DEFAULT 0,
     raw_json TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS onboarding_sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    token TEXT NOT NULL UNIQUE,
+    status TEXT NOT NULL DEFAULT 'started',
+    started_ip TEXT,
+    user_agent TEXT,
+    application_id INTEGER,
+    expires_at DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS member_users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    password_salt TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS member_sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    token TEXT NOT NULL UNIQUE,
+    expires_at DATETIME NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS business_memberships (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    application_id INTEGER,
+    business_name TEXT,
+    plan TEXT,
+    membership_status TEXT NOT NULL DEFAULT 'pending_payment',
+    credit_limit_status TEXT NOT NULL DEFAULT 'approved_not_active',
+    approved_limit INTEGER DEFAULT 0,
+    active_limit INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
 });
@@ -128,6 +165,73 @@ app.use((req, res, next) => {
   return express.urlencoded({ extended: true })(req, res, next);
 });
 app.use(express.static(WEB_DIR));
+
+const scryptAsync = promisify(crypto.scrypt);
+
+function parseCookies(req) {
+  const raw = req.headers.cookie || '';
+  const out = {};
+  raw.split(';').forEach((part) => {
+    const idx = part.indexOf('=');
+    if (idx === -1) return;
+    const key = part.slice(0, idx).trim();
+    const value = part.slice(idx + 1).trim();
+    if (key) out[key] = decodeURIComponent(value);
+  });
+  return out;
+}
+
+async function hashPassword(password, salt = crypto.randomBytes(16).toString('hex')) {
+  const derived = await scryptAsync(password, salt, 64);
+  return { salt, hash: derived.toString('hex') };
+}
+
+async function verifyPassword(password, salt, expectedHash) {
+  const derived = await scryptAsync(password, salt, 64);
+  return crypto.timingSafeEqual(Buffer.from(expectedHash, 'hex'), derived);
+}
+
+function setSessionCookie(res, token) {
+  const secure = process.env.NODE_ENV === 'production';
+  res.setHeader('Set-Cookie', `ventus_session=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000${secure ? '; Secure' : ''}`);
+}
+
+function clearSessionCookie(res) {
+  const secure = process.env.NODE_ENV === 'production';
+  res.setHeader('Set-Cookie', `ventus_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure ? '; Secure' : ''}`);
+}
+
+function dbGet(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.get(sql, params, (err, row) => (err ? reject(err) : resolve(row)));
+  });
+}
+
+function dbRun(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.run(sql, params, function onRun(err) {
+      if (err) return reject(err);
+      resolve(this);
+    });
+  });
+}
+
+async function getAuthedUser(req) {
+  const cookies = parseCookies(req);
+  const sessionToken = cookies.ventus_session;
+  if (!sessionToken) return null;
+
+  const session = await dbGet(
+    `SELECT ms.user_id, ms.expires_at, mu.email
+     FROM member_sessions ms
+     JOIN member_users mu ON mu.id = ms.user_id
+     WHERE ms.token = ?`,
+    [sessionToken]
+  );
+  if (!session) return null;
+  if (new Date(session.expires_at) < new Date()) return null;
+  return { userId: session.user_id, email: session.email };
+}
 
 function issueToken(email, product, cb) {
   const token = crypto.randomBytes(24).toString('hex');
@@ -291,9 +395,38 @@ app.post('/api/free-signup', async (req, res) => {
   });
 });
 
-app.post('/api/studio-application', (req, res) => {
+app.get('/start-application', async (req, res) => {
+  try {
+    const token = crypto.randomBytes(24).toString('hex');
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 6).toISOString();
+    await dbRun(
+      'INSERT INTO onboarding_sessions (token, started_ip, user_agent, expires_at) VALUES (?, ?, ?, ?)',
+      [token, req.ip || '', req.get('user-agent') || '', expiresAt]
+    );
+    return res.redirect(302, `/apply.html?token=${token}`);
+  } catch (error) {
+    console.error('[onboarding] start failed', error.message);
+    return res.status(500).send('Could not start application right now.');
+  }
+});
+
+app.get('/api/onboarding/session/:token', async (req, res) => {
+  const token = String(req.params.token || '').trim();
+  if (!token) return res.status(400).json({ ok: false, error: 'Token required' });
+  try {
+    const session = await dbGet('SELECT * FROM onboarding_sessions WHERE token = ?', [token]);
+    if (!session) return res.status(404).json({ ok: false, error: 'Session not found' });
+    if (session.status === 'completed') return res.status(410).json({ ok: false, error: 'Session completed' });
+    if (session.expires_at && new Date(session.expires_at) < new Date()) return res.status(410).json({ ok: false, error: 'Session expired' });
+    return res.json({ ok: true, token: session.token, expiresAt: session.expires_at });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: 'Could not validate session' });
+  }
+});
+
+app.post('/api/studio-application', async (req, res) => {
   const payload = req.body || {};
-  const required = ['businessLegalName', 'ein', 'contactName', 'email'];
+  const required = ['businessLegalName', 'ein', 'contactName', 'email', 'password', 'onboardingToken'];
   for (const key of required) {
     if (!String(payload[key] || '').trim()) {
       return res.status(400).json({ ok: false, error: `Missing required field: ${key}` });
@@ -301,44 +434,70 @@ app.post('/api/studio-application', (req, res) => {
   }
 
   const normalizedEmail = String(payload.email || '').trim().toLowerCase();
-  if (!normalizedEmail.includes('@')) {
-    return res.status(400).json({ ok: false, error: 'Valid email required' });
-  }
+  if (!normalizedEmail.includes('@')) return res.status(400).json({ ok: false, error: 'Valid email required' });
+  if (String(payload.password).length < 8) return res.status(400).json({ ok: false, error: 'Password must be at least 8 characters' });
 
-  const servicesNeeded = Array.isArray(payload.servicesNeeded)
-    ? payload.servicesNeeded.map((s) => String(s).trim()).filter(Boolean)
-    : [];
+  try {
+    const onboarding = await dbGet('SELECT * FROM onboarding_sessions WHERE token = ?', [String(payload.onboardingToken)]);
+    if (!onboarding) return res.status(404).json({ ok: false, error: 'Invalid onboarding session' });
+    if (onboarding.status === 'completed') return res.status(410).json({ ok: false, error: 'Onboarding session already used' });
+    if (onboarding.expires_at && new Date(onboarding.expires_at) < new Date()) return res.status(410).json({ ok: false, error: 'Onboarding session expired' });
 
-  db.run(
-    `INSERT INTO studio_applications (
-      business_legal_name, dba, ein, entity_type, contact_name, email, phone,
-      package_interest, website_url, monthly_revenue_band, services_needed,
-      consent_terms, consent_reporting, raw_json
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [
-      String(payload.businessLegalName || '').trim(),
-      String(payload.dba || '').trim(),
-      String(payload.ein || '').trim(),
-      String(payload.entityType || '').trim(),
-      String(payload.contactName || '').trim(),
-      normalizedEmail,
-      String(payload.phone || '').trim(),
-      String(payload.packageInterest || '').trim(),
-      String(payload.websiteUrl || '').trim(),
-      String(payload.monthlyRevenueBand || '').trim(),
-      servicesNeeded.join(','),
-      payload.consentTerms ? 1 : 0,
-      payload.consentReporting ? 1 : 0,
-      JSON.stringify(payload)
-    ],
-    function onInsert(err) {
-      if (err) {
-        console.error('[studio-application] insert failed', err.message);
-        return res.status(500).json({ ok: false, error: 'Could not submit application' });
-      }
-      return res.json({ ok: true, id: this.lastID });
+    const servicesNeeded = Array.isArray(payload.servicesNeeded)
+      ? payload.servicesNeeded.map((s) => String(s).trim()).filter(Boolean)
+      : [];
+
+    const insertApp = await dbRun(
+      `INSERT INTO studio_applications (
+        business_legal_name, dba, ein, entity_type, contact_name, email, phone,
+        package_interest, website_url, monthly_revenue_band, services_needed,
+        consent_terms, consent_reporting, raw_json
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        String(payload.businessLegalName || '').trim(),
+        String(payload.dba || '').trim(),
+        String(payload.ein || '').trim(),
+        String(payload.entityType || '').trim(),
+        String(payload.contactName || '').trim(),
+        normalizedEmail,
+        String(payload.phone || '').trim(),
+        String(payload.packageInterest || '').trim(),
+        String(payload.websiteUrl || '').trim(),
+        String(payload.monthlyRevenueBand || '').trim(),
+        servicesNeeded.join(','),
+        payload.consentTerms ? 1 : 0,
+        payload.consentReporting ? 1 : 0,
+        JSON.stringify(payload)
+      ]
+    );
+
+    const applicationId = insertApp.lastID;
+
+    let user = await dbGet('SELECT * FROM member_users WHERE email = ?', [normalizedEmail]);
+    if (!user) {
+      const pw = await hashPassword(String(payload.password));
+      const createUser = await dbRun('INSERT INTO member_users (email, password_hash, password_salt) VALUES (?, ?, ?)', [normalizedEmail, pw.hash, pw.salt]);
+      user = { id: createUser.lastID, email: normalizedEmail };
     }
-  );
+
+    await dbRun(
+      `INSERT INTO business_memberships (user_id, application_id, business_name, plan, membership_status, credit_limit_status, approved_limit, active_limit)
+       VALUES (?, ?, ?, ?, 'pending_payment', 'approved_not_active', ?, 0)`,
+      [user.id, applicationId, String(payload.businessLegalName || '').trim(), String(payload.packageInterest || 'Foundation').trim(), 1000]
+    );
+
+    await dbRun('UPDATE onboarding_sessions SET status = ?, application_id = ? WHERE token = ?', ['completed', applicationId, String(payload.onboardingToken)]);
+
+    const sessionToken = crypto.randomBytes(32).toString('hex');
+    const sessionExpires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString();
+    await dbRun('INSERT INTO member_sessions (user_id, token, expires_at) VALUES (?, ?, ?)', [user.id, sessionToken, sessionExpires]);
+    setSessionCookie(res, sessionToken);
+
+    return res.json({ ok: true, id: applicationId, redirect: '/portal.html' });
+  } catch (error) {
+    console.error('[studio-application] submit failed', error.message);
+    return res.status(500).json({ ok: false, error: 'Could not submit application' });
+  }
 });
 
 // Paid download endpoint using issued token
@@ -514,6 +673,64 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
   }
 
   return res.json({ received: true });
+});
+
+app.post('/api/member/login', async (req, res) => {
+  const email = String(req.body?.email || '').trim().toLowerCase();
+  const password = String(req.body?.password || '');
+  if (!email || !password) return res.status(400).json({ ok: false, error: 'Email and password required' });
+  try {
+    const user = await dbGet('SELECT * FROM member_users WHERE email = ?', [email]);
+    if (!user) return res.status(401).json({ ok: false, error: 'Invalid credentials' });
+    const valid = await verifyPassword(password, user.password_salt, user.password_hash);
+    if (!valid) return res.status(401).json({ ok: false, error: 'Invalid credentials' });
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString();
+    await dbRun('INSERT INTO member_sessions (user_id, token, expires_at) VALUES (?, ?, ?)', [user.id, token, expiresAt]);
+    setSessionCookie(res, token);
+    return res.json({ ok: true });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: 'Could not log in' });
+  }
+});
+
+app.post('/api/member/logout', async (req, res) => {
+  try {
+    const cookies = parseCookies(req);
+    if (cookies.ventus_session) {
+      await dbRun('DELETE FROM member_sessions WHERE token = ?', [cookies.ventus_session]);
+    }
+    clearSessionCookie(res);
+    return res.json({ ok: true });
+  } catch {
+    clearSessionCookie(res);
+    return res.json({ ok: true });
+  }
+});
+
+app.get('/api/member/me', async (req, res) => {
+  try {
+    const auth = await getAuthedUser(req);
+    if (!auth) return res.status(401).json({ ok: false, error: 'Not authenticated' });
+
+    const membership = await dbGet(
+      `SELECT bm.*, sa.created_at AS application_created_at
+       FROM business_memberships bm
+       LEFT JOIN studio_applications sa ON sa.id = bm.application_id
+       WHERE bm.user_id = ?
+       ORDER BY bm.id DESC LIMIT 1`,
+      [auth.userId]
+    );
+
+    return res.json({
+      ok: true,
+      user: { email: auth.email },
+      membership: membership || null
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: 'Could not load profile' });
+  }
 });
 
 app.get('/api/health', (req, res) => res.json({

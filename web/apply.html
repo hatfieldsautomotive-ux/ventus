@@ -69,8 +69,10 @@
         </section>
 
         <section class="step" data-step="4">
-          <h2 class="font-bold mb-3">Confirm & Submit</h2>
-          <p class="text-sm mb-3" style="color:var(--muted)">By submitting, you confirm the information is accurate and agree to review final service and reporting terms in your membership agreement.</p>
+          <h2 class="font-bold mb-3">Create Login & Submit</h2>
+          <p class="text-sm mb-3" style="color:var(--muted)">Create your member login so you can track application status, membership, and credit-limit state.</p>
+          <input class="field" name="password" type="password" placeholder="Create password (8+ characters)" required/>
+          <input class="field" name="passwordConfirm" type="password" placeholder="Confirm password" required/>
           <label class="block text-sm"><input type="checkbox" name="consentTerms" required/> I agree to Ventus Studios membership and service terms.</label>
           <label class="block text-sm"><input type="checkbox" name="consentReporting" required/> I understand reporting eligibility depends on active status and good standing.</label>
           <p id="msg" class="text-sm mt-3" style="color:var(--muted)"></p>
@@ -94,6 +96,8 @@
     const submitBtn = document.getElementById('submitBtn');
     const form = document.getElementById('applyForm');
     const msg = document.getElementById('msg');
+    const params = new URLSearchParams(window.location.search);
+    const onboardingToken = params.get('token');
     let current = 0;
 
     function render() {
@@ -116,7 +120,16 @@
 
       const data = new FormData(form);
       const servicesNeeded = data.getAll('servicesNeeded');
+      const password = data.get('password');
+      const passwordConfirm = data.get('passwordConfirm');
+
+      if (password !== passwordConfirm) {
+        msg.textContent = 'Passwords do not match.';
+        return;
+      }
+
       const payload = {
+        onboardingToken,
         businessLegalName: data.get('businessLegalName'),
         dba: data.get('dba'),
         ein: data.get('ein'),
@@ -128,6 +141,7 @@
         packageInterest: data.get('packageInterest'),
         monthlyRevenueBand: data.get('monthlyRevenueBand'),
         servicesNeeded,
+        password,
         consentTerms: data.get('consentTerms') === 'on',
         consentReporting: data.get('consentReporting') === 'on'
       };
@@ -141,16 +155,29 @@
         const json = await res.json();
         if (!res.ok || !json.ok) throw new Error(json.error || 'Submission failed');
 
-        msg.textContent = 'Application received. We will contact you shortly with next steps.';
-        form.reset();
-        current = 0;
-        render();
+        msg.textContent = 'Application received. Redirecting to your member portal...';
+        setTimeout(() => {
+          window.location.href = json.redirect || '/portal.html';
+        }, 700);
       } catch (err) {
         msg.textContent = err.message || 'Could not submit right now. Please try again.';
       }
     });
 
-    render();
+    (async () => {
+      if (!onboardingToken) {
+        window.location.href = '/start-application';
+        return;
+      }
+      try {
+        const res = await fetch(`/api/onboarding/session/${encodeURIComponent(onboardingToken)}`);
+        const json = await res.json();
+        if (!res.ok || !json.ok) throw new Error(json.error || 'Session invalid');
+        render();
+      } catch {
+        window.location.href = '/start-application';
+      }
+    })();
   </script>
 </body>
 </html>
