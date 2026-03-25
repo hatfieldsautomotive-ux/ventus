@@ -46,6 +46,7 @@
 
       <div>
         <h4 class="font-semibold mb-1">Tasks</h4>
+        <div class="grid grid-cols-2 gap-1 mb-1"><button id="applyTemplateBtn" class="btn-ghost">Apply Package Template</button><span id="templateMsg" class="text-xs text-zinc-500 self-center"></span></div>
         <input id="taskTitle" class="field mb-1" placeholder="Task title"/>
         <div class="grid grid-cols-2 gap-1"><input id="taskAssignee" class="field" placeholder="Assignee"/><input id="taskDue" class="field" type="date"/></div>
         <button id="addTaskBtn" class="btn w-full mt-2">Create Task</button>
@@ -76,6 +77,7 @@ async function loadTasks(){if(!selectedAppId) return;const j=await api(`/api/adm
 
 document.getElementById('saveWorkflowBtn').onclick=async()=>{if(!selectedAppId) return;await api('/api/admin/application/status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({applicationId:selectedAppId,status:document.getElementById('workflowStatus').value,assignee:document.getElementById('workflowAssignee').value})});msg.textContent='Workflow saved.';loadApplications();};
 document.getElementById('addNoteBtn').onclick=async()=>{if(!selectedAppId) return;await api('/api/admin/application/note',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({applicationId:selectedAppId,note:document.getElementById('noteText').value})});document.getElementById('noteText').value='';loadNotes();loadApplications();};
+document.getElementById('applyTemplateBtn').onclick=async()=>{if(!selectedAppId) return;const j=await api('/api/admin/application/tasks/apply-template',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({applicationId:selectedAppId})});document.getElementById('templateMsg').textContent=`${j.inserted} tasks added (${j.templateKey})`;loadTasks();loadApplications();};
 document.getElementById('addTaskBtn').onclick=async()=>{if(!selectedAppId) return;await api('/api/admin/application/task',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({applicationId:selectedAppId,title:document.getElementById('taskTitle').value,assignee:document.getElementById('taskAssignee').value,dueDate:document.getElementById('taskDue').value,status:'todo'})});document.getElementById('taskTitle').value='';loadTasks();loadApplications();};
 
 async function refreshAuth(){const r=await fetch('/api/admin/me');if(!r.ok){authCard.classList.remove('hidden');dash.classList.add('hidden');return;}const j=await r.json();authCard.classList.add('hidden');dash.classList.remove('hidden');adminLine.textContent=`Logged in as ${j.admin.email} (${j.admin.role})`;loadApplications();}

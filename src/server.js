@@ -268,6 +268,36 @@ const MEMBERSHIP_ACTIVATION = {
   amount: 50000
 };
 
+const PROJECT_TASK_TEMPLATES = {
+  foundation: [
+    'Kickoff call + intake confirmation',
+    'Collect brand assets and references',
+    'Build core website pages',
+    'Design and deliver logo package',
+    'QA + mobile responsiveness pass',
+    'Launch and handoff'
+  ],
+  growth: [
+    'Kickoff call + intake confirmation',
+    'Collect brand assets and references',
+    'Build core website pages',
+    'Design and deliver logo package',
+    'Configure social posting calendar',
+    'Implement local SEO basics',
+    'Monthly strategy review setup'
+  ],
+  authority: [
+    'Kickoff call + intake confirmation',
+    'Collect brand assets and references',
+    'Build core website pages',
+    'Design and deliver logo package',
+    'Configure social posting calendar',
+    'Implement local SEO basics',
+    'Build conversion landing page sprint',
+    'Set up reporting dashboard + priority support lane'
+  ]
+};
+
 let STRIPE_PRICE_MAP = {};
 try {
   const priceMapPath = path.join(__dirname, '..', 'stripe-price-map.json');
@@ -1442,6 +1472,50 @@ app.post('/api/admin/application/task/update', async (req, res) => {
     return res.json({ ok: true });
   } catch {
     return res.status(500).json({ ok: false, error: 'Could not update task' });
+  }
+});
+
+app.post('/api/admin/application/tasks/apply-template', async (req, res) => {
+  try {
+    const admin = await requireAdmin(req, res);
+    if (!admin) return;
+
+    const applicationId = Number(req.body?.applicationId || 0);
+    if (!applicationId) return res.status(400).json({ ok: false, error: 'Application id required' });
+
+    const appRow = await dbGet('SELECT package_interest FROM studio_applications WHERE id = ?', [applicationId]);
+    if (!appRow) return res.status(404).json({ ok: false, error: 'Application not found' });
+
+    const pkg = String(appRow.package_interest || 'Foundation').toLowerCase();
+    const templateKey = pkg.includes('authority') ? 'authority' : pkg.includes('growth') ? 'growth' : 'foundation';
+    const tasks = PROJECT_TASK_TEMPLATES[templateKey] || PROJECT_TASK_TEMPLATES.foundation;
+
+    const existingRows = await new Promise((resolve, reject) => {
+      db.all('SELECT title FROM project_tasks WHERE application_id = ?', [applicationId], (err, rows) => (err ? reject(err) : resolve(rows || [])));
+    });
+    const existing = new Set(existingRows.map((r) => String(r.title || '').toLowerCase().trim()));
+
+    let inserted = 0;
+    for (const title of tasks) {
+      const key = title.toLowerCase().trim();
+      if (existing.has(key)) continue;
+      await dbRun(
+        `INSERT INTO project_tasks (application_id, title, status, assignee, due_date, created_by_admin_user_id, updated_at)
+         VALUES (?, ?, 'todo', 'unassigned', '', ?, CURRENT_TIMESTAMP)`,
+        [applicationId, title, admin.adminUserId]
+      );
+      inserted += 1;
+    }
+
+    await dbRun(
+      `INSERT INTO admin_audit_log (admin_user_id, action, target_type, target_id, payload_json)
+       VALUES (?, 'apply_task_template', 'application', ?, ?)`,
+      [admin.adminUserId, String(applicationId), JSON.stringify({ templateKey, inserted })]
+    );
+
+    return res.json({ ok: true, templateKey, inserted });
+  } catch {
+    return res.status(500).json({ ok: false, error: 'Could not apply task template' });
   }
 });
 
