@@ -13,35 +13,44 @@
   <p id="msg" class="text-sm text-zinc-400 mt-2"></p>
 </section>
 
-<section id="dash" class="hidden grid lg:grid-cols-3 gap-4">
-  <div class="lg:col-span-2 card p-4">
-    <div class="flex justify-between items-center mb-3"><p id="adminLine" class="text-sm text-zinc-300"></p><button id="logoutBtn" class="btn-ghost">Logout</button></div>
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm"><thead class="text-zinc-400"><tr><th class="p-2 text-left">Business</th><th class="p-2 text-left">Workflow</th><th class="p-2 text-left">Verification</th><th class="p-2 text-left">Underwriting</th><th class="p-2 text-left">Counts</th><th class="p-2 text-left">Actions</th></tr></thead><tbody id="rows"></tbody></table>
-    </div>
-  </div>
+<section id="dash" class="hidden space-y-4">
+  <div class="card p-4 flex justify-between items-center"><p id="adminLine" class="text-sm text-zinc-300"></p><button id="logoutBtn" class="btn-ghost">Logout</button></div>
+
   <div class="card p-4">
-    <h3 class="font-bold mb-2">Application Workspace</h3>
-    <p id="selectedLine" class="text-sm text-zinc-400 mb-3">Select an application row.</p>
-    <div class="space-y-2 mb-3">
-      <select id="workflowStatus" class="field"><option>new</option><option>verifying</option><option>needs-review</option><option>approved</option><option>declined</option><option>activated</option></select>
-      <input id="workflowAssignee" class="field" placeholder="Assignee"/>
-      <button id="saveWorkflowBtn" class="btn w-full">Save Workflow</button>
+    <h3 class="font-bold mb-3">Application Workflow Board</h3>
+    <div id="kanban" class="grid md:grid-cols-3 lg:grid-cols-6 gap-2"></div>
+  </div>
+
+  <div class="grid lg:grid-cols-3 gap-4">
+    <div class="lg:col-span-2 card p-4">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm"><thead class="text-zinc-400"><tr><th class="p-2 text-left">Business</th><th class="p-2 text-left">Workflow</th><th class="p-2 text-left">Verification</th><th class="p-2 text-left">Underwriting</th><th class="p-2 text-left">Counts</th><th class="p-2 text-left">Actions</th></tr></thead><tbody id="rows"></tbody></table>
+      </div>
     </div>
 
-    <div class="mb-3">
-      <h4 class="font-semibold mb-1">Add Internal Note</h4>
-      <textarea id="noteText" class="field w-full" placeholder="Note"></textarea>
-      <button id="addNoteBtn" class="btn w-full mt-2">Add Note</button>
-      <div id="notesList" class="mt-2 text-xs text-zinc-300 space-y-1 max-h-36 overflow-auto"></div>
-    </div>
+    <div class="card p-4">
+      <h3 class="font-bold mb-2">Application Workspace</h3>
+      <p id="selectedLine" class="text-sm text-zinc-400 mb-3">Select an application row.</p>
+      <div class="space-y-2 mb-3">
+        <select id="workflowStatus" class="field"><option>new</option><option>verifying</option><option>needs-review</option><option>approved</option><option>declined</option><option>activated</option></select>
+        <input id="workflowAssignee" class="field" placeholder="Assignee"/>
+        <button id="saveWorkflowBtn" class="btn w-full">Save Workflow</button>
+      </div>
 
-    <div>
-      <h4 class="font-semibold mb-1">Create Task</h4>
-      <input id="taskTitle" class="field mb-1" placeholder="Task title"/>
-      <div class="grid grid-cols-2 gap-1"><input id="taskAssignee" class="field" placeholder="Assignee"/><input id="taskDue" class="field" type="date"/></div>
-      <button id="addTaskBtn" class="btn w-full mt-2">Create Task</button>
-      <div id="tasksList" class="mt-2 text-xs text-zinc-300 space-y-1 max-h-36 overflow-auto"></div>
+      <div class="mb-3">
+        <h4 class="font-semibold mb-1">Add Internal Note</h4>
+        <textarea id="noteText" class="field w-full" placeholder="Note"></textarea>
+        <button id="addNoteBtn" class="btn w-full mt-2">Add Note</button>
+        <div id="notesList" class="mt-2 text-xs text-zinc-300 space-y-1 max-h-36 overflow-auto"></div>
+      </div>
+
+      <div>
+        <h4 class="font-semibold mb-1">Tasks</h4>
+        <input id="taskTitle" class="field mb-1" placeholder="Task title"/>
+        <div class="grid grid-cols-2 gap-1"><input id="taskAssignee" class="field" placeholder="Assignee"/><input id="taskDue" class="field" type="date"/></div>
+        <button id="addTaskBtn" class="btn w-full mt-2">Create Task</button>
+        <div id="tasksList" class="mt-2 text-xs text-zinc-300 space-y-2 max-h-56 overflow-auto"></div>
+      </div>
     </div>
   </div>
 </section>
@@ -49,16 +58,21 @@
 
 <script>
 const msg=document.getElementById('msg'),rowsEl=document.getElementById('rows'),authCard=document.getElementById('authCard'),dash=document.getElementById('dash'),adminLine=document.getElementById('adminLine');
-let selectedAppId=null;
+let selectedAppId=null, appCache=[];
+const wfCols=['new','verifying','needs-review','approved','declined','activated'];
 
 async function api(url,opts={}){const r=await fetch(url,opts);const j=await r.json().catch(()=>({ok:false,error:'Bad response'}));if(!r.ok||!j.ok) throw new Error(j.error||'Request failed');return j;}
 
-async function loadApplications(){const j=await api('/api/admin/applications');rowsEl.innerHTML='';j.applications.forEach(a=>{const tr=document.createElement('tr');tr.className='border-t border-zinc-800';tr.innerHTML=`<td class='p-2'>${a.business_legal_name||''}<div class='text-xs text-zinc-500'>${a.email||''}</div></td><td class='p-2'>${a.workflow_status||'new'}<div class='text-xs text-zinc-500'>${a.workflow_assignee||'unassigned'}</div></td><td class='p-2'>${a.verification_status||'pending'} (${a.verification_score||0})</td><td class='p-2'>${a.underwriting_decision||'pending'} / $${a.underwriting_limit||0}</td><td class='p-2'>N:${a.notes_count||0} T:${a.tasks_count||0}</td><td class='p-2'><button class='btn-ghost open'>Open</button></td>`;tr.querySelector('.open').onclick=()=>selectApplication(a);rowsEl.appendChild(tr);});}
+function renderKanban(apps){const el=document.getElementById('kanban');el.innerHTML='';wfCols.forEach(col=>{const list=apps.filter(a=>(a.workflow_status||'new')===col);const card=document.createElement('div');card.className='card p-2';card.innerHTML=`<div class='text-xs uppercase text-zinc-400 mb-2'>${col} (${list.length})</div>`+list.slice(0,8).map(a=>`<button data-id='${a.application_id}' class='w-full text-left text-xs card p-2 mb-1 hover:border-orange-500'>${a.business_legal_name||'Business'}<div class='text-zinc-500'>${a.workflow_assignee||'unassigned'}</div></button>`).join('');el.appendChild(card);});el.querySelectorAll('button[data-id]').forEach(b=>b.onclick=()=>{const a=appCache.find(x=>String(x.application_id)===b.dataset.id);if(a) selectApplication(a);});}
+
+async function loadApplications(){const j=await api('/api/admin/applications');appCache=j.applications||[];rowsEl.innerHTML='';appCache.forEach(a=>{const tr=document.createElement('tr');tr.className='border-t border-zinc-800';tr.innerHTML=`<td class='p-2'>${a.business_legal_name||''}<div class='text-xs text-zinc-500'>${a.email||''}</div></td><td class='p-2'>${a.workflow_status||'new'}<div class='text-xs text-zinc-500'>${a.workflow_assignee||'unassigned'}</div></td><td class='p-2'>${a.verification_status||'pending'} (${a.verification_score||0})</td><td class='p-2'>${a.underwriting_decision||'pending'} / $${a.underwriting_limit||0}</td><td class='p-2'>N:${a.notes_count||0} T:${a.tasks_count||0}</td><td class='p-2'><button class='btn-ghost open'>Open</button></td>`;tr.querySelector('.open').onclick=()=>selectApplication(a);rowsEl.appendChild(tr);});renderKanban(appCache);}
 
 async function selectApplication(a){selectedAppId=a.application_id;document.getElementById('selectedLine').textContent=`Application #${a.application_id} - ${a.business_legal_name}`;document.getElementById('workflowStatus').value=a.workflow_status||'new';document.getElementById('workflowAssignee').value=a.workflow_assignee||'unassigned';await Promise.all([loadNotes(),loadTasks()]);}
 
-async function loadNotes(){if(!selectedAppId) return;const j=await api(`/api/admin/application/${selectedAppId}/notes`);const el=document.getElementById('notesList');el.innerHTML=j.notes.map(n=>`<div class='card p-2'>${n.note}<div class='text-zinc-500'>${n.admin_email||'admin'} - ${n.created_at}</div></div>`).join('');}
-async function loadTasks(){if(!selectedAppId) return;const j=await api(`/api/admin/application/${selectedAppId}/tasks`);const el=document.getElementById('tasksList');el.innerHTML=j.tasks.map(t=>`<div class='card p-2'>${t.title}<div class='text-zinc-500'>${t.status} | ${t.assignee||'unassigned'} | ${t.due_date||'no due'}</div></div>`).join('');}
+async function loadNotes(){if(!selectedAppId) return;const j=await api(`/api/admin/application/${selectedAppId}/notes`);document.getElementById('notesList').innerHTML=j.notes.map(n=>`<div class='card p-2'>${n.note}<div class='text-zinc-500'>${n.admin_email||'admin'} - ${n.created_at}</div></div>`).join('');}
+async function loadTasks(){if(!selectedAppId) return;const j=await api(`/api/admin/application/${selectedAppId}/tasks`);document.getElementById('tasksList').innerHTML=j.tasks.map(t=>`<div class='card p-2'><input data-id='${t.id}' class='field task-title mb-1' value='${(t.title||'').replace(/'/g,"&#39;")}'/><div class='grid grid-cols-3 gap-1'><select data-id='${t.id}' class='field task-status'><option ${t.status==='todo'?'selected':''}>todo</option><option ${t.status==='in-progress'?'selected':''}>in-progress</option><option ${t.status==='done'?'selected':''}>done</option><option ${t.status==='blocked'?'selected':''}>blocked</option></select><input data-id='${t.id}' class='field task-assignee' value='${(t.assignee||'').replace(/'/g,"&#39;")}'/><input data-id='${t.id}' class='field task-due' type='date' value='${t.due_date||''}'/></div><button data-id='${t.id}' class='btn-ghost w-full mt-1 task-save'>Update Task</button></div>`).join('');
+  document.querySelectorAll('.task-save').forEach(btn=>btn.onclick=async()=>{const id=btn.dataset.id;const title=document.querySelector(`.task-title[data-id='${id}']`).value;const status=document.querySelector(`.task-status[data-id='${id}']`).value;const assignee=document.querySelector(`.task-assignee[data-id='${id}']`).value;const dueDate=document.querySelector(`.task-due[data-id='${id}']`).value;await api('/api/admin/application/task/update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({taskId:Number(id),title,status,assignee,dueDate})});msg.textContent='Task updated.';loadTasks();});
+}
 
 document.getElementById('saveWorkflowBtn').onclick=async()=>{if(!selectedAppId) return;await api('/api/admin/application/status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({applicationId:selectedAppId,status:document.getElementById('workflowStatus').value,assignee:document.getElementById('workflowAssignee').value})});msg.textContent='Workflow saved.';loadApplications();};
 document.getElementById('addNoteBtn').onclick=async()=>{if(!selectedAppId) return;await api('/api/admin/application/note',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({applicationId:selectedAppId,note:document.getElementById('noteText').value})});document.getElementById('noteText').value='';loadNotes();loadApplications();};

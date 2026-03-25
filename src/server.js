@@ -1407,6 +1407,44 @@ app.post('/api/admin/application/task', async (req, res) => {
   }
 });
 
+app.post('/api/admin/application/task/update', async (req, res) => {
+  try {
+    const admin = await requireAdmin(req, res);
+    if (!admin) return;
+
+    const taskId = Number(req.body?.taskId || 0);
+    const status = String(req.body?.status || '').trim();
+    const assignee = String(req.body?.assignee || '').trim();
+    const dueDate = String(req.body?.dueDate || '').trim();
+    const title = String(req.body?.title || '').trim();
+    const validStatuses = ['todo', 'in-progress', 'done', 'blocked'];
+
+    if (!taskId || !validStatuses.includes(status)) {
+      return res.status(400).json({ ok: false, error: 'Invalid task update payload' });
+    }
+
+    const existing = await dbGet('SELECT * FROM project_tasks WHERE id = ?', [taskId]);
+    if (!existing) return res.status(404).json({ ok: false, error: 'Task not found' });
+
+    await dbRun(
+      `UPDATE project_tasks
+       SET title = ?, status = ?, assignee = ?, due_date = ?, updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [title || existing.title, status, assignee || existing.assignee, dueDate || existing.due_date, taskId]
+    );
+
+    await dbRun(
+      `INSERT INTO admin_audit_log (admin_user_id, action, target_type, target_id, payload_json)
+       VALUES (?, 'application_task_update', 'task', ?, ?)`,
+      [admin.adminUserId, String(taskId), JSON.stringify({ status, assignee, dueDate, title })]
+    );
+
+    return res.json({ ok: true });
+  } catch {
+    return res.status(500).json({ ok: false, error: 'Could not update task' });
+  }
+});
+
 app.post('/api/admin/underwriting/decide', async (req, res) => {
   try {
     const admin = await requireAdmin(req, res);
