@@ -14,7 +14,31 @@ const WEB_DIR = path.join(__dirname, '..', 'web');
 const PRIVATE_DOWNLOADS = path.join(__dirname, '..', 'private-downloads');
 const DEFAULT_DB_PATH = path.join(__dirname, '..', 'data', 'downloads.db');
 const REQUESTED_DB_PATH = process.env.VENTUS_DB_PATH || process.env.DATABASE_PATH || DEFAULT_DB_PATH;
-let DB_PATH = REQUESTED_DB_PATH;
+
+function resolveDbPath(inputPath) {
+  const raw = String(inputPath || '').trim();
+  if (!raw) return DEFAULT_DB_PATH;
+
+  try {
+    if (fs.existsSync(raw) && fs.statSync(raw).isDirectory()) {
+      const resolved = path.join(raw, 'downloads.db');
+      console.warn(`[db] VENTUS_DB_PATH points to a directory. Using ${resolved}`);
+      return resolved;
+    }
+  } catch (err) {
+    console.warn(`[db] could not inspect requested DB path (${raw}): ${err.message}`);
+  }
+
+  if (/[\\/]$/.test(raw)) {
+    const resolved = path.join(raw, 'downloads.db');
+    console.warn(`[db] VENTUS_DB_PATH looks like a directory path. Using ${resolved}`);
+    return resolved;
+  }
+
+  return raw;
+}
+
+let DB_PATH = resolveDbPath(REQUESTED_DB_PATH);
 
 function ensureDbPathWritable(targetPath) {
   fs.mkdirSync(path.dirname(targetPath), { recursive: true });
