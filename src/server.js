@@ -198,6 +198,23 @@ db.serialize(() => {
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
+  runMigration(`CREATE TABLE IF NOT EXISTS project_questionnaires (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    application_id INTEGER NOT NULL,
+    template_key TEXT,
+    title TEXT NOT NULL,
+    questions_json TEXT NOT NULL,
+    token TEXT NOT NULL UNIQUE,
+    status TEXT NOT NULL DEFAULT 'sent',
+    created_by_admin_user_id INTEGER,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+  runMigration(`CREATE TABLE IF NOT EXISTS questionnaire_submissions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    questionnaire_id INTEGER NOT NULL,
+    answers_json TEXT NOT NULL,
+    submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
 });
 
 db.all("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name", (err, rows) => {
@@ -296,6 +313,39 @@ const PROJECT_TASK_TEMPLATES = {
     'Build conversion landing page sprint',
     'Set up reporting dashboard + priority support lane'
   ]
+};
+
+const QUESTIONNAIRE_TEMPLATES = {
+  website_kickoff: {
+    title: 'Website Kickoff Questionnaire',
+    questions: [
+      'What is your primary business goal for this website in the next 90 days?',
+      'Who is your ideal customer and what action should they take on the site?',
+      'List 3 competitor websites you like and why.',
+      'What services should be featured above the fold?',
+      'What trust signals can we include? (reviews, certifications, years in business, etc.)'
+    ]
+  },
+  brand_identity: {
+    title: 'Brand Identity Questionnaire',
+    questions: [
+      'What 3 words should describe your brand personality?',
+      'Are there colors or styles you want to avoid?',
+      'Do you have an existing logo or brand assets we should reference?',
+      'What should customers feel after seeing your brand?',
+      'Where will your logo be used most? (site, social, print, vehicle, etc.)'
+    ]
+  },
+  social_media: {
+    title: 'Social Media Growth Questionnaire',
+    questions: [
+      'Which social channels matter most to your business right now?',
+      'What content types perform best for your audience? (before/after, education, offers, etc.)',
+      'How often can your team capture photos/videos each week?',
+      'What offers or promotions should we push this month?',
+      'List any compliance or tone constraints for your posts.'
+    ]
+  }
 };
 
 let STRIPE_PRICE_MAP = {};
@@ -1516,6 +1566,96 @@ app.post('/api/admin/application/tasks/apply-template', async (req, res) => {
     return res.json({ ok: true, templateKey, inserted });
   } catch {
     return res.status(500).json({ ok: false, error: 'Could not apply task template' });
+  }
+});
+
+app.post('/api/admin/application/questionnaire/send', async (req, res) => {
+  try {
+    const admin = await requireAdmin(req, res);
+    if (!admin) return;
+
+    const applicationId = Number(req.body?.applicationId || 0);
+    const templateKey = String(req.body?.templateKey || '').trim();
+    const customTitle = String(req.body?.title || '').trim();
+
+    if (!applicationId) return res.status(400).json({ ok: false, error: 'Application id required' });
+
+    const template = QUESTIONNAIRE_TEMPLATES[templateKey];
+    if (!template) return res.status(400).json({ ok: false, error: 'Invalid questionnaire template' });
+
+    const token = crypto.randomBytes(24).toString('hex');
+    const title = customTitle || template.title;
+
+    const row = await dbRun(
+      `INSERT INTO project_questionnaires (application_id, template_key, title, questions_json, token, status, created_by_admin_user_id)
+       VALUES (?, ?, ?, ?, ?, 'sent', ?)`,
+      [applicationId, templateKey, title, JSON.stringify(template.questions), token, admin.adminUserId]
+    );
+
+    const origin = process.env.PUBLIC_BASE_URL || '';
+    const shareUrl = `${origin}/questionnaire.html?token=${token}`;
+
+    await dbRun(
+      `INSERT INTO admin_audit_log (admin_user_id, action, target_type, target_id, payload_json)
+       VALUES (?, 'send_questionnaire', 'application', ?, ?)`,
+      [admin.adminUserId, String(applicationId), JSON.stringify({ templateKey, questionnaireId: row.lastID, shareUrl })]
+    );
+
+    return res.json({ ok: true, questionnaireId: row.lastID, shareUrl });
+  } catch {
+    return res.status(500).json({ ok: false, error: 'Could not send questionnaire' });
+  }
+});
+
+app.get('/api/admin/application/:id/questionnaires', async (req, res) => {
+  try {
+    const admin = await requireAdmin(req, res);
+    if (!admin) return;
+    const applicationId = Number(req.params.id || 0);
+    const rows = await new Promise((resolve, reject) => {
+      db.all(
+        `SELECT q.id, q.template_key, q.title, q.status, q.token, q.created_at,
+                (SELECT submitted_at FROM questionnaire_submissions s WHERE s.questionnaire_id = q.id ORDER BY id DESC LIMIT 1) AS submitted_at
+         FROM project_questionnaires q
+         WHERE q.application_id = ?
+         ORDER BY q.id DESC`,
+        [applicationId],
+        (err, out) => (err ? reject(err) : resolve(out || []))
+      );
+    });
+    const origin = process.env.PUBLIC_BASE_URL || '';
+    return res.json({ ok: true, questionnaires: rows.map((r) => ({ ...r, share_url: `${origin}/questionnaire.html?token=${r.token}` })) });
+  } catch {
+    return res.status(500).json({ ok: false, error: 'Could not load questionnaires' });
+  }
+});
+
+app.get('/api/questionnaire/:token', async (req, res) => {
+  try {
+    const token = String(req.params.token || '').trim();
+    const q = await dbGet('SELECT id, title, questions_json, status FROM project_questionnaires WHERE token = ?', [token]);
+    if (!q) return res.status(404).json({ ok: false, error: 'Questionnaire not found' });
+    return res.json({ ok: true, questionnaire: { id: q.id, title: q.title, questions: JSON.parse(q.questions_json || '[]'), status: q.status } });
+  } catch {
+    return res.status(500).json({ ok: false, error: 'Could not load questionnaire' });
+  }
+});
+
+app.post('/api/questionnaire/:token/submit', async (req, res) => {
+  try {
+    const token = String(req.params.token || '').trim();
+    const answers = Array.isArray(req.body?.answers) ? req.body.answers : [];
+    if (!answers.length) return res.status(400).json({ ok: false, error: 'Answers required' });
+
+    const q = await dbGet('SELECT id FROM project_questionnaires WHERE token = ?', [token]);
+    if (!q) return res.status(404).json({ ok: false, error: 'Questionnaire not found' });
+
+    await dbRun('INSERT INTO questionnaire_submissions (questionnaire_id, answers_json) VALUES (?, ?)', [q.id, JSON.stringify(answers)]);
+    await dbRun(`UPDATE project_questionnaires SET status = 'completed' WHERE id = ?`, [q.id]);
+
+    return res.json({ ok: true });
+  } catch {
+    return res.status(500).json({ ok: false, error: 'Could not submit questionnaire' });
   }
 });
 
