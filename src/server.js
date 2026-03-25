@@ -129,6 +129,17 @@ db.serialize(() => {
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
+  db.run(`CREATE TABLE IF NOT EXISTS verification_evidence (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    application_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    ein_letter_provided INTEGER DEFAULT 0,
+    formation_doc_provided INTEGER DEFAULT 0,
+    bank_proof_provided INTEGER DEFAULT 0,
+    evidence_notes TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
 });
 
 const stripeSecret = process.env.STRIPE_SECRET_KEY || process.env.STRIPE_API_KEY;
@@ -836,6 +847,14 @@ app.get('/api/member/me', async (req, res) => {
       [auth.userId]
     );
 
+    const evidence = await dbGet(
+      `SELECT ein_letter_provided, formation_doc_provided, bank_proof_provided, evidence_notes, updated_at
+       FROM verification_evidence
+       WHERE user_id = ?
+       ORDER BY id DESC LIMIT 1`,
+      [auth.userId]
+    );
+
     const underwriting = await dbGet(
       `SELECT decision, approved_limit, reason, reviewer, updated_at
        FROM underwriting_decisions
@@ -850,6 +869,7 @@ app.get('/api/member/me', async (req, res) => {
       membership: membership || null,
       addons,
       verification: verification || null,
+      evidence: evidence || null,
       underwriting: underwriting || null
     });
   } catch (error) {
@@ -929,19 +949,58 @@ app.post('/api/member/addons/checkout', async (req, res) => {
   }
 });
 
+app.post('/api/member/verification/evidence', async (req, res) => {
+  try {
+    const auth = await getAuthedUser(req);
+    if (!auth) return res.status(401).json({ ok: false, error: 'Not authenticated' });
+
+    const appRow = await dbGet(
+      `SELECT id FROM studio_applications WHERE email = ? ORDER BY id DESC LIMIT 1`,
+      [auth.email]
+    );
+    if (!appRow) return res.status(404).json({ ok: false, error: 'Application not found' });
+
+    const payload = req.body || {};
+    const einLetter = payload.einLetterProvided ? 1 : 0;
+    const formationDoc = payload.formationDocProvided ? 1 : 0;
+    const bankProof = payload.bankProofProvided ? 1 : 0;
+    const notes = String(payload.evidenceNotes || '').trim();
+
+    await dbRun(
+      `INSERT INTO verification_evidence (
+        application_id, user_id, ein_letter_provided, formation_doc_provided,
+        bank_proof_provided, evidence_notes, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+      [appRow.id, auth.userId, einLetter, formationDoc, bankProof, notes]
+    );
+
+    return res.json({ ok: true });
+  } catch (error) {
+    console.error('[verification] evidence save failed', error.message);
+    return res.status(500).json({ ok: false, error: 'Could not save evidence' });
+  }
+});
+
 app.post('/api/member/verification/run', async (req, res) => {
   try {
     const auth = await getAuthedUser(req);
     if (!auth) return res.status(401).json({ ok: false, error: 'Not authenticated' });
 
     const appRow = await dbGet(
-      `SELECT id, business_legal_name, ein, email
+      `SELECT id, business_legal_name, ein, email, package_interest
        FROM studio_applications
        WHERE email = ?
        ORDER BY id DESC LIMIT 1`,
       [auth.email]
     );
     if (!appRow) return res.status(404).json({ ok: false, error: 'Application not found' });
+
+    const evidence = await dbGet(
+      `SELECT * FROM verification_evidence
+       WHERE user_id = ?
+       ORDER BY id DESC LIMIT 1`,
+      [auth.userId]
+    );
 
     const einRaw = String(appRow.ein || '').trim();
     const einDigits = einRaw.replace(/\D/g, '');
@@ -953,15 +1012,24 @@ app.post('/api/member/verification/run', async (req, res) => {
     const emailDomainMatch = !!domainStem && businessNormalized.replace(/[^a-z0-9]/g, '').includes(domainStem.replace(/[^a-z0-9]/g, ''));
     const businessNamePresent = businessNormalized.length > 2;
 
-    let score = 0;
-    if (einValid) score += 60;
-    if (emailDomainMatch) score += 25;
-    if (businessNamePresent) score += 15;
+    const hasEinLetter = !!evidence?.ein_letter_provided;
+    const hasFormationDoc = !!evidence?.formation_doc_provided;
+    const hasBankProof = !!evidence?.bank_proof_provided;
 
-    const status = score >= 75 ? 'passed' : 'needs_review';
+    let score = 0;
+    if (einValid) score += 35;
+    if (emailDomainMatch) score += 15;
+    if (businessNamePresent) score += 10;
+    if (hasEinLetter) score += 15;
+    if (hasFormationDoc) score += 15;
+    if (hasBankProof) score += 10;
+
+    const status = score >= 75 ? 'passed' : score >= 55 ? 'needs_review' : 'failed';
     const notes = status === 'passed'
-      ? 'Rules check passed. Ready for underwriting decision.'
-      : 'Rules check incomplete. Manual review recommended.';
+      ? 'Verification checks passed with evidence.'
+      : status === 'needs_review'
+        ? 'Verification partial. Manual review required.'
+        : 'Verification failed. Missing required confidence signals.';
 
     await dbRun(
       `INSERT INTO verification_checks (application_id, user_id, provider, status, score, notes, ein_valid, email_domain_match, business_name_present, updated_at)
@@ -969,7 +1037,38 @@ app.post('/api/member/verification/run', async (req, res) => {
       [appRow.id, auth.userId, status, score, notes, einValid ? 1 : 0, emailDomainMatch ? 1 : 0, businessNamePresent ? 1 : 0]
     );
 
-    return res.json({ ok: true, status, score, notes });
+    let decision = 'pending';
+    let approvedLimit = 0;
+    let reason = 'Awaiting manual review';
+
+    if (status === 'passed') {
+      decision = 'approved';
+      approvedLimit = appRow.package_interest === 'Authority' ? 3000 : appRow.package_interest === 'Growth' ? 2000 : 1000;
+      reason = 'Auto-approved by rules + evidence score.';
+      await dbRun(
+        `UPDATE business_memberships
+         SET approved_limit = ?, credit_limit_status = 'approved_not_active'
+         WHERE user_id = ?`,
+        [approvedLimit, auth.userId]
+      );
+    } else if (status === 'failed') {
+      decision = 'declined';
+      reason = 'Auto-declined: verification score below threshold.';
+      await dbRun(
+        `UPDATE business_memberships
+         SET approved_limit = 0, active_limit = 0, credit_limit_status = 'declined'
+         WHERE user_id = ?`,
+        [auth.userId]
+      );
+    }
+
+    await dbRun(
+      `INSERT INTO underwriting_decisions (application_id, user_id, decision, approved_limit, reason, reviewer, updated_at)
+       VALUES (?, ?, ?, ?, ?, 'system', CURRENT_TIMESTAMP)`,
+      [appRow.id, auth.userId, decision, approvedLimit, reason]
+    );
+
+    return res.json({ ok: true, status, score, notes, decision, approvedLimit });
   } catch (error) {
     console.error('[verification] run failed', error.message);
     return res.status(500).json({ ok: false, error: 'Could not run verification' });

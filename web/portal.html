@@ -50,7 +50,18 @@
         <h2 class="text-xl font-bold mb-2">Verification & Underwriting</h2>
         <p id="verificationLine" class="text-zinc-300"></p>
         <p id="underwritingLine" class="text-zinc-300 mt-1"></p>
-        <button id="verifyBtn" class="btn-ghost mt-3">Run Verification Check</button>
+
+        <div class="mt-4 text-sm text-zinc-300 space-y-2">
+          <label class="block"><input id="einLetter" type="checkbox"/> EIN letter provided</label>
+          <label class="block"><input id="formationDoc" type="checkbox"/> Formation document provided</label>
+          <label class="block"><input id="bankProof" type="checkbox"/> Business bank proof provided</label>
+          <textarea id="evidenceNotes" class="field" placeholder="Evidence notes (optional)"></textarea>
+        </div>
+
+        <div class="mt-3 flex gap-2">
+          <button id="saveEvidenceBtn" class="btn-ghost">Save Evidence</button>
+          <button id="verifyBtn" class="btn-ghost">Run Verification Check</button>
+        </div>
       </div>
 
       <div class="card p-6">
@@ -89,8 +100,13 @@
 
       const v = data.verification || {};
       const u = data.underwriting || {};
+      const e = data.evidence || {};
       document.getElementById('verificationLine').textContent = `Verification: ${v.status || 'pending'} | Score: ${v.score || 0} | Provider: ${v.provider || 'n/a'}`;
       document.getElementById('underwritingLine').textContent = `Underwriting: ${u.decision || 'pending'} | Approved limit: $${u.approved_limit || 0}`;
+      document.getElementById('einLetter').checked = !!e.ein_letter_provided;
+      document.getElementById('formationDoc').checked = !!e.formation_doc_provided;
+      document.getElementById('bankProof').checked = !!e.bank_proof_provided;
+      document.getElementById('evidenceNotes').value = e.evidence_notes || '';
     }
 
     document.getElementById('loginBtn').addEventListener('click', async () => {
@@ -126,6 +142,28 @@
       window.location.href = json.url;
     });
 
+    document.getElementById('saveEvidenceBtn').addEventListener('click', async () => {
+      addonMsg.textContent = 'Saving evidence...';
+      const payload = {
+        einLetterProvided: document.getElementById('einLetter').checked,
+        formationDocProvided: document.getElementById('formationDoc').checked,
+        bankProofProvided: document.getElementById('bankProof').checked,
+        evidenceNotes: document.getElementById('evidenceNotes').value
+      };
+      const res = await fetch('/api/member/verification/evidence', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const json = await res.json();
+      if (!res.ok || !json.ok) {
+        addonMsg.textContent = json.error || 'Could not save evidence.';
+        return;
+      }
+      addonMsg.textContent = 'Evidence saved.';
+      refresh();
+    });
+
     document.getElementById('verifyBtn').addEventListener('click', async () => {
       addonMsg.textContent = 'Running verification...';
       const res = await fetch('/api/member/verification/run', { method: 'POST' });
@@ -134,7 +172,7 @@
         addonMsg.textContent = json.error || 'Verification failed.';
         return;
       }
-      addonMsg.textContent = `Verification complete: ${json.status} (score ${json.score}).`;
+      addonMsg.textContent = `Verification complete: ${json.status} (score ${json.score}), underwriting: ${json.decision}.`;
       refresh();
     });
 
