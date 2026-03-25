@@ -1658,6 +1658,45 @@ app.get('/api/admin/application/:id/questionnaires', async (req, res) => {
   }
 });
 
+app.get('/api/admin/questionnaire/:id/submissions', async (req, res) => {
+  try {
+    const admin = await requireAdmin(req, res);
+    if (!admin) return;
+    const questionnaireId = Number(req.params.id || 0);
+    if (!questionnaireId) return res.status(400).json({ ok: false, error: 'Questionnaire id required' });
+
+    const questionnaire = await dbGet('SELECT id, title, questions_json FROM project_questionnaires WHERE id = ?', [questionnaireId]);
+    if (!questionnaire) return res.status(404).json({ ok: false, error: 'Questionnaire not found' });
+
+    const submissions = await new Promise((resolve, reject) => {
+      db.all(
+        `SELECT id, answers_json, submitted_at
+         FROM questionnaire_submissions
+         WHERE questionnaire_id = ?
+         ORDER BY id DESC`,
+        [questionnaireId],
+        (err, rows) => (err ? reject(err) : resolve(rows || []))
+      );
+    });
+
+    return res.json({
+      ok: true,
+      questionnaire: {
+        id: questionnaire.id,
+        title: questionnaire.title,
+        questions: JSON.parse(questionnaire.questions_json || '[]')
+      },
+      submissions: submissions.map((s) => ({
+        id: s.id,
+        submitted_at: s.submitted_at,
+        answers: JSON.parse(s.answers_json || '[]')
+      }))
+    });
+  } catch {
+    return res.status(500).json({ ok: false, error: 'Could not load questionnaire submissions' });
+  }
+});
+
 app.get('/api/questionnaire/:token', async (req, res) => {
   try {
     const token = String(req.params.token || '').trim();
