@@ -12,9 +12,10 @@ app.set('trust proxy', true);
 const PORT = process.env.PORT || 3460;
 const WEB_DIR = path.join(__dirname, '..', 'web');
 const PRIVATE_DOWNLOADS = path.join(__dirname, '..', 'private-downloads');
-const DB_PATH = path.join(__dirname, '..', 'data', 'downloads.db');
+const DEFAULT_DB_PATH = path.join(__dirname, '..', 'data', 'downloads.db');
+const DB_PATH = process.env.VENTUS_DB_PATH || process.env.DATABASE_PATH || DEFAULT_DB_PATH;
 
-fs.mkdirSync(path.join(__dirname, '..', 'data'), { recursive: true });
+fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 fs.mkdirSync(PRIVATE_DOWNLOADS, { recursive: true });
 
 const db = new sqlite3.Database(DB_PATH);
@@ -217,6 +218,7 @@ db.serialize(() => {
   )`);
 });
 
+console.log(`[db] using path: ${DB_PATH}`);
 db.all("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name", (err, rows) => {
   if (err) {
     console.error('[db] migration check failed', err.message);
