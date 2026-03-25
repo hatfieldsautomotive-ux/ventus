@@ -22,13 +22,76 @@ function ensureDbPathWritable(targetPath) {
   fs.closeSync(fd);
 }
 
+function isRepoLocalDb(targetPath) {
+  const normalized = path.normalize(targetPath).toLowerCase();
+  return normalized.includes(`${path.sep}ventus${path.sep}data${path.sep}`) || normalized.endsWith(`${path.sep}data${path.sep}downloads.db`);
+}
+
 try {
   ensureDbPathWritable(REQUESTED_DB_PATH);
 } catch (err) {
   console.warn(`[db] requested path not writable (${REQUESTED_DB_PATH}): ${err.code || err.message}`);
+
+  const isProd = process.env.NODE_ENV === 'production';
+  const userProvidedPath = !!(process.env.VENTUS_DB_PATH || process.env.DATABASE_PATH);
+
+  if (isProd && userProvidedPath) {
+    console.error('[db] Refusing to fall back in production because a custom DB path was provided but is not writable.');
+    process.exit(1);
+  }
+
   DB_PATH = DEFAULT_DB_PATH;
   ensureDbPathWritable(DB_PATH);
 }
+
+if (process.env.NODE_ENV === 'production' && !process.env.VENTUS_DB_PATH && !process.env.DATABASE_PATH) {
+  console.warn('[db] WARNING: Using default local DB path in production. Configure VENTUS_DB_PATH to a persistent volume path to prevent signups/admin logins from being lost on updates.');
+}
+
+if (process.env.NODE_ENV === 'production' && isRepoLocalDb(DB_PATH)) {
+  console.warn(`[db] WARNING: DB path appears repo-local (${DB_PATH}). Use VENTUS_DB_PATH to point to persistent storage outside the deploy bundle.`);
+}
+
+function safeIsoStamp() {
+  return new Date().toISOString().replace(/[:.]/g, '-');
+}
+
+function backupDbOnBoot(dbPath) {
+  const backupsEnabled = String(process.env.VENTUS_DB_BACKUP_ON_BOOT || 'true').toLowerCase() !== 'false';
+  if (!backupsEnabled) return;
+
+  if (!fs.existsSync(dbPath)) return;
+
+  const stat = fs.statSync(dbPath);
+  if (!stat.size) return;
+
+  const backupDir = process.env.VENTUS_DB_BACKUP_DIR || path.join(path.dirname(dbPath), 'backups');
+  fs.mkdirSync(backupDir, { recursive: true });
+
+  const backupPath = path.join(backupDir, `downloads-${safeIsoStamp()}.db`);
+  fs.copyFileSync(dbPath, backupPath);
+  console.log(`[db] startup backup created: ${backupPath}`);
+
+  const keep = Math.max(1, Number(process.env.VENTUS_DB_BACKUP_KEEP || 10));
+  const backupFiles = fs.readdirSync(backupDir)
+    .filter((name) => /^downloads-.*\.db$/i.test(name))
+    .map((name) => ({
+      name,
+      fullPath: path.join(backupDir, name),
+      mtimeMs: fs.statSync(path.join(backupDir, name)).mtimeMs
+    }))
+    .sort((a, b) => b.mtimeMs - a.mtimeMs);
+
+  for (const oldFile of backupFiles.slice(keep)) {
+    try {
+      fs.unlinkSync(oldFile.fullPath);
+    } catch (err) {
+      console.warn(`[db] backup prune failed for ${oldFile.name}: ${err.message}`);
+    }
+  }
+}
+
+backupDbOnBoot(DB_PATH);
 
 fs.mkdirSync(PRIVATE_DOWNLOADS, { recursive: true });
 
@@ -683,6 +746,9 @@ app.post('/api/studio-application', async (req, res) => {
   if (!normalizedEmail.includes('@')) return res.status(400).json({ ok: false, error: 'Valid email required' });
   if (String(payload.password).length < 8) return res.status(400).json({ ok: false, error: 'Password must be at least 8 characters' });
 
+  const einDigits = String(payload.ein || '').replace(/\D/g, '');
+  if (einDigits.length !== 9) return res.status(400).json({ ok: false, error: 'Valid EIN is required (9 digits)' });
+
   try {
     const onboarding = await dbGet('SELECT * FROM onboarding_sessions WHERE token = ?', [String(payload.onboardingToken)]);
     if (!onboarding) return res.status(404).json({ ok: false, error: 'Invalid onboarding session' });
@@ -702,7 +768,7 @@ app.post('/api/studio-application', async (req, res) => {
       [
         String(payload.businessLegalName || '').trim(),
         String(payload.dba || '').trim(),
-        String(payload.ein || '').trim(),
+        `${einDigits.slice(0, 2)}-${einDigits.slice(2)}`,
         String(payload.entityType || '').trim(),
         String(payload.contactName || '').trim(),
         normalizedEmail,
