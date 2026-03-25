@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const sqlite3 = require('sqlite3').verbose();
 const Stripe = require('stripe');
 const nodemailer = require('nodemailer');
+const { createClient } = require('@supabase/supabase-js');
 const { promisify } = require('util');
 
 const app = express();
@@ -332,6 +333,13 @@ const stripeSecret = process.env.STRIPE_SECRET_KEY || process.env.STRIPE_API_KEY
 const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 const stripe = stripeSecret ? new Stripe(stripeSecret) : null;
 
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseEnabled = !!(supabaseUrl && supabaseAnonKey && supabaseServiceRoleKey);
+const supabaseAnon = supabaseEnabled ? createClient(supabaseUrl, supabaseAnonKey) : null;
+const supabaseAdmin = supabaseEnabled ? createClient(supabaseUrl, supabaseServiceRoleKey) : null;
+
 const beehiivApiKey = process.env.BEEHIIV_API_KEY;
 const beehiivPublicationId = process.env.BEEHIIV_PUBLICATION_ID || '73ab0160-a8c1-47bb-a157-599a0c458abe';
 
@@ -531,10 +539,49 @@ function dbRun(sql, params = []) {
   });
 }
 
+async function ensureSupabaseProfile(userId, email, role = 'member', active = true) {
+  if (!supabaseEnabled) return;
+  await supabaseAdmin
+    .from('profiles')
+    .upsert({ id: userId, email: (email || '').toLowerCase(), role, active }, { onConflict: 'id' });
+}
+
+async function ensureSupabaseUser(email, password) {
+  const normalizedEmail = String(email || '').trim().toLowerCase();
+
+  const createResp = await supabaseAdmin.auth.admin.createUser({
+    email: normalizedEmail,
+    password,
+    email_confirm: true
+  });
+
+  if (!createResp.error && createResp.data?.user) {
+    return { user: createResp.data.user, created: true };
+  }
+
+  const errMsg = String(createResp.error?.message || '').toLowerCase();
+  if (!errMsg.includes('already') && !errMsg.includes('exists') && !errMsg.includes('registered')) {
+    throw createResp.error || new Error('Could not create Supabase user');
+  }
+
+  const signInResp = await supabaseAnon.auth.signInWithPassword({ email: normalizedEmail, password });
+  if (signInResp.error || !signInResp.data?.user) {
+    throw new Error('Email already exists. Use the existing account password to continue.');
+  }
+
+  return { user: signInResp.data.user, created: false, session: signInResp.data.session };
+}
+
 async function getAuthedUser(req) {
   const cookies = parseCookies(req);
   const sessionToken = cookies.ventus_session;
   if (!sessionToken) return null;
+
+  if (supabaseEnabled) {
+    const { data, error } = await supabaseAdmin.auth.getUser(sessionToken);
+    if (error || !data?.user) return null;
+    return { userId: data.user.id, email: data.user.email || '' };
+  }
 
   const session = await dbGet(
     `SELECT ms.user_id, ms.expires_at, mu.email
@@ -552,6 +599,21 @@ async function getAuthedAdmin(req) {
   const cookies = parseCookies(req);
   const token = cookies.ventus_admin_session;
   if (!token) return null;
+
+  if (supabaseEnabled) {
+    const { data: authData, error: authError } = await supabaseAdmin.auth.getUser(token);
+    if (authError || !authData?.user) return null;
+
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('role,active,email')
+      .eq('id', authData.user.id)
+      .maybeSingle();
+
+    if (!profile?.active) return null;
+    if (!['admin', 'owner'].includes(profile.role)) return null;
+    return { adminUserId: authData.user.id, email: profile.email || authData.user.email || '', role: profile.role };
+  }
 
   const session = await dbGet(
     `SELECT s.admin_user_id, s.expires_at, a.email, a.role, a.active
@@ -782,6 +844,76 @@ app.post('/api/studio-application', async (req, res) => {
     const servicesNeeded = Array.isArray(payload.servicesNeeded)
       ? payload.servicesNeeded.map((s) => String(s).trim()).filter(Boolean)
       : [];
+
+    if (supabaseEnabled) {
+      const ensured = await ensureSupabaseUser(normalizedEmail, String(payload.password));
+      const user = ensured.user;
+      await ensureSupabaseProfile(user.id, normalizedEmail, 'member', true);
+
+      const { data: appRow, error: appErr } = await supabaseAdmin
+        .from('studio_applications')
+        .insert({
+          user_id: user.id,
+          business_legal_name: String(payload.businessLegalName || '').trim(),
+          dba: String(payload.dba || '').trim(),
+          ein: `${einDigits.slice(0, 2)}-${einDigits.slice(2)}`,
+          entity_type: String(payload.entityType || '').trim(),
+          contact_name: String(payload.contactName || '').trim(),
+          email: normalizedEmail,
+          phone: String(payload.phone || '').trim(),
+          package_interest: String(payload.packageInterest || '').trim(),
+          website_url: String(payload.websiteUrl || '').trim(),
+          monthly_revenue_band: String(payload.monthlyRevenueBand || '').trim(),
+          services_needed: servicesNeeded.join(','),
+          consent_terms: !!payload.consentTerms,
+          consent_reporting: !!payload.consentReporting,
+          raw_json: payload
+        })
+        .select('id')
+        .single();
+      if (appErr) throw appErr;
+
+      const applicationId = appRow.id;
+
+      await supabaseAdmin.from('business_memberships').insert({
+        user_id: user.id,
+        application_id: applicationId,
+        business_name: String(payload.businessLegalName || '').trim(),
+        plan: String(payload.packageInterest || 'Foundation').trim(),
+        membership_status: 'pending_payment',
+        credit_limit_status: 'verification_pending',
+        approved_limit: 0,
+        active_limit: 0
+      });
+
+      await supabaseAdmin.from('verification_checks').insert({
+        application_id: applicationId,
+        user_id: user.id,
+        provider: 'manual_rules_v1',
+        status: 'pending',
+        score: 0,
+        notes: 'Awaiting verification run'
+      });
+
+      await supabaseAdmin.from('underwriting_decisions').insert({
+        application_id: applicationId,
+        user_id: user.id,
+        decision: 'pending',
+        approved_limit: 0,
+        reason: 'Verification not completed',
+        reviewer: 'system'
+      });
+
+      await dbRun('UPDATE onboarding_sessions SET status = ?, application_id = ? WHERE token = ?', ['completed', applicationId, String(payload.onboardingToken)]);
+
+      const loginResp = await supabaseAnon.auth.signInWithPassword({ email: normalizedEmail, password: String(payload.password) });
+      if (loginResp.error || !loginResp.data?.session?.access_token) {
+        return res.status(500).json({ ok: false, error: 'Application saved but could not create login session. Please sign in from portal.' });
+      }
+
+      setSessionCookie(res, loginResp.data.session.access_token);
+      return res.json({ ok: true, id: applicationId, redirect: '/portal.html' });
+    }
 
     const insertApp = await dbRun(
       `INSERT INTO studio_applications (
@@ -1075,6 +1207,14 @@ app.post('/api/member/login', async (req, res) => {
   const password = String(req.body?.password || '');
   if (!email || !password) return res.status(400).json({ ok: false, error: 'Email and password required' });
   try {
+    if (supabaseEnabled) {
+      const { data, error } = await supabaseAnon.auth.signInWithPassword({ email, password });
+      if (error || !data?.session?.access_token) return res.status(401).json({ ok: false, error: 'Invalid credentials' });
+      await ensureSupabaseProfile(data.user.id, email, 'member', true);
+      setSessionCookie(res, data.session.access_token);
+      return res.json({ ok: true });
+    }
+
     const user = await dbGet('SELECT * FROM member_users WHERE email = ?', [email]);
     if (!user) return res.status(401).json({ ok: false, error: 'Invalid credentials' });
     const valid = await verifyPassword(password, user.password_salt, user.password_hash);
@@ -1092,9 +1232,11 @@ app.post('/api/member/login', async (req, res) => {
 
 app.post('/api/member/logout', async (req, res) => {
   try {
-    const cookies = parseCookies(req);
-    if (cookies.ventus_session) {
-      await dbRun('DELETE FROM member_sessions WHERE token = ?', [cookies.ventus_session]);
+    if (!supabaseEnabled) {
+      const cookies = parseCookies(req);
+      if (cookies.ventus_session) {
+        await dbRun('DELETE FROM member_sessions WHERE token = ?', [cookies.ventus_session]);
+      }
     }
     clearSessionCookie(res);
     return res.json({ ok: true });
@@ -1108,6 +1250,57 @@ app.get('/api/member/me', async (req, res) => {
   try {
     const auth = await getAuthedUser(req);
     if (!auth) return res.status(401).json({ ok: false, error: 'Not authenticated' });
+
+    if (supabaseEnabled) {
+      const { data: membership } = await supabaseAdmin
+        .from('business_memberships')
+        .select('*')
+        .eq('user_id', auth.userId)
+        .order('id', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const { data: addons } = await supabaseAdmin
+        .from('addon_purchases')
+        .select('addon_key,amount_cents,created_at')
+        .eq('user_id', auth.userId)
+        .order('id', { ascending: false })
+        .limit(20);
+
+      const { data: verification } = await supabaseAdmin
+        .from('verification_checks')
+        .select('status,score,notes,provider,updated_at')
+        .eq('user_id', auth.userId)
+        .order('id', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const { data: evidence } = await supabaseAdmin
+        .from('verification_evidence')
+        .select('ein_letter_provided,formation_doc_provided,bank_proof_provided,evidence_notes,updated_at')
+        .eq('user_id', auth.userId)
+        .order('id', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const { data: underwriting } = await supabaseAdmin
+        .from('underwriting_decisions')
+        .select('decision,approved_limit,reason,reviewer,updated_at')
+        .eq('user_id', auth.userId)
+        .order('id', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      return res.json({
+        ok: true,
+        user: { email: auth.email },
+        membership: membership || null,
+        addons: addons || [],
+        verification: verification || null,
+        evidence: evidence || null,
+        underwriting: underwriting || null
+      });
+    }
 
     const membership = await dbGet(
       `SELECT bm.*, sa.created_at AS application_created_at
@@ -1376,6 +1569,24 @@ app.post('/api/admin/login', async (req, res) => {
     const password = String(req.body?.password || '');
     if (!email || !password) return res.status(400).json({ ok: false, error: 'Email and password required' });
 
+    if (supabaseEnabled) {
+      const { data, error } = await supabaseAnon.auth.signInWithPassword({ email, password });
+      if (error || !data?.session?.access_token) return res.status(401).json({ ok: false, error: 'Invalid credentials' });
+
+      const { data: profile } = await supabaseAdmin
+        .from('profiles')
+        .select('role,active')
+        .eq('id', data.user.id)
+        .maybeSingle();
+
+      if (!profile?.active || !['admin', 'owner'].includes(profile?.role)) {
+        return res.status(403).json({ ok: false, error: 'Forbidden' });
+      }
+
+      setAdminSessionCookie(res, data.session.access_token);
+      return res.json({ ok: true });
+    }
+
     const adminUser = await dbGet('SELECT * FROM admin_users WHERE email = ?', [email]);
     if (!adminUser || !adminUser.active) return res.status(401).json({ ok: false, error: 'Invalid credentials' });
 
@@ -1394,9 +1605,11 @@ app.post('/api/admin/login', async (req, res) => {
 
 app.post('/api/admin/logout', async (req, res) => {
   try {
-    const cookies = parseCookies(req);
-    if (cookies.ventus_admin_session) {
-      await dbRun('DELETE FROM admin_sessions WHERE token = ?', [cookies.ventus_admin_session]);
+    if (!supabaseEnabled) {
+      const cookies = parseCookies(req);
+      if (cookies.ventus_admin_session) {
+        await dbRun('DELETE FROM admin_sessions WHERE token = ?', [cookies.ventus_admin_session]);
+      }
     }
     clearAdminSessionCookie(res);
     return res.json({ ok: true });
@@ -1418,6 +1631,29 @@ app.post('/api/admin/bootstrap', async (req, res) => {
     const password = String(req.body?.password || '');
     if (!email || !password || password.length < 8) {
       return res.status(400).json({ ok: false, error: 'Valid email and password (8+ chars) required' });
+    }
+
+    if (supabaseEnabled) {
+      const list = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 200 });
+      const existingByEmail = (list.data?.users || []).find((u) => (u.email || '').toLowerCase() === email);
+
+      if (existingByEmail) {
+        await supabaseAdmin.auth.admin.updateUserById(existingByEmail.id, { password, email_confirm: true });
+        await ensureSupabaseProfile(existingByEmail.id, email, 'owner', true);
+        return res.json({ ok: true, reset: true });
+      }
+
+      const anyOwner = await supabaseAdmin.from('profiles').select('id,email').in('role', ['owner', 'admin']).limit(1);
+      if (anyOwner.data && anyOwner.data.length) {
+        return res.status(409).json({ ok: false, error: `Admin exists (${anyOwner.data[0].email}). Use that email to reset.` });
+      }
+
+      const created = await supabaseAdmin.auth.admin.createUser({ email, password, email_confirm: true });
+      if (created.error || !created.data?.user) {
+        return res.status(500).json({ ok: false, error: created.error?.message || 'Could not bootstrap admin' });
+      }
+      await ensureSupabaseProfile(created.data.user.id, email, 'owner', true);
+      return res.json({ ok: true, created: true });
     }
 
     const pw = await hashPassword(password);
@@ -1447,6 +1683,69 @@ app.get('/api/admin/applications', async (req, res) => {
   try {
     const admin = await requireAdmin(req, res);
     if (!admin) return;
+
+    if (supabaseEnabled) {
+      const { data: apps, error } = await supabaseAdmin
+        .from('studio_applications')
+        .select('id,business_legal_name,email,package_interest,created_at,user_id')
+        .order('id', { ascending: false })
+        .limit(200);
+      if (error) throw error;
+
+      const appIds = (apps || []).map((a) => a.id);
+      const userIds = (apps || []).map((a) => a.user_id).filter(Boolean);
+
+      const { data: memberships } = await supabaseAdmin
+        .from('business_memberships')
+        .select('application_id,user_id,membership_status,credit_limit_status,approved_limit,active_limit')
+        .in('application_id', appIds.length ? appIds : [-1]);
+
+      const { data: verifications } = await supabaseAdmin
+        .from('verification_checks')
+        .select('application_id,status,score,id')
+        .in('application_id', appIds.length ? appIds : [-1])
+        .order('id', { ascending: false });
+
+      const { data: underwriting } = await supabaseAdmin
+        .from('underwriting_decisions')
+        .select('application_id,decision,approved_limit,id')
+        .in('application_id', appIds.length ? appIds : [-1])
+        .order('id', { ascending: false });
+
+      const membershipByApp = new Map((memberships || []).map((m) => [m.application_id, m]));
+      const verificationByApp = new Map();
+      for (const v of (verifications || [])) if (!verificationByApp.has(v.application_id)) verificationByApp.set(v.application_id, v);
+      const underwritingByApp = new Map();
+      for (const u of (underwriting || [])) if (!underwritingByApp.has(u.application_id)) underwritingByApp.set(u.application_id, u);
+
+      const rows = (apps || []).map((sa) => {
+        const bm = membershipByApp.get(sa.id) || {};
+        const vc = verificationByApp.get(sa.id) || {};
+        const ud = underwritingByApp.get(sa.id) || {};
+        return {
+          application_id: sa.id,
+          business_legal_name: sa.business_legal_name,
+          email: sa.email,
+          package_interest: sa.package_interest,
+          created_at: sa.created_at,
+          user_id: sa.user_id,
+          membership_status: bm.membership_status || null,
+          credit_limit_status: bm.credit_limit_status || null,
+          approved_limit: bm.approved_limit || 0,
+          active_limit: bm.active_limit || 0,
+          verification_status: vc.status || null,
+          verification_score: vc.score || 0,
+          underwriting_decision: ud.decision || null,
+          underwriting_limit: ud.approved_limit || 0,
+          workflow_status: 'new',
+          workflow_assignee: 'unassigned',
+          notes_count: 0,
+          tasks_count: 0
+        };
+      });
+
+      return res.json({ ok: true, applications: rows });
+    }
 
     const rows = await new Promise((resolve, reject) => {
       db.all(
