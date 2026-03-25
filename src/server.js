@@ -104,6 +104,31 @@ db.serialize(() => {
     status TEXT NOT NULL DEFAULT 'paid',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
+  db.run(`CREATE TABLE IF NOT EXISTS verification_checks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    application_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    provider TEXT NOT NULL DEFAULT 'manual_rules_v1',
+    status TEXT NOT NULL DEFAULT 'pending',
+    score INTEGER DEFAULT 0,
+    notes TEXT,
+    ein_valid INTEGER DEFAULT 0,
+    email_domain_match INTEGER DEFAULT 0,
+    business_name_present INTEGER DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS underwriting_decisions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    application_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    decision TEXT NOT NULL DEFAULT 'pending',
+    approved_limit INTEGER DEFAULT 0,
+    reason TEXT,
+    reviewer TEXT DEFAULT 'system',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
 });
 
 const stripeSecret = process.env.STRIPE_SECRET_KEY || process.env.STRIPE_API_KEY;
@@ -502,8 +527,20 @@ app.post('/api/studio-application', async (req, res) => {
 
     await dbRun(
       `INSERT INTO business_memberships (user_id, application_id, business_name, plan, membership_status, credit_limit_status, approved_limit, active_limit)
-       VALUES (?, ?, ?, ?, 'pending_payment', 'approved_not_active', ?, 0)`,
-      [user.id, applicationId, String(payload.businessLegalName || '').trim(), String(payload.packageInterest || 'Foundation').trim(), 1000]
+       VALUES (?, ?, ?, ?, 'pending_payment', 'verification_pending', 0, 0)`,
+      [user.id, applicationId, String(payload.businessLegalName || '').trim(), String(payload.packageInterest || 'Foundation').trim()]
+    );
+
+    await dbRun(
+      `INSERT INTO verification_checks (application_id, user_id, provider, status, score, notes)
+       VALUES (?, ?, 'manual_rules_v1', 'pending', 0, 'Awaiting verification run')`,
+      [applicationId, user.id]
+    );
+
+    await dbRun(
+      `INSERT INTO underwriting_decisions (application_id, user_id, decision, approved_limit, reason, reviewer)
+       VALUES (?, ?, 'pending', 0, 'Verification not completed', 'system')`,
+      [applicationId, user.id]
     );
 
     await dbRun('UPDATE onboarding_sessions SET status = ?, application_id = ? WHERE token = ?', ['completed', applicationId, String(payload.onboardingToken)]);
@@ -673,8 +710,14 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
           await dbRun(
             `UPDATE business_memberships
              SET membership_status = 'active',
-                 credit_limit_status = 'active',
-                 active_limit = approved_limit
+                 credit_limit_status = CASE
+                   WHEN credit_limit_status = 'approved_not_active' AND approved_limit > 0 THEN 'active'
+                   ELSE credit_limit_status
+                 END,
+                 active_limit = CASE
+                   WHEN credit_limit_status = 'approved_not_active' AND approved_limit > 0 THEN approved_limit
+                   ELSE active_limit
+                 END
              WHERE user_id = ?`,
             [userId]
           );
@@ -785,11 +828,29 @@ app.get('/api/member/me', async (req, res) => {
       });
     });
 
+    const verification = await dbGet(
+      `SELECT status, score, notes, provider, updated_at
+       FROM verification_checks
+       WHERE user_id = ?
+       ORDER BY id DESC LIMIT 1`,
+      [auth.userId]
+    );
+
+    const underwriting = await dbGet(
+      `SELECT decision, approved_limit, reason, reviewer, updated_at
+       FROM underwriting_decisions
+       WHERE user_id = ?
+       ORDER BY id DESC LIMIT 1`,
+      [auth.userId]
+    );
+
     return res.json({
       ok: true,
       user: { email: auth.email },
       membership: membership || null,
-      addons
+      addons,
+      verification: verification || null,
+      underwriting: underwriting || null
     });
   } catch (error) {
     return res.status(500).json({ ok: false, error: 'Could not load profile' });
@@ -865,6 +926,110 @@ app.post('/api/member/addons/checkout', async (req, res) => {
     return res.json({ ok: true, url: session.url });
   } catch (error) {
     return res.status(500).json({ ok: false, error: 'Could not create addon checkout' });
+  }
+});
+
+app.post('/api/member/verification/run', async (req, res) => {
+  try {
+    const auth = await getAuthedUser(req);
+    if (!auth) return res.status(401).json({ ok: false, error: 'Not authenticated' });
+
+    const appRow = await dbGet(
+      `SELECT id, business_legal_name, ein, email
+       FROM studio_applications
+       WHERE email = ?
+       ORDER BY id DESC LIMIT 1`,
+      [auth.email]
+    );
+    if (!appRow) return res.status(404).json({ ok: false, error: 'Application not found' });
+
+    const einRaw = String(appRow.ein || '').trim();
+    const einDigits = einRaw.replace(/\D/g, '');
+    const einValid = einDigits.length === 9;
+
+    const emailDomain = String(appRow.email || '').split('@')[1] || '';
+    const businessNormalized = String(appRow.business_legal_name || '').toLowerCase();
+    const domainStem = emailDomain.split('.')[0]?.toLowerCase() || '';
+    const emailDomainMatch = !!domainStem && businessNormalized.replace(/[^a-z0-9]/g, '').includes(domainStem.replace(/[^a-z0-9]/g, ''));
+    const businessNamePresent = businessNormalized.length > 2;
+
+    let score = 0;
+    if (einValid) score += 60;
+    if (emailDomainMatch) score += 25;
+    if (businessNamePresent) score += 15;
+
+    const status = score >= 75 ? 'passed' : 'needs_review';
+    const notes = status === 'passed'
+      ? 'Rules check passed. Ready for underwriting decision.'
+      : 'Rules check incomplete. Manual review recommended.';
+
+    await dbRun(
+      `INSERT INTO verification_checks (application_id, user_id, provider, status, score, notes, ein_valid, email_domain_match, business_name_present, updated_at)
+       VALUES (?, ?, 'manual_rules_v1', ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+      [appRow.id, auth.userId, status, score, notes, einValid ? 1 : 0, emailDomainMatch ? 1 : 0, businessNamePresent ? 1 : 0]
+    );
+
+    return res.json({ ok: true, status, score, notes });
+  } catch (error) {
+    console.error('[verification] run failed', error.message);
+    return res.status(500).json({ ok: false, error: 'Could not run verification' });
+  }
+});
+
+app.post('/api/admin/underwriting/decide', async (req, res) => {
+  try {
+    const adminKey = process.env.VENTUS_ADMIN_KEY || '';
+    const provided = req.get('x-admin-key') || '';
+    if (!adminKey || provided !== adminKey) {
+      return res.status(403).json({ ok: false, error: 'Forbidden' });
+    }
+
+    const userId = Number(req.body?.userId || 0);
+    const decision = String(req.body?.decision || '').trim();
+    const approvedLimit = Number(req.body?.approvedLimit || 0);
+    const reason = String(req.body?.reason || '').trim() || 'Manual underwriting decision';
+    const reviewer = String(req.body?.reviewer || 'admin').trim();
+
+    if (!userId || !['approved', 'declined', 'pending'].includes(decision)) {
+      return res.status(400).json({ ok: false, error: 'Invalid decision payload' });
+    }
+
+    const membership = await dbGet('SELECT * FROM business_memberships WHERE user_id = ? ORDER BY id DESC LIMIT 1', [userId]);
+    if (!membership) return res.status(404).json({ ok: false, error: 'Membership not found' });
+
+    const applicationId = membership.application_id || 0;
+
+    await dbRun(
+      `INSERT INTO underwriting_decisions (application_id, user_id, decision, approved_limit, reason, reviewer, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+      [applicationId, userId, decision, Math.max(0, approvedLimit), reason, reviewer]
+    );
+
+    if (decision === 'approved') {
+      await dbRun(
+        `UPDATE business_memberships
+         SET approved_limit = ?,
+             active_limit = 0,
+             credit_limit_status = 'approved_not_active',
+             membership_status = CASE WHEN membership_status = 'pending_payment' THEN membership_status ELSE 'pending_payment' END
+         WHERE id = ?`,
+        [Math.max(0, approvedLimit), membership.id]
+      );
+    } else if (decision === 'declined') {
+      await dbRun(
+        `UPDATE business_memberships
+         SET approved_limit = 0,
+             active_limit = 0,
+             credit_limit_status = 'declined'
+         WHERE id = ?`,
+        [membership.id]
+      );
+    }
+
+    return res.json({ ok: true });
+  } catch (error) {
+    console.error('[underwriting] decision failed', error.message);
+    return res.status(500).json({ ok: false, error: 'Could not save decision' });
   }
 });
 

@@ -47,6 +47,13 @@
       </div>
 
       <div class="card p-6">
+        <h2 class="text-xl font-bold mb-2">Verification & Underwriting</h2>
+        <p id="verificationLine" class="text-zinc-300"></p>
+        <p id="underwritingLine" class="text-zinc-300 mt-1"></p>
+        <button id="verifyBtn" class="btn-ghost mt-3">Run Verification Check</button>
+      </div>
+
+      <div class="card p-6">
         <h2 class="text-xl font-bold mb-2">Add-ons</h2>
         <p class="text-zinc-400 mb-3">Purchase add-ons from your member area.</p>
         <div class="grid md:grid-cols-3 gap-2 text-sm text-zinc-200">
@@ -79,6 +86,11 @@
       const m = data.membership || {};
       document.getElementById('membershipLine').textContent = `Plan: ${m.plan || 'N/A'} | Membership: ${m.membership_status || 'pending'}`;
       document.getElementById('creditLine').textContent = `Credit limit status: ${m.credit_limit_status || 'none'} | Approved: $${m.approved_limit || 0} | Active: $${m.active_limit || 0}`;
+
+      const v = data.verification || {};
+      const u = data.underwriting || {};
+      document.getElementById('verificationLine').textContent = `Verification: ${v.status || 'pending'} | Score: ${v.score || 0} | Provider: ${v.provider || 'n/a'}`;
+      document.getElementById('underwritingLine').textContent = `Underwriting: ${u.decision || 'pending'} | Approved limit: $${u.approved_limit || 0}`;
     }
 
     document.getElementById('loginBtn').addEventListener('click', async () => {
@@ -112,6 +124,18 @@
         return;
       }
       window.location.href = json.url;
+    });
+
+    document.getElementById('verifyBtn').addEventListener('click', async () => {
+      addonMsg.textContent = 'Running verification...';
+      const res = await fetch('/api/member/verification/run', { method: 'POST' });
+      const json = await res.json();
+      if (!res.ok || !json.ok) {
+        addonMsg.textContent = json.error || 'Verification failed.';
+        return;
+      }
+      addonMsg.textContent = `Verification complete: ${json.status} (score ${json.score}).`;
+      refresh();
     });
 
     document.querySelectorAll('.addon-btn').forEach((btn) => {
