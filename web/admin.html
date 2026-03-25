@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ventus Admin - Underwriting</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body{background:#060606;color:#f5f5f5}
+    .card{background:#111;border:1px solid #2a2a2a;border-radius:12px}
+    .field{background:#0a0a0a;border:1px solid #333;border-radius:8px;padding:8px 10px;color:#f5f5f5}
+    .btn{background:#f97316;color:#170d06;border-radius:999px;padding:8px 14px;font-weight:700}
+  </style>
+</head>
+<body>
+  <main class="max-w-6xl mx-auto p-6">
+    <h1 class="text-2xl font-bold mb-4">Ventus Admin - Underwriting Queue</h1>
+    <div class="card p-4 mb-4 flex gap-2 items-end">
+      <div>
+        <label class="text-xs text-zinc-400">Admin Key</label><br/>
+        <input id="adminKey" class="field w-80" type="password" placeholder="VENTUS_ADMIN_KEY"/>
+      </div>
+      <button id="loadBtn" class="btn">Load Applications</button>
+      <p id="msg" class="text-sm text-zinc-400"></p>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm" id="tbl">
+        <thead class="text-zinc-400">
+          <tr>
+            <th class="text-left p-2">Business</th><th class="text-left p-2">Email</th><th class="text-left p-2">Plan</th>
+            <th class="text-left p-2">Verification</th><th class="text-left p-2">Underwriting</th><th class="text-left p-2">Membership</th>
+            <th class="text-left p-2">Decision</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </main>
+
+<script>
+const msg = document.getElementById('msg');
+const rowsEl = document.getElementById('rows');
+
+async function load() {
+  const key = document.getElementById('adminKey').value.trim();
+  msg.textContent = 'Loading...';
+  const res = await fetch('/api/admin/applications', { headers: { 'x-admin-key': key } });
+  const json = await res.json();
+  if (!res.ok || !json.ok) { msg.textContent = json.error || 'Failed'; return; }
+  rowsEl.innerHTML = '';
+  json.applications.forEach((a) => {
+    const tr = document.createElement('tr');
+    tr.className = 'border-t border-zinc-800';
+    tr.innerHTML = `
+      <td class="p-2">${a.business_legal_name || ''}</td>
+      <td class="p-2">${a.email || ''}</td>
+      <td class="p-2">${a.package_interest || ''}</td>
+      <td class="p-2">${a.verification_status || 'pending'} (${a.verification_score || 0})</td>
+      <td class="p-2">${a.underwriting_decision || 'pending'} / $${a.underwriting_limit || 0}</td>
+      <td class="p-2">${a.membership_status || ''} / ${a.credit_limit_status || ''}</td>
+      <td class="p-2">
+        <select class="field decision"><option>approved</option><option>declined</option><option>pending</option></select>
+        <input class="field limit mt-1 w-24" type="number" placeholder="Limit" value="${a.approved_limit || 0}"/>
+        <button class="btn mt-1 save">Save</button>
+      </td>`;
+
+    tr.querySelector('.save').addEventListener('click', async () => {
+      const decision = tr.querySelector('.decision').value;
+      const approvedLimit = Number(tr.querySelector('.limit').value || 0);
+      const r = await fetch('/api/admin/underwriting/decide', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-admin-key': key },
+        body: JSON.stringify({ userId: a.user_id, decision, approvedLimit, reason: 'Admin UI decision', reviewer: 'admin-ui' })
+      });
+      const j = await r.json();
+      msg.textContent = r.ok && j.ok ? 'Saved.' : (j.error || 'Save failed');
+      if (r.ok && j.ok) load();
+    });
+
+    rowsEl.appendChild(tr);
+  });
+  msg.textContent = `Loaded ${json.applications.length} applications.`;
+}
+
+document.getElementById('loadBtn').addEventListener('click', load);
+</script>
+</body>
+</html>

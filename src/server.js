@@ -18,14 +18,20 @@ fs.mkdirSync(path.join(__dirname, '..', 'data'), { recursive: true });
 fs.mkdirSync(PRIVATE_DOWNLOADS, { recursive: true });
 
 const db = new sqlite3.Database(DB_PATH);
+const MIGRATION_TABLES = [];
+function runMigration(sql) {
+  MIGRATION_TABLES.push(sql);
+  db.run(sql);
+}
+
 db.serialize(() => {
-  db.run(`CREATE TABLE IF NOT EXISTS newsletter_signups (
+  runMigration(`CREATE TABLE IF NOT EXISTS newsletter_signups (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     email TEXT NOT NULL,
     source TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
-  db.run(`CREATE TABLE IF NOT EXISTS paid_tokens (
+  runMigration(`CREATE TABLE IF NOT EXISTS paid_tokens (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     email TEXT,
     product TEXT NOT NULL,
@@ -34,14 +40,14 @@ db.serialize(() => {
     used_at DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
-  db.run(`CREATE TABLE IF NOT EXISTS fulfilled_sessions (
+  runMigration(`CREATE TABLE IF NOT EXISTS fulfilled_sessions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     session_id TEXT NOT NULL UNIQUE,
     email TEXT,
     products TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
-  db.run(`CREATE TABLE IF NOT EXISTS studio_applications (
+  runMigration(`CREATE TABLE IF NOT EXISTS studio_applications (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     business_legal_name TEXT NOT NULL,
     dba TEXT,
@@ -59,7 +65,7 @@ db.serialize(() => {
     raw_json TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
-  db.run(`CREATE TABLE IF NOT EXISTS onboarding_sessions (
+  runMigration(`CREATE TABLE IF NOT EXISTS onboarding_sessions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     token TEXT NOT NULL UNIQUE,
     status TEXT NOT NULL DEFAULT 'started',
@@ -69,21 +75,21 @@ db.serialize(() => {
     expires_at DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
-  db.run(`CREATE TABLE IF NOT EXISTS member_users (
+  runMigration(`CREATE TABLE IF NOT EXISTS member_users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     email TEXT NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
     password_salt TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
-  db.run(`CREATE TABLE IF NOT EXISTS member_sessions (
+  runMigration(`CREATE TABLE IF NOT EXISTS member_sessions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
     token TEXT NOT NULL UNIQUE,
     expires_at DATETIME NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
-  db.run(`CREATE TABLE IF NOT EXISTS business_memberships (
+  runMigration(`CREATE TABLE IF NOT EXISTS business_memberships (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
     application_id INTEGER,
@@ -95,7 +101,7 @@ db.serialize(() => {
     active_limit INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
-  db.run(`CREATE TABLE IF NOT EXISTS addon_purchases (
+  runMigration(`CREATE TABLE IF NOT EXISTS addon_purchases (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
     addon_key TEXT NOT NULL,
@@ -104,7 +110,7 @@ db.serialize(() => {
     status TEXT NOT NULL DEFAULT 'paid',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
-  db.run(`CREATE TABLE IF NOT EXISTS verification_checks (
+  runMigration(`CREATE TABLE IF NOT EXISTS verification_checks (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     application_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
@@ -118,7 +124,7 @@ db.serialize(() => {
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
-  db.run(`CREATE TABLE IF NOT EXISTS underwriting_decisions (
+  runMigration(`CREATE TABLE IF NOT EXISTS underwriting_decisions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     application_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
@@ -129,7 +135,7 @@ db.serialize(() => {
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
-  db.run(`CREATE TABLE IF NOT EXISTS verification_evidence (
+  runMigration(`CREATE TABLE IF NOT EXISTS verification_evidence (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     application_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
@@ -140,6 +146,14 @@ db.serialize(() => {
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
+});
+
+db.all("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name", (err, rows) => {
+  if (err) {
+    console.error('[db] migration check failed', err.message);
+    return;
+  }
+  console.log(`[db] schema ready (${rows.length} tables): ${rows.map((r) => r.name).join(', ')}`);
 });
 
 const stripeSecret = process.env.STRIPE_SECRET_KEY || process.env.STRIPE_API_KEY;
@@ -1075,13 +1089,50 @@ app.post('/api/member/verification/run', async (req, res) => {
   }
 });
 
+function requireAdmin(req, res) {
+  const adminKey = process.env.VENTUS_ADMIN_KEY || '';
+  const provided = req.get('x-admin-key') || '';
+  if (!adminKey || provided !== adminKey) {
+    res.status(403).json({ ok: false, error: 'Forbidden' });
+    return false;
+  }
+  return true;
+}
+
+app.get('/api/admin/applications', async (req, res) => {
+  try {
+    if (!requireAdmin(req, res)) return;
+
+    const rows = await new Promise((resolve, reject) => {
+      db.all(
+        `SELECT sa.id AS application_id, sa.business_legal_name, sa.email, sa.package_interest, sa.created_at,
+                bm.user_id, bm.membership_status, bm.credit_limit_status, bm.approved_limit, bm.active_limit,
+                vc.status AS verification_status, vc.score AS verification_score,
+                ud.decision AS underwriting_decision, ud.approved_limit AS underwriting_limit
+         FROM studio_applications sa
+         LEFT JOIN business_memberships bm ON bm.application_id = sa.id
+         LEFT JOIN verification_checks vc ON vc.id = (
+            SELECT id FROM verification_checks v2 WHERE v2.application_id = sa.id ORDER BY id DESC LIMIT 1
+         )
+         LEFT JOIN underwriting_decisions ud ON ud.id = (
+            SELECT id FROM underwriting_decisions u2 WHERE u2.application_id = sa.id ORDER BY id DESC LIMIT 1
+         )
+         ORDER BY sa.id DESC
+         LIMIT 200`,
+        [],
+        (err, result) => (err ? reject(err) : resolve(result || []))
+      );
+    });
+
+    return res.json({ ok: true, applications: rows });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: 'Could not load applications' });
+  }
+});
+
 app.post('/api/admin/underwriting/decide', async (req, res) => {
   try {
-    const adminKey = process.env.VENTUS_ADMIN_KEY || '';
-    const provided = req.get('x-admin-key') || '';
-    if (!adminKey || provided !== adminKey) {
-      return res.status(403).json({ ok: false, error: 'Forbidden' });
-    }
+    if (!requireAdmin(req, res)) return;
 
     const userId = Number(req.body?.userId || 0);
     const decision = String(req.body?.decision || '').trim();
