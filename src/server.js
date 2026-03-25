@@ -16,12 +16,18 @@ const DEFAULT_DB_PATH = path.join(__dirname, '..', 'data', 'downloads.db');
 const REQUESTED_DB_PATH = process.env.VENTUS_DB_PATH || process.env.DATABASE_PATH || DEFAULT_DB_PATH;
 let DB_PATH = REQUESTED_DB_PATH;
 
+function ensureDbPathWritable(targetPath) {
+  fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+  const fd = fs.openSync(targetPath, 'a');
+  fs.closeSync(fd);
+}
+
 try {
-  fs.mkdirSync(path.dirname(REQUESTED_DB_PATH), { recursive: true });
+  ensureDbPathWritable(REQUESTED_DB_PATH);
 } catch (err) {
   console.warn(`[db] requested path not writable (${REQUESTED_DB_PATH}): ${err.code || err.message}`);
   DB_PATH = DEFAULT_DB_PATH;
-  fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
+  ensureDbPathWritable(DB_PATH);
 }
 
 fs.mkdirSync(PRIVATE_DOWNLOADS, { recursive: true });
