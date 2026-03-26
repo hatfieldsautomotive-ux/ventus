@@ -13,116 +13,130 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <style>
     :root{
-      --bg:#050505;
-      --surface:#0b0b0b;
-      --surface-2:#111111;
-      --line:#232323;
-      --text:#f5f5f5;
-      --muted:#9a9a9a;
-      --accent:#f97316;
-      --accent-2:#a855f7;
+      --bg:#f8fafc;
+      --surface:#ffffff;
+      --surface-soft:#f1f5f9;
+      --surface-tint:#eef2ff;
+      --line:#dbe3ef;
+      --text:#0f172a;
+      --muted:#475569;
+      --accent:#3b82f6;
+      --accent-2:#6366f1;
+      --accent-3:#14b8a6;
     }
     *{box-sizing:border-box}
     html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,sans-serif}
-    .container{max-width:1140px;margin:0 auto;padding:0 24px}
-    .card{background:linear-gradient(180deg,var(--surface),var(--surface-2));border:1px solid var(--line);border-radius:20px}
-    .accent{color:var(--accent)}
-    .btn{background:linear-gradient(120deg,var(--accent),#fb923c);color:#120b05;font-weight:800;border-radius:999px;padding:14px 26px;display:inline-block;text-decoration:none}
-    .btn:hover{filter:brightness(1.08)}
-    .btn-ghost{border:1px solid #3a3a3a;color:#ddd;border-radius:999px;padding:14px 26px;display:inline-block;text-decoration:none}
+    .container{max-width:1160px;margin:0 auto;padding:0 24px}
     .section{padding:86px 0}
-    .fade-up{opacity:0;transform:translateY(16px)}
-    .glow{box-shadow:0 0 0 1px rgba(249,115,22,.35) inset, 0 0 60px rgba(249,115,22,.12)}
-    .kpi{font-size:30px;font-weight:900;line-height:1}
-    input, select{background:#090909;border:1px solid #2b2b2b;color:#f5f5f5;border-radius:12px;padding:12px 14px;width:100%}
-    label{display:block;font-size:12px;color:#b8b8b8;margin-bottom:6px;letter-spacing:.08em;text-transform:uppercase}
-    .hero-wrap{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
-    .hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.42;pointer-events:none}
-    .hero-overlay{position:absolute;inset:0;background:radial-gradient(circle at center, rgba(10,10,10,.28), rgba(5,5,5,.82) 65%, rgba(5,5,5,.96));pointer-events:none}
-    .hero-content{position:relative;z-index:2}
+    .surface{background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:0 8px 30px rgba(15,23,42,.06)}
+    .card{background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:0 10px 24px rgba(15,23,42,.05)}
+    .tint{background:linear-gradient(180deg,#f8fbff,#eef2ff)}
+    .hero-bg{position:relative;overflow:hidden;background:linear-gradient(160deg,#ffffff 0%,#f5f8ff 42%,#eef2ff 100%)}
+    .hero-bg:before{content:"";position:absolute;inset:-120px -20% auto;height:460px;background:radial-gradient(circle at 50% 30%,rgba(99,102,241,.18),transparent 56%)}
+    .btn{background:linear-gradient(120deg,var(--accent),var(--accent-2));color:white;font-weight:800;border-radius:12px;padding:13px 22px;display:inline-block;text-decoration:none;box-shadow:0 8px 22px rgba(59,130,246,.28);transition:.2s ease}
+    .btn:hover{transform:translateY(-1px);box-shadow:0 12px 30px rgba(59,130,246,.35)}
+    .btn-ghost{border:1px solid #c8d5e8;color:#1e293b;background:#fff;border-radius:12px;padding:13px 22px;display:inline-block;text-decoration:none;transition:.2s ease}
+    .btn-ghost:hover{background:#f8fbff}
+    .badge{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#334155;background:#eef4ff;border:1px solid #d6e4ff;padding:5px 10px;border-radius:999px}
+    .fade-up{opacity:0;transform:translateY(14px)}
     .mobile-nav{display:none}
     .mobile-nav.open{display:block}
-    @media (max-width: 768px){
+    @media (max-width:768px){
       .section{padding:62px 0}
-      .hero-video{opacity:.28}
-      .hero-content h1{font-size:2.25rem;line-height:1.08}
-      .hero-content p{font-size:1rem}
-      .hero-content .btn,.hero-content .btn-ghost{width:100%;text-align:center}
       .container{padding:0 16px}
+      .hero-title{font-size:2.25rem;line-height:1.08}
+      .hero-cta .btn,.hero-cta .btn-ghost{width:100%;text-align:center}
     }
   </style>
 </head>
 <body>
-  <header class="sticky top-0 z-50 border-b" style="border-color:var(--line);background:rgba(5,5,5,.88);backdrop-filter:blur(8px)">
+  <header class="sticky top-0 z-50 border-b" style="border-color:var(--line);background:rgba(248,250,252,.9);backdrop-filter:blur(10px)">
     <div class="container py-4 flex items-center justify-between">
-      <a href="#" class="text-sm tracking-[0.35em] uppercase font-semibold">Ventus Studios</a>
-      <nav class="hidden md:flex items-center gap-6 text-sm" style="color:var(--muted)">
+      <a href="#" class="text-sm tracking-[0.35em] uppercase font-semibold text-slate-800">Ventus Studios</a>
+      <nav class="hidden md:flex items-center gap-6 text-sm text-slate-600">
         <a href="#how">How it Works</a>
         <a href="#pricing">Pricing</a>
         <a href="/blog.html">Blog</a>
         <a href="#proof">Design Proof</a>
         <a href="/start-application">Apply</a>
         <a href="/portal.html">Client Login</a>
-        <a href="https://calendar.app.google/q6B9BioBjLVTPXtcA" class="btn" style="padding:10px 18px" target="_blank" rel="noopener">Book a Strategy Call</a>
+        <a href="https://calendar.app.google/q6B9BioBjLVTPXtcA" class="btn" style="padding:10px 16px" target="_blank" rel="noopener">Book a Strategy Call</a>
       </nav>
       <button id="mobileMenuBtn" class="md:hidden btn-ghost" style="padding:8px 12px">Menu</button>
     </div>
     <div id="mobileNav" class="mobile-nav md:hidden border-t" style="border-color:var(--line)">
-      <div class="container py-3 flex flex-col gap-3 text-sm" style="color:var(--muted)">
+      <div class="container py-3 flex flex-col gap-3 text-sm text-slate-600">
         <a href="#how">How it Works</a>
         <a href="#pricing">Pricing</a>
         <a href="/blog.html">Blog</a>
         <a href="#proof">Design Proof</a>
         <a href="/start-application">Apply</a>
         <a href="/portal.html">Client Login</a>
+        <a href="https://calendar.app.google/q6B9BioBjLVTPXtcA" class="btn" target="_blank" rel="noopener">Book a Strategy Call</a>
       </div>
     </div>
   </header>
 
   <main>
-    <section class="section hero-wrap" style="padding-top:110px;padding-bottom:62px">
-      <video class="hero-video" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
-        <source src="assets/brand/ventus-hero.mp4" type="video/mp4"/>
-      </video>
-      <div class="hero-overlay"></div>
-      <div class="container text-center hero-content">
-        <p class="text-xs tracking-[0.28em] uppercase mb-5 fade-up" style="color:var(--accent)">For New, Growing, and Rebuilding Businesses</p>
-        <h1 class="text-5xl md:text-7xl font-black leading-[1.03] max-w-5xl mx-auto mb-5 fade-up">Build More Than a Website. Build <span class="accent">Revenue + Business Credit.</span></h1>
-        <p class="text-lg max-w-3xl mx-auto mb-9 fade-up" style="color:var(--muted)">We build conversion-ready websites and marketing systems so you can win more customers while strengthening your business credit profile through Net 30 strategy.</p>
-        <div class="flex flex-wrap justify-center gap-3 fade-up">
-          <a class="btn" href="https://calendar.app.google/q6B9BioBjLVTPXtcA" target="_blank" rel="noopener">Book a Strategy Call</a>
-          <a class="btn-ghost" href="#how">See How It Works</a>
-          <a class="btn-ghost" href="#pricing">View Packages</a>
+    <section class="section hero-bg" style="padding-top:108px">
+      <div class="container relative z-10 grid lg:grid-cols-12 gap-7 items-center">
+        <div class="lg:col-span-7">
+          <span class="badge fade-up">For New, Growing, and Rebuilding Businesses</span>
+          <h1 class="hero-title text-5xl md:text-6xl font-black leading-[1.04] mt-4 mb-5 fade-up">Build More Than a Website. Build <span style="background:linear-gradient(120deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent">Revenue + Business Credit.</span></h1>
+          <p class="text-lg max-w-2xl mb-8 text-slate-600 fade-up">We build conversion-ready websites and marketing systems so you can win more customers while strengthening your business credit profile through Net 30 strategy.</p>
+          <div class="hero-cta flex flex-wrap gap-3 fade-up">
+            <a class="btn" href="https://calendar.app.google/q6B9BioBjLVTPXtcA" target="_blank" rel="noopener">Book a Strategy Call</a>
+            <a class="btn-ghost" href="#how">See How It Works</a>
+            <a class="btn-ghost" href="#pricing">View Packages</a>
+          </div>
+        </div>
+        <div class="lg:col-span-5 fade-up">
+          <div class="surface p-4">
+            <div class="card p-4 mb-3">
+              <p class="text-xs uppercase tracking-[.12em] text-slate-500 mb-2">Website Preview</p>
+              <div class="h-24 rounded-xl" style="background:linear-gradient(120deg,#e0ebff,#e9e8ff)"></div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="card p-4">
+                <p class="text-xs text-slate-500">Payment Cycle</p>
+                <p class="text-2xl font-bold mt-1">Monthly</p>
+              </div>
+              <div class="card p-4">
+                <p class="text-xs text-slate-500">Growth Indicator</p>
+                <p class="text-2xl font-bold mt-1" style="color:var(--accent-3)">Upward</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="section" style="padding-top:10px;padding-bottom:20px">
+    <section class="section" style="padding-top:24px;padding-bottom:26px">
       <div class="container grid md:grid-cols-3 gap-4">
-        <div class="card p-6 fade-up"><p class="kpi">Conversion</p><p class="text-sm mt-2" style="color:var(--muted)">Website + messaging built to drive action</p></div>
-        <div class="card p-6 fade-up"><p class="kpi">Growth</p><p class="text-sm mt-2" style="color:var(--muted)">Ongoing marketing execution and optimization</p></div>
-        <div class="card p-6 fade-up"><p class="kpi">Net 30</p><p class="text-sm mt-2" style="color:var(--muted)">Structured credit-building guidance and discipline</p></div>
+        <div class="card p-6 fade-up"><p class="text-xs uppercase text-slate-500">Conversion</p><p class="text-3xl font-black mt-2">Built for action</p><p class="text-sm mt-2 text-slate-600">Website + messaging built to drive action</p></div>
+        <div class="card p-6 fade-up"><p class="text-xs uppercase text-slate-500">Growth</p><p class="text-3xl font-black mt-2">Execution loop</p><p class="text-sm mt-2 text-slate-600">Ongoing marketing execution and optimization</p></div>
+        <div class="card p-6 fade-up"><p class="text-xs uppercase text-slate-500">Net 30</p><p class="text-3xl font-black mt-2">Credit discipline</p><p class="text-sm mt-2 text-slate-600">Structured credit-building guidance and discipline</p></div>
       </div>
     </section>
 
-    <section id="how" class="section">
+    <section id="how" class="section tint">
       <div class="container">
-        <p class="text-sm mb-2" style="color:var(--accent)">How It Works</p>
+        <p class="text-sm mb-2 text-blue-600">How It Works</p>
         <h2 class="text-4xl font-extrabold mb-6">A simple system: convert better, market smarter, build stronger credit</h2>
         <div class="grid md:grid-cols-3 gap-4">
-          <div class="card p-6 fade-up"><h3 class="font-bold mb-2">1) Clarify Your Offer</h3><p style="color:var(--muted)">We define your audience, positioning, and conversion path before design starts.</p></div>
-          <div class="card p-6 fade-up"><h3 class="font-bold mb-2">2) Build + Launch</h3><p style="color:var(--muted)">You get a conversion-ready site and practical monthly marketing execution.</p></div>
-          <div class="card p-6 fade-up"><h3 class="font-bold mb-2">3) Strengthen Credit Discipline</h3><p style="color:var(--muted)">We help you execute Net 30 strategy consistently to improve business credit profile strength.</p></div>
+          <div class="card p-6 fade-up"><h3 class="font-bold mb-2">1) Clarify Your Offer</h3><p class="text-slate-600">We define your audience, positioning, and conversion path before design starts.</p></div>
+          <div class="card p-6 fade-up"><h3 class="font-bold mb-2">2) Build + Launch</h3><p class="text-slate-600">You get a conversion-ready site and practical monthly marketing execution.</p></div>
+          <div class="card p-6 fade-up"><h3 class="font-bold mb-2">3) Strengthen Credit Discipline</h3><p class="text-slate-600">We help you execute Net 30 strategy consistently to improve business credit profile strength.</p></div>
         </div>
       </div>
     </section>
 
-    <section class="section" style="padding-top:20px;padding-bottom:10px">
+    <section class="section" style="padding-top:36px;padding-bottom:22px">
       <div class="container">
-        <div class="card p-8 fade-up">
-          <p class="text-sm mb-2" style="color:var(--accent)">Who This Is For</p>
+        <div class="surface p-8 fade-up">
+          <p class="text-sm mb-2 text-indigo-600">Who This Is For</p>
           <h3 class="text-3xl font-extrabold mb-4">Built for businesses that need results and credibility</h3>
-          <div class="grid md:grid-cols-2 gap-3 text-sm" style="color:var(--muted)">
+          <div class="grid md:grid-cols-2 gap-3 text-sm text-slate-600">
             <p>- You are launching and need to look established fast</p>
             <p>- You are growing and need a site that actually converts</p>
             <p>- You are rebuilding and need cleaner messaging and momentum</p>
@@ -132,29 +146,29 @@
       </div>
     </section>
 
-    <section id="pricing" class="section" style="padding-top:30px">
+    <section id="pricing" class="section tint" style="padding-top:40px">
       <div class="container">
-        <p class="text-sm mb-2" style="color:var(--accent)">Core Offers</p>
+        <p class="text-sm mb-2 text-blue-600">Core Offers</p>
         <h2 class="text-4xl font-extrabold mb-6">Pick your growth tier</h2>
         <div class="grid md:grid-cols-3 gap-4">
-          <div class="card p-7 fade-up glow">
-            <p class="text-xs uppercase tracking-[.2em]" style="color:var(--accent)">Foundation</p>
+          <div class="card p-7 fade-up" style="border-color:#9fc0ff;box-shadow:0 10px 28px rgba(59,130,246,.15)">
+            <p class="text-xs uppercase tracking-[.2em] text-blue-600">Foundation</p>
             <h3 class="text-2xl font-black mt-2">$500 upfront + $500/mo</h3>
-            <ul class="mt-4 text-sm space-y-2" style="color:var(--muted)">
+            <ul class="mt-4 text-sm space-y-2 text-slate-600">
               <li>- Conversion-ready core website</li><li>- Offer messaging + CTA structure</li><li>- Monthly maintenance + updates</li><li>- Net 30 starter roadmap</li>
             </ul>
           </div>
           <div class="card p-7 fade-up">
-            <p class="text-xs uppercase tracking-[.2em]" style="color:var(--accent)">Growth</p>
+            <p class="text-xs uppercase tracking-[.2em] text-blue-600">Growth</p>
             <h3 class="text-2xl font-black mt-2">$1,000 upfront + $1,000/mo</h3>
-            <ul class="mt-4 text-sm space-y-2" style="color:var(--muted)">
+            <ul class="mt-4 text-sm space-y-2 text-slate-600">
               <li>- Everything in Foundation</li><li>- Social posting system</li><li>- Local SEO execution</li><li>- Net 30 implementation support + monthly strategy call</li>
             </ul>
           </div>
           <div class="card p-7 fade-up">
-            <p class="text-xs uppercase tracking-[.2em]" style="color:var(--accent)">Authority</p>
+            <p class="text-xs uppercase tracking-[.2em] text-blue-600">Authority</p>
             <h3 class="text-2xl font-black mt-2">$1,500 upfront + $1,500/mo</h3>
-            <ul class="mt-4 text-sm space-y-2" style="color:var(--muted)">
+            <ul class="mt-4 text-sm space-y-2 text-slate-600">
               <li>- Everything in Growth</li><li>- Full social management workflows</li><li>- Landing page + funnel optimization</li><li>- Priority support + advanced Net 30 advisory</li>
             </ul>
           </div>
@@ -162,11 +176,11 @@
       </div>
     </section>
 
-    <section class="section" style="padding-top:30px">
+    <section class="section" style="padding-top:36px">
       <div class="container">
-        <div class="card p-8 fade-up">
-          <p class="text-sm mb-2" style="color:var(--accent)">Popular Add-ons</p>
-          <div class="grid md:grid-cols-2 gap-3 text-sm" style="color:var(--muted)">
+        <div class="surface p-8 fade-up">
+          <p class="text-sm mb-2 text-indigo-600">Popular Add-ons</p>
+          <div class="grid md:grid-cols-2 gap-3 text-sm text-slate-600">
             <p>- Social Posting Pack — $300/mo</p><p>- Social Media Management — $600/mo</p>
             <p>- Local SEO Boost — $400/mo</p><p>- Landing Page Sprint — $500 each</p>
             <p>- Review/ Reputation Workflow Setup — $350 setup</p><p>- CRM + Lead Pipeline Setup — $750 setup</p>
@@ -175,48 +189,48 @@
       </div>
     </section>
 
-    <section class="section" style="padding-top:20px;padding-bottom:20px">
+    <section class="section" style="padding-top:30px;padding-bottom:24px">
       <div class="container">
         <div class="flex items-center justify-between mb-4">
           <div>
-            <p class="text-sm mb-1" style="color:var(--accent)">Education + SEO</p>
+            <p class="text-sm mb-1 text-blue-600">Education + SEO</p>
             <h3 class="text-3xl font-extrabold">New blog articles for business growth</h3>
           </div>
           <a class="btn-ghost" href="/blog.html">View All Articles</a>
         </div>
         <div class="grid md:grid-cols-3 gap-4">
-          <a class="card p-6 fade-up" href="/blog-business-credit-year-one.html"><p class="text-xs uppercase mb-2" style="color:var(--accent)">Business Credit</p><h4 class="font-bold">Business Credit for New Businesses: What Actually Matters in Year 1</h4></a>
-          <a class="card p-6 fade-up" href="/blog-net-30-guide.html"><p class="text-xs uppercase mb-2" style="color:var(--accent)">Net 30</p><h4 class="font-bold">Net 30 for Small Businesses: How to Use Terms Without Creating Cash-Flow Problems</h4></a>
-          <a class="card p-6 fade-up" href="/blog-conversion-must-haves.html"><p class="text-xs uppercase mb-2" style="color:var(--accent)">Website Conversion</p><h4 class="font-bold">Website Conversion Must-Haves for New Businesses (Before You Spend on Ads)</h4></a>
+          <a class="card p-6 fade-up" href="/blog-business-credit-year-one.html"><p class="text-xs uppercase mb-2 text-blue-600">Business Credit</p><h4 class="font-bold">Business Credit for New Businesses: What Actually Matters in Year 1</h4></a>
+          <a class="card p-6 fade-up" href="/blog-net-30-guide.html"><p class="text-xs uppercase mb-2 text-blue-600">Net 30</p><h4 class="font-bold">Net 30 for Small Businesses: How to Use Terms Without Creating Cash-Flow Problems</h4></a>
+          <a class="card p-6 fade-up" href="/blog-conversion-must-haves.html"><p class="text-xs uppercase mb-2 text-blue-600">Website Conversion</p><h4 class="font-bold">Website Conversion Must-Haves for New Businesses (Before You Spend on Ads)</h4></a>
         </div>
       </div>
     </section>
 
-    <section id="proof" class="section">
+    <section id="proof" class="section tint">
       <div class="container">
-        <p class="text-sm mb-2" style="color:var(--accent)">Design Proof</p>
+        <p class="text-sm mb-2 text-blue-600">Design Proof</p>
         <h3 class="text-4xl font-extrabold mb-3">Examples from our website work</h3>
-        <p style="color:var(--muted)" class="mb-7">Creative direction and execution samples from recent projects.</p>
+        <p class="text-slate-600 mb-7">Creative direction and execution samples from recent projects.</p>
         <div class="grid md:grid-cols-2 gap-4">
           <a href="https://ventusdetailshop.onrender.com" target="_blank" class="card overflow-hidden fade-up">
-            <div class="p-2 bg-black"><img src="assets/proof/ventusdetailshop.jpg" alt="Ventus Detail Shop" class="w-full h-44 object-contain"/></div>
-            <div class="p-4"><p class="font-semibold">Ventus Detail Shop</p><p class="text-sm" style="color:var(--muted)">Cinematic detailing site with premium vehicle-first visuals.</p></div>
+            <div class="p-2 bg-white"><img src="assets/proof/ventusdetailshop.jpg" alt="Ventus Detail Shop" class="w-full h-44 object-contain"/></div>
+            <div class="p-4"><p class="font-semibold">Ventus Detail Shop</p><p class="text-sm text-slate-600">Cinematic detailing site with premium vehicle-first visuals.</p></div>
           </a>
           <a href="https://grind-beans.onrender.com" target="_blank" class="card overflow-hidden fade-up">
-            <div class="p-2 bg-black"><img src="assets/proof/grindbeans.jpg" alt="Grind & Beans" class="w-full h-44 object-contain"/></div>
-            <div class="p-4"><p class="font-semibold">Grind & Beans</p><p class="text-sm" style="color:var(--muted)">Brand-forward launch site with conversion-oriented layout.</p></div>
+            <div class="p-2 bg-white"><img src="assets/proof/grindbeans.jpg" alt="Grind & Beans" class="w-full h-44 object-contain"/></div>
+            <div class="p-4"><p class="font-semibold">Grind & Beans</p><p class="text-sm text-slate-600">Brand-forward launch site with conversion-oriented layout.</p></div>
           </a>
         </div>
       </div>
     </section>
 
-    <section id="apply" class="section" style="padding-top:20px">
+    <section id="apply" class="section" style="padding-top:30px">
       <div class="container">
-        <div class="card p-10 fade-up glow">
-          <p class="text-sm mb-2" style="color:var(--accent)">Why Clients Choose This</p>
+        <div class="surface p-10 fade-up" style="border-color:#bfd2ff">
+          <p class="text-sm mb-2 text-indigo-600">Why Clients Choose This</p>
           <h3 class="text-4xl font-extrabold mb-2">One system to grow revenue and strengthen your business credit</h3>
-          <p class="mb-5" style="color:var(--muted)">Most businesses do not fail from lack of effort - they fail from inconsistent execution. Ventus gives you a clear structure for conversion-focused design, monthly marketing action, and disciplined Net 30 credit-building.</p>
-          <div class="grid md:grid-cols-3 gap-3 text-sm mb-7" style="color:var(--muted)">
+          <p class="mb-5 text-slate-600">Most businesses do not fail from lack of effort - they fail from inconsistent execution. Ventus gives you a clear structure for conversion-focused design, monthly marketing action, and disciplined Net 30 credit-building.</p>
+          <div class="grid md:grid-cols-3 gap-3 text-sm mb-7 text-slate-600">
             <p>- A stronger first impression that converts</p>
             <p>- Ongoing monthly execution, not one-and-done design</p>
             <p>- Practical steps toward better business credit health</p>
@@ -226,7 +240,7 @@
             <a class="btn" href="https://calendar.app.google/q6B9BioBjLVTPXtcA" target="_blank" rel="noopener">Book a Strategy Call</a>
             <a class="btn-ghost" href="#pricing">Compare Packages</a>
           </div>
-          <p class="text-xs mt-4" style="color:var(--muted)">Credit outcomes vary by business profile and execution; terms are governed by signed membership documents and account standing requirements.</p>
+          <p class="text-xs mt-4 text-slate-500">Credit outcomes vary by business profile and execution; terms are governed by signed membership documents and account standing requirements.</p>
         </div>
       </div>
     </section>
@@ -234,9 +248,9 @@
     <section class="section" style="padding-top:0">
       <div class="container">
         <div class="card p-8 fade-up">
-          <p class="text-sm mb-2" style="color:var(--accent)">Existing Clients</p>
+          <p class="text-sm mb-2 text-blue-600">Existing Clients</p>
           <h3 class="text-3xl font-extrabold mb-2">Already a Ventus Studios member?</h3>
-          <p class="mb-5" style="color:var(--muted)">Log in to view your membership status, verification progress, approved limit status, and add-ons.</p>
+          <p class="mb-5 text-slate-600">Log in to view your membership status, verification progress, approved limit status, and add-ons.</p>
           <a class="btn" href="/portal.html">Client Login</a>
         </div>
       </div>
@@ -244,15 +258,15 @@
   </main>
 
   <footer class="py-8 border-t" style="border-color:var(--line)">
-    <div class="container flex flex-col md:flex-row gap-4 justify-between text-sm" style="color:var(--muted)">
+    <div class="container flex flex-col md:flex-row gap-4 justify-between text-sm text-slate-600">
       <p>© 2026 Ventus Studios</p>
-      <div class="flex gap-6"><a href="#pricing">Pricing</a><a href="/blog.html">Blog</a><a href="#apply">Apply</a><a href="/portal.html">Client Login</a><a href="/privacy-policy.html">Privacy Policy</a><a href="/terms-of-service.html">Terms</a><a href="mailto:hello@ventusstudios.co">hello@ventusstudios.co</a></div>
+      <div class="flex gap-6 flex-wrap"><a href="#pricing">Pricing</a><a href="/blog.html">Blog</a><a href="#apply">Apply</a><a href="/portal.html">Client Login</a><a href="/privacy-policy.html">Privacy Policy</a><a href="/terms-of-service.html">Terms</a><a href="mailto:hello@ventusstudios.co">hello@ventusstudios.co</a></div>
     </div>
   </footer>
 
   <script>
     gsap.registerPlugin(ScrollTrigger);
-    gsap.utils.toArray('.fade-up').forEach(el=>gsap.fromTo(el,{opacity:0,y:16},{opacity:1,y:0,duration:.5,scrollTrigger:{trigger:el,start:'top 88%'}}));
+    gsap.utils.toArray('.fade-up').forEach(el=>gsap.fromTo(el,{opacity:0,y:14},{opacity:1,y:0,duration:.45,scrollTrigger:{trigger:el,start:'top 88%'}}));
 
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const mobileNav = document.getElementById('mobileNav');
