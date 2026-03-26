@@ -2413,6 +2413,167 @@ app.get('/api/admin/evidence-document/:id/download', async (req, res) => {
   }
 });
 
+app.get('/api/admin/application/:id/workspace', async (req, res) => {
+  try {
+    const admin = await requireAdmin(req, res);
+    if (!admin) return;
+
+    const applicationId = Number(req.params.id || 0);
+    if (!applicationId) return res.status(400).json({ ok: false, error: 'Invalid application id' });
+
+    const milestones = await new Promise((resolve, reject) => {
+      db.all(
+        `SELECT id, title, status, due_date, completed_at, created_at, updated_at
+         FROM project_milestones
+         WHERE application_id = ?
+         ORDER BY COALESCE(due_date, created_at) ASC, id ASC`,
+        [applicationId],
+        (err, rows) => (err ? reject(err) : resolve(rows || []))
+      );
+    });
+
+    const deliverables = await new Promise((resolve, reject) => {
+      db.all(
+        `SELECT id, title, description, file_url, status, due_date, requires_approval, approved_at, created_at, updated_at
+         FROM client_deliverables
+         WHERE application_id = ?
+         ORDER BY id DESC`,
+        [applicationId],
+        (err, rows) => (err ? reject(err) : resolve(rows || []))
+      );
+    });
+
+    const threads = await new Promise((resolve, reject) => {
+      db.all(
+        `SELECT st.id, st.subject, st.status, st.priority, st.created_at, st.updated_at,
+                (SELECT sm.message FROM support_messages sm WHERE sm.thread_id = st.id ORDER BY sm.id DESC LIMIT 1) AS last_message,
+                (SELECT sm.created_at FROM support_messages sm WHERE sm.thread_id = st.id ORDER BY sm.id DESC LIMIT 1) AS last_message_at
+         FROM support_threads st
+         WHERE st.application_id = ?
+         ORDER BY st.updated_at DESC, st.id DESC`,
+        [applicationId],
+        (err, rows) => (err ? reject(err) : resolve(rows || []))
+      );
+    });
+
+    return res.json({ ok: true, milestones, deliverables, threads });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: `Could not load workspace (${error?.message || 'unknown'})` });
+  }
+});
+
+app.post('/api/admin/application/milestone', async (req, res) => {
+  try {
+    const admin = await requireAdmin(req, res);
+    if (!admin) return;
+
+    const applicationId = Number(req.body?.applicationId || 0);
+    const title = String(req.body?.title || '').trim();
+    const dueDate = String(req.body?.dueDate || '').trim() || null;
+
+    if (!applicationId) return res.status(400).json({ ok: false, error: 'Invalid application id' });
+    if (!title) return res.status(400).json({ ok: false, error: 'Milestone title is required' });
+
+    await dbRun(
+      `INSERT INTO project_milestones (application_id, title, status, due_date, updated_at)
+       VALUES (?, ?, 'pending', ?, CURRENT_TIMESTAMP)`,
+      [applicationId, title, dueDate]
+    );
+
+    return res.json({ ok: true });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: `Could not create milestone (${error?.message || 'unknown'})` });
+  }
+});
+
+app.post('/api/admin/application/deliverable', async (req, res) => {
+  try {
+    const admin = await requireAdmin(req, res);
+    if (!admin) return;
+
+    const applicationId = Number(req.body?.applicationId || 0);
+    const title = String(req.body?.title || '').trim();
+    const description = String(req.body?.description || '').trim();
+    const fileUrl = String(req.body?.fileUrl || '').trim() || null;
+    const dueDate = String(req.body?.dueDate || '').trim() || null;
+    const requiresApproval = req.body?.requiresApproval === false ? 0 : 1;
+
+    if (!applicationId) return res.status(400).json({ ok: false, error: 'Invalid application id' });
+    if (!title) return res.status(400).json({ ok: false, error: 'Deliverable title is required' });
+
+    await dbRun(
+      `INSERT INTO client_deliverables (application_id, title, description, file_url, status, due_date, requires_approval, updated_at)
+       VALUES (?, ?, ?, ?, 'pending', ?, ?, CURRENT_TIMESTAMP)`,
+      [applicationId, title, description || null, fileUrl, dueDate, requiresApproval]
+    );
+
+    return res.json({ ok: true });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: `Could not create deliverable (${error?.message || 'unknown'})` });
+  }
+});
+
+app.get('/api/admin/support/thread/:id', async (req, res) => {
+  try {
+    const admin = await requireAdmin(req, res);
+    if (!admin) return;
+
+    const threadId = Number(req.params.id || 0);
+    if (!threadId) return res.status(400).json({ ok: false, error: 'Invalid thread id' });
+
+    const thread = await dbGet('SELECT * FROM support_threads WHERE id = ?', [threadId]);
+    if (!thread) return res.status(404).json({ ok: false, error: 'Support thread not found' });
+
+    const messages = await new Promise((resolve, reject) => {
+      db.all(
+        `SELECT id, author_type, message, created_at
+         FROM support_messages
+         WHERE thread_id = ?
+         ORDER BY id ASC`,
+        [threadId],
+        (err, rows) => (err ? reject(err) : resolve(rows || []))
+      );
+    });
+
+    return res.json({ ok: true, thread, messages });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: `Could not load support thread (${error?.message || 'unknown'})` });
+  }
+});
+
+app.post('/api/admin/support/thread/:id/message', async (req, res) => {
+  try {
+    const admin = await requireAdmin(req, res);
+    if (!admin) return;
+
+    const threadId = Number(req.params.id || 0);
+    const message = String(req.body?.message || '').trim();
+    const status = String(req.body?.status || '').trim().toLowerCase();
+
+    if (!threadId) return res.status(400).json({ ok: false, error: 'Invalid thread id' });
+    if (!message) return res.status(400).json({ ok: false, error: 'Message is required' });
+
+    const thread = await dbGet('SELECT id FROM support_threads WHERE id = ?', [threadId]);
+    if (!thread) return res.status(404).json({ ok: false, error: 'Support thread not found' });
+
+    await dbRun(
+      `INSERT INTO support_messages (thread_id, author_type, admin_user_id, message)
+       VALUES (?, 'admin', ?, ?)`,
+      [threadId, admin.adminUserId || null, message]
+    );
+
+    if (['open', 'pending', 'resolved', 'closed'].includes(status)) {
+      await dbRun('UPDATE support_threads SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [status, threadId]);
+    } else {
+      await dbRun('UPDATE support_threads SET updated_at = CURRENT_TIMESTAMP WHERE id = ?', [threadId]);
+    }
+
+    return res.json({ ok: true });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: `Could not reply to support thread (${error?.message || 'unknown'})` });
+  }
+});
+
 app.get('/api/admin/application/:id/notes', async (req, res) => {
   try {
     const admin = await requireAdmin(req, res);
