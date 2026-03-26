@@ -1,95 +1,139 @@
 <!DOCTYPE html>
-<html lang="en"><head>
-<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Ventus Admin</title><script src="https://cdn.tailwindcss.com"></script>
-<style>body{background:#060606;color:#f5f5f5}.card{background:#111;border:1px solid #2a2a2a;border-radius:12px}.field{background:#0a0a0a;border:1px solid #333;border-radius:8px;padding:8px 10px;color:#f5f5f5}.btn{background:#f97316;color:#170d06;border-radius:999px;padding:8px 14px;font-weight:700}.btn-ghost{border:1px solid #444;color:#ddd;border-radius:999px;padding:8px 14px}</style>
-</head><body>
-<main class="max-w-7xl mx-auto p-6">
-<h1 class="text-2xl font-bold mb-4">Ventus Admin Backend</h1>
-<section id="authCard" class="card p-4 mb-4">
-  <h2 class="font-semibold mb-3">Admin Login</h2>
-  <div class="grid md:grid-cols-2 gap-2"><input id="email" class="field" type="email" placeholder="Admin email"/><input id="password" class="field" type="password" placeholder="Password"/></div>
-  <div class="mt-3 flex gap-2"><button id="loginBtn" class="btn">Login</button><button id="bootstrapBtn" class="btn-ghost">Create / Reset Admin</button></div>
-  <p id="msg" class="text-sm text-zinc-400 mt-2"></p>
-</section>
-
-<section id="dash" class="hidden space-y-4">
-  <div class="card p-4 flex justify-between items-center"><p id="adminLine" class="text-sm text-zinc-300"></p><button id="logoutBtn" class="btn-ghost">Logout</button></div>
-
-  <div class="card p-4">
-    <h3 class="font-bold mb-3">Application Workflow Board</h3>
-    <div id="kanban" class="grid md:grid-cols-3 lg:grid-cols-6 gap-2"></div>
-  </div>
-
-  <div class="grid lg:grid-cols-3 gap-4">
-    <div class="lg:col-span-2 card p-4">
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm"><thead class="text-zinc-400"><tr><th class="p-2 text-left">Business</th><th class="p-2 text-left">Workflow</th><th class="p-2 text-left">Verification</th><th class="p-2 text-left">Underwriting</th><th class="p-2 text-left">Counts</th><th class="p-2 text-left">Actions</th></tr></thead><tbody id="rows"></tbody></table>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ventus Admin</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root{--bg:#060607;--panel:#111215;--panel2:#17181c;--line:#2b2d33;--muted:#a1a1aa;--text:#f5f5f5;--brand:#f97316}
+  body{background:radial-gradient(1200px 500px at 20% -20%,#27160a 0%,#060607 40%),var(--bg);color:var(--text)}
+  .shell{max-width:1400px;margin:0 auto;padding:20px}
+  .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:14px}
+  .field{background:#0d0e11;border:1px solid #343741;border-radius:10px;padding:10px 12px;color:#f5f5f5;width:100%}
+  .btn{background:var(--brand);color:#1c1107;border-radius:999px;padding:9px 14px;font-weight:800}
+  .btn-ghost{border:1px solid #4a4d57;color:#ddd;border-radius:999px;padding:9px 14px}
+  .btn-ghost:hover{background:rgba(255,255,255,.03)}
+  .pill{font-size:11px;border:1px solid #434752;border-radius:999px;padding:4px 9px;color:#d4d4d8}
+  .side-tab{display:block;width:100%;text-align:left;padding:10px 12px;border:1px solid #3d404a;border-radius:10px;background:#101116;color:#d4d4d8}
+  .side-tab.active{border-color:rgba(249,115,22,.6);background:rgba(249,115,22,.12);color:#fff}
+  .panel{display:none}
+  .panel.active{display:block}
+</style>
+</head>
+<body>
+<main class="shell">
+  <header class="card p-5 mb-4">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div>
+        <p class="text-xs uppercase tracking-wide text-zinc-500">Operations Console</p>
+        <h1 class="text-2xl font-black">Ventus Admin Workspace</h1>
+        <p class="text-sm text-zinc-400">Manage pipeline, client operations, deliverables, and support from one dashboard.</p>
       </div>
+      <div class="flex gap-2 text-xs">
+        <span class="pill" id="opsHealth">System ready</span>
+        <span class="pill" id="adminLine">Not logged in</span>
+      </div>
+    </div>
+  </header>
+
+  <section id="authCard" class="card p-5 mb-4">
+    <h2 class="font-semibold mb-3">Admin Login</h2>
+    <div class="grid md:grid-cols-2 gap-2"><input id="email" class="field" type="email" placeholder="Admin email"/><input id="password" class="field" type="password" placeholder="Password"/></div>
+    <div class="mt-3 flex gap-2"><button id="loginBtn" class="btn">Login</button><button id="bootstrapBtn" class="btn-ghost">Create / Reset Admin</button></div>
+    <p id="msg" class="text-sm text-zinc-400 mt-2"></p>
+  </section>
+
+  <section id="dash" class="hidden space-y-4">
+    <div class="grid md:grid-cols-4 gap-3">
+      <div class="card p-4"><p class="text-xs text-zinc-500 uppercase">Applications</p><p id="kpiApps" class="text-xl font-bold mt-1">0</p></div>
+      <div class="card p-4"><p class="text-xs text-zinc-500 uppercase">Needs Review</p><p id="kpiReview" class="text-xl font-bold mt-1">0</p></div>
+      <div class="card p-4"><p class="text-xs text-zinc-500 uppercase">Approved</p><p id="kpiApproved" class="text-xl font-bold mt-1">0</p></div>
+      <div class="card p-4 flex items-center justify-between"><div><p class="text-xs text-zinc-500 uppercase">Session</p><p class="text-sm mt-1">Admin active</p></div><button id="logoutBtn" class="btn-ghost">Logout</button></div>
     </div>
 
     <div class="card p-4">
-      <h3 class="font-bold mb-2">Application Workspace</h3>
-      <p id="selectedLine" class="text-sm text-zinc-400 mb-2">Select an application row.</p>
-      <div id="accountInfo" class="card p-2 mb-3 text-xs text-zinc-300">No account selected.</div>
-      <div class="space-y-2 mb-3">
-        <select id="workflowStatus" class="field"><option>new</option><option>verifying</option><option>needs-review</option><option>approved</option><option>declined</option><option>activated</option></select>
-        <input id="workflowAssignee" class="field" placeholder="Assignee"/>
-        <button id="saveWorkflowBtn" class="btn w-full">Save Workflow</button>
-      </div>
-
-      <div class="mb-3">
-        <h4 class="font-semibold mb-1">Add Internal Note</h4>
-        <textarea id="noteText" class="field w-full" placeholder="Note"></textarea>
-        <button id="addNoteBtn" class="btn w-full mt-2">Add Note</button>
-        <div id="notesList" class="mt-2 text-xs text-zinc-300 space-y-1 max-h-36 overflow-auto"></div>
-      </div>
-
-      <div class="mb-3">
-        <h4 class="font-semibold mb-1">Client Questionnaires</h4>
-        <div class="grid grid-cols-2 gap-1">
-          <select id="qTemplate" class="field"><option value="website_kickoff">Website Kickoff</option><option value="brand_identity">Brand Identity</option><option value="social_media">Social Media Growth</option></select>
-          <button id="sendQBtn" class="btn-ghost">Create + Copy Link</button>
-        </div>
-        <div id="qList" class="mt-2 text-xs text-zinc-300 space-y-1 max-h-28 overflow-auto"></div>
-        <div id="qResponses" class="mt-2 text-xs text-zinc-300 space-y-1 max-h-44 overflow-auto"></div>
-      </div>
-
-      <div class="mb-3">
-        <h4 class="font-semibold mb-1">Milestones</h4>
-        <div class="grid grid-cols-3 gap-1 mb-1"><input id="milestoneTitle" class="field col-span-2" placeholder="Milestone title"/><input id="milestoneDue" class="field" type="date"/></div>
-        <button id="addMilestoneBtn" class="btn-ghost w-full">Add Milestone</button>
-        <div id="milestonesList" class="mt-2 text-xs text-zinc-300 space-y-1 max-h-24 overflow-auto"></div>
-      </div>
-
-      <div class="mb-3">
-        <h4 class="font-semibold mb-1">Deliverables</h4>
-        <input id="deliverableTitle" class="field mb-1" placeholder="Deliverable title"/>
-        <textarea id="deliverableDesc" class="field mb-1" placeholder="Description (optional)"></textarea>
-        <div class="grid grid-cols-2 gap-1 mb-1"><input id="deliverableUrl" class="field" placeholder="File URL (optional)"/><input id="deliverableDue" class="field" type="date"/></div>
-        <label class="text-xs text-zinc-400"><input id="deliverableRequiresApproval" type="checkbox" checked/> Requires client approval</label>
-        <button id="addDeliverableBtn" class="btn-ghost w-full mt-1">Add Deliverable</button>
-        <div id="deliverablesAdminList" class="mt-2 text-xs text-zinc-300 space-y-1 max-h-28 overflow-auto"></div>
-      </div>
-
-      <div class="mb-3">
-        <h4 class="font-semibold mb-1">Support Threads</h4>
-        <div id="supportThreadsList" class="text-xs text-zinc-300 space-y-1 max-h-28 overflow-auto"></div>
-        <textarea id="supportReplyText" class="field mt-2" placeholder="Reply to selected support thread"></textarea>
-        <div class="grid grid-cols-2 gap-1 mt-1"><select id="supportReplyStatus" class="field"><option value="">Keep status</option><option>open</option><option>pending</option><option>resolved</option><option>closed</option></select><button id="sendSupportReplyBtn" class="btn-ghost">Send Reply</button></div>
-      </div>
-
-      <div>
-        <h4 class="font-semibold mb-1">Tasks</h4>
-        <div class="grid grid-cols-2 gap-1 mb-1"><button id="applyTemplateBtn" class="btn-ghost">Apply Package Template</button><span id="templateMsg" class="text-xs text-zinc-500 self-center"></span></div>
-        <input id="taskTitle" class="field mb-1" placeholder="Task title"/>
-        <div class="grid grid-cols-2 gap-1"><input id="taskAssignee" class="field" placeholder="Assignee"/><input id="taskDue" class="field" type="date"/></div>
-        <button id="addTaskBtn" class="btn w-full mt-2">Create Task</button>
-        <div id="tasksList" class="mt-2 text-xs text-zinc-300 space-y-2 max-h-56 overflow-auto"></div>
-      </div>
+      <div class="flex items-center justify-between mb-3"><h3 class="font-bold">Pipeline Workflow Board</h3><span class="text-xs text-zinc-500">Click any card to load workspace</span></div>
+      <div id="kanban" class="grid md:grid-cols-3 lg:grid-cols-6 gap-2"></div>
     </div>
-  </div>
-</section>
+
+    <div class="grid lg:grid-cols-12 gap-4">
+      <div class="lg:col-span-8 card p-4">
+        <div class="flex items-center justify-between mb-2"><h3 class="font-bold">Applications</h3><span class="text-xs text-zinc-500">Quick open + approve</span></div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm"><thead class="text-zinc-400"><tr><th class="p-2 text-left">Business</th><th class="p-2 text-left">Workflow</th><th class="p-2 text-left">Verification</th><th class="p-2 text-left">Underwriting</th><th class="p-2 text-left">Counts</th><th class="p-2 text-left">Actions</th></tr></thead><tbody id="rows"></tbody></table>
+        </div>
+      </div>
+
+      <aside class="lg:col-span-4 space-y-3">
+        <div class="card p-4">
+          <h3 class="font-bold mb-1">Application Workspace</h3>
+          <p id="selectedLine" class="text-sm text-zinc-400 mb-2">Select an application row.</p>
+          <div id="accountInfo" class="card p-2 mb-3 text-xs text-zinc-300">No account selected.</div>
+          <div class="space-y-2 mb-3">
+            <select id="workflowStatus" class="field"><option>new</option><option>verifying</option><option>needs-review</option><option>approved</option><option>declined</option><option>activated</option></select>
+            <input id="workflowAssignee" class="field" placeholder="Assignee"/>
+            <button id="saveWorkflowBtn" class="btn w-full">Save Workflow</button>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <button class="side-tab active" data-panel="notesPanel">Notes + Tasks</button>
+            <button class="side-tab" data-panel="deliveryPanel">Delivery Ops</button>
+            <button class="side-tab" data-panel="questionnairePanel">Questionnaires</button>
+            <button class="side-tab" data-panel="supportPanel">Support</button>
+          </div>
+        </div>
+
+        <div id="notesPanel" class="card p-4 panel active">
+          <h4 class="font-semibold mb-1">Add Internal Note</h4>
+          <textarea id="noteText" class="field" placeholder="Note"></textarea>
+          <button id="addNoteBtn" class="btn w-full mt-2">Add Note</button>
+          <div id="notesList" class="mt-2 text-xs text-zinc-300 space-y-1 max-h-36 overflow-auto"></div>
+
+          <hr class="border-zinc-800 my-3"/>
+          <h4 class="font-semibold mb-1">Tasks</h4>
+          <div class="grid grid-cols-2 gap-1 mb-1"><button id="applyTemplateBtn" class="btn-ghost">Apply Package Template</button><span id="templateMsg" class="text-xs text-zinc-500 self-center"></span></div>
+          <input id="taskTitle" class="field mb-1" placeholder="Task title"/>
+          <div class="grid grid-cols-2 gap-1"><input id="taskAssignee" class="field" placeholder="Assignee"/><input id="taskDue" class="field" type="date"/></div>
+          <button id="addTaskBtn" class="btn w-full mt-2">Create Task</button>
+          <div id="tasksList" class="mt-2 text-xs text-zinc-300 space-y-2 max-h-56 overflow-auto"></div>
+        </div>
+
+        <div id="deliveryPanel" class="card p-4 panel">
+          <h4 class="font-semibold mb-1">Milestones</h4>
+          <div class="grid grid-cols-3 gap-1 mb-1"><input id="milestoneTitle" class="field col-span-2" placeholder="Milestone title"/><input id="milestoneDue" class="field" type="date"/></div>
+          <button id="addMilestoneBtn" class="btn-ghost w-full">Add Milestone</button>
+          <div id="milestonesList" class="mt-2 text-xs text-zinc-300 space-y-1 max-h-24 overflow-auto"></div>
+
+          <hr class="border-zinc-800 my-3"/>
+          <h4 class="font-semibold mb-1">Deliverables</h4>
+          <input id="deliverableTitle" class="field mb-1" placeholder="Deliverable title"/>
+          <textarea id="deliverableDesc" class="field mb-1" placeholder="Description (optional)"></textarea>
+          <div class="grid grid-cols-2 gap-1 mb-1"><input id="deliverableUrl" class="field" placeholder="File URL (optional)"/><input id="deliverableDue" class="field" type="date"/></div>
+          <label class="text-xs text-zinc-400"><input id="deliverableRequiresApproval" type="checkbox" checked/> Requires client approval</label>
+          <button id="addDeliverableBtn" class="btn-ghost w-full mt-1">Add Deliverable</button>
+          <div id="deliverablesAdminList" class="mt-2 text-xs text-zinc-300 space-y-1 max-h-28 overflow-auto"></div>
+        </div>
+
+        <div id="questionnairePanel" class="card p-4 panel">
+          <h4 class="font-semibold mb-1">Client Questionnaires</h4>
+          <div class="grid grid-cols-2 gap-1">
+            <select id="qTemplate" class="field"><option value="website_kickoff">Website Kickoff</option><option value="brand_identity">Brand Identity</option><option value="social_media">Social Media Growth</option></select>
+            <button id="sendQBtn" class="btn-ghost">Create + Copy Link</button>
+          </div>
+          <div id="qList" class="mt-2 text-xs text-zinc-300 space-y-1 max-h-28 overflow-auto"></div>
+          <div id="qResponses" class="mt-2 text-xs text-zinc-300 space-y-1 max-h-44 overflow-auto"></div>
+        </div>
+
+        <div id="supportPanel" class="card p-4 panel">
+          <h4 class="font-semibold mb-1">Support Threads</h4>
+          <div id="supportThreadsList" class="text-xs text-zinc-300 space-y-1 max-h-28 overflow-auto"></div>
+          <textarea id="supportReplyText" class="field mt-2" placeholder="Reply to selected support thread"></textarea>
+          <div class="grid grid-cols-2 gap-1 mt-1"><select id="supportReplyStatus" class="field"><option value="">Keep status</option><option>open</option><option>pending</option><option>resolved</option><option>closed</option></select><button id="sendSupportReplyBtn" class="btn-ghost">Send Reply</button></div>
+        </div>
+      </aside>
+    </div>
+  </section>
 </main>
 
 <script>
@@ -99,9 +143,16 @@ const wfCols=['new','verifying','needs-review','approved','declined','activated'
 
 async function api(url,opts={}){const r=await fetch(url,opts);const j=await r.json().catch(()=>({ok:false,error:'Bad response'}));if(!r.ok||!j.ok) throw new Error(j.error||'Request failed');return j;}
 
+function setPanel(panelId){document.querySelectorAll('.side-tab').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));const b=document.querySelector(`.side-tab[data-panel='${panelId}']`);if(b)b.classList.add('active');const p=document.getElementById(panelId);if(p)p.classList.add('active');}
+document.querySelectorAll('.side-tab').forEach(b=>b.onclick=()=>setPanel(b.dataset.panel));
+
 function renderKanban(apps){const el=document.getElementById('kanban');el.innerHTML='';wfCols.forEach(col=>{const list=apps.filter(a=>(a.workflow_status||'new')===col);const card=document.createElement('div');card.className='card p-2';card.innerHTML=`<div class='text-xs uppercase text-zinc-400 mb-2'>${col} (${list.length})</div>`+list.slice(0,8).map(a=>`<button data-id='${a.application_id}' class='w-full text-left text-xs card p-2 mb-1 hover:border-orange-500'>${a.business_legal_name||'Business'}<div class='text-zinc-500'>${a.workflow_assignee||'unassigned'}</div></button>`).join('');el.appendChild(card);});el.querySelectorAll('button[data-id]').forEach(b=>b.onclick=()=>{const a=appCache.find(x=>String(x.application_id)===b.dataset.id);if(a) selectApplication(a);});}
 
-async function loadApplications(){const j=await api('/api/admin/applications');appCache=j.applications||[];rowsEl.innerHTML='';appCache.forEach(a=>{const tr=document.createElement('tr');tr.className='border-t border-zinc-800';tr.innerHTML=`<td class='p-2'>${a.business_legal_name||''}<div class='text-xs text-zinc-500'>${a.email||''}</div></td><td class='p-2'>${a.workflow_status||'new'}<div class='text-xs text-zinc-500'>${a.workflow_assignee||'unassigned'}</div></td><td class='p-2'>${a.verification_status||'pending'} (${a.verification_score||0})</td><td class='p-2'>${a.underwriting_decision||'pending'} / $${a.underwriting_limit||0}</td><td class='p-2'>N:${a.notes_count||0} T:${a.tasks_count||0}</td><td class='p-2'><div class='flex gap-1'><button class='btn-ghost open'>Open</button><button class='btn-ghost approve'>Approve</button></div></td>`;tr.querySelector('.open').onclick=()=>selectApplication(a);tr.querySelector('.approve').onclick=()=>quickApprove(a);rowsEl.appendChild(tr);});renderKanban(appCache);}
+async function loadApplications(){const j=await api('/api/admin/applications');appCache=j.applications||[];rowsEl.innerHTML='';appCache.forEach(a=>{const tr=document.createElement('tr');tr.className='border-t border-zinc-800';tr.innerHTML=`<td class='p-2'>${a.business_legal_name||''}<div class='text-xs text-zinc-500'>${a.email||''}</div></td><td class='p-2'>${a.workflow_status||'new'}<div class='text-xs text-zinc-500'>${a.workflow_assignee||'unassigned'}</div></td><td class='p-2'>${a.verification_status||'pending'} (${a.verification_score||0})</td><td class='p-2'>${a.underwriting_decision||'pending'} / $${a.underwriting_limit||0}</td><td class='p-2'>N:${a.notes_count||0} T:${a.tasks_count||0}</td><td class='p-2'><div class='flex gap-1'><button class='btn-ghost open'>Open</button><button class='btn-ghost approve'>Approve</button></div></td>`;tr.querySelector('.open').onclick=()=>selectApplication(a);tr.querySelector('.approve').onclick=()=>quickApprove(a);rowsEl.appendChild(tr);});renderKanban(appCache);
+  document.getElementById('kpiApps').textContent=String(appCache.length);
+  document.getElementById('kpiReview').textContent=String(appCache.filter(a=>(a.workflow_status||'new')==='needs-review').length);
+  document.getElementById('kpiApproved').textContent=String(appCache.filter(a=>(a.workflow_status||'new')==='approved').length);
+}
 
 async function loadAccountInfo(){if(!selectedAppId) return;const j=await api(`/api/admin/application/${selectedAppId}/detail`);const a=j.application||{},m=j.membership||{},v=j.verification||{},u=j.underwriting||{};const docs=(j.evidenceDocuments||[]);const docsHtml=docs.length?docs.map(d=>`<a class='underline text-orange-400' href='/api/admin/evidence-document/${d.id}/download' target='_blank' rel='noopener'>${d.original_name||`document-${d.id}`}</a>`).join(' · '):'none';document.getElementById('accountInfo').innerHTML=`<div><b>Contact:</b> ${a.contact_name||'-'} (${a.email||'-'})</div><div><b>EIN:</b> ${a.ein||'-'} | <b>Plan:</b> ${a.package_interest||'-'}</div><div><b>Membership:</b> ${m.membership_status||'-'} | <b>Credit:</b> ${m.credit_limit_status||'-'} | <b>Approved:</b> $${m.approved_limit||0}</div><div><b>Verification:</b> ${v.status||'-'} (${v.score||0}) | <b>Underwriting:</b> ${u.decision||'-'}</div><div><b>Uploaded Docs:</b> ${docsHtml}</div>`;}
 
@@ -126,7 +177,7 @@ document.getElementById('addMilestoneBtn').onclick=async()=>{try{if(!selectedApp
 document.getElementById('addDeliverableBtn').onclick=async()=>{try{if(!selectedAppId){msg.textContent='Select an application first.';return;}const title=document.getElementById('deliverableTitle').value.trim();if(!title){msg.textContent='Deliverable title is required.';return;}await api('/api/admin/application/deliverable',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({applicationId:selectedAppId,title,description:document.getElementById('deliverableDesc').value,fileUrl:document.getElementById('deliverableUrl').value,dueDate:document.getElementById('deliverableDue').value,requiresApproval:document.getElementById('deliverableRequiresApproval').checked})});document.getElementById('deliverableTitle').value='';document.getElementById('deliverableDesc').value='';document.getElementById('deliverableUrl').value='';document.getElementById('deliverableDue').value='';msg.textContent='Deliverable added.';loadWorkspaceAdmin();}catch(e){msg.textContent=e.message;}};
 document.getElementById('sendSupportReplyBtn').onclick=async()=>{try{if(!selectedSupportThreadId){msg.textContent='Select a support thread first.';return;}const text=document.getElementById('supportReplyText').value.trim();if(!text){msg.textContent='Reply cannot be empty.';return;}await api(`/api/admin/support/thread/${selectedSupportThreadId}/message`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,status:document.getElementById('supportReplyStatus').value})});document.getElementById('supportReplyText').value='';document.getElementById('supportReplyStatus').value='';msg.textContent='Support reply sent.';loadWorkspaceAdmin();}catch(e){msg.textContent=e.message;}};
 
-async function refreshAuth(){const r=await fetch('/api/admin/me');if(!r.ok){authCard.classList.remove('hidden');dash.classList.add('hidden');return;}const j=await r.json();authCard.classList.add('hidden');dash.classList.remove('hidden');adminLine.textContent=`Logged in as ${j.admin.email} (${j.admin.role})`;loadApplications();}
+async function refreshAuth(){const r=await fetch('/api/admin/me');if(!r.ok){authCard.classList.remove('hidden');dash.classList.add('hidden');adminLine.textContent='Not logged in';return;}const j=await r.json();authCard.classList.add('hidden');dash.classList.remove('hidden');adminLine.textContent=`${j.admin.email} (${j.admin.role})`;document.getElementById('opsHealth').textContent='Operational';await loadApplications();}
 
 document.getElementById('loginBtn').onclick=async()=>{try{await api('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('email').value.trim(),password:document.getElementById('password').value})});msg.textContent='';refreshAuth();}catch(e){msg.textContent=e.message;}};
 document.getElementById('bootstrapBtn').onclick=async()=>{try{const r=await api('/api/admin/bootstrap',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('email').value.trim(),password:document.getElementById('password').value})});msg.textContent=r.reset?'Admin password reset. You can now login.':'Admin created.';}catch(e){msg.textContent=e.message;}};
