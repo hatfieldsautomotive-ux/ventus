@@ -31,7 +31,7 @@
         <p id="stepLabel" class="text-xs mt-2" style="color:var(--muted)">Step 1 of 4</p>
       </div>
 
-      <form id="applyForm" class="space-y-4">
+      <form id="applyForm" class="space-y-4" novalidate>
         <section class="step active" data-step="1">
           <h2 class="font-bold mb-3">Business Information</h2>
           <input class="field" name="businessLegalName" placeholder="Business Legal Name" required/>
@@ -113,11 +113,33 @@
       submitBtn.style.display = last ? 'inline-block' : 'none';
     }
 
-    nextBtn.addEventListener('click', () => { if (current < steps.length - 1) { current++; render(); } });
+    function validateCurrentStep() {
+      const activeStep = steps[current];
+      const controls = [...activeStep.querySelectorAll('input, select, textarea')];
+      for (const el of controls) {
+        if (el.disabled) continue;
+        if (!el.checkValidity()) {
+          el.reportValidity();
+          return false;
+        }
+      }
+      return true;
+    }
+
+    nextBtn.addEventListener('click', () => {
+      if (!validateCurrentStep()) return;
+      if (current < steps.length - 1) { current++; render(); }
+    });
     prevBtn.addEventListener('click', () => { if (current > 0) { current--; render(); } });
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (!validateCurrentStep()) return;
+      if (current < steps.length - 1) {
+        current++;
+        render();
+        return;
+      }
       msg.textContent = 'Submitting application...';
 
       const data = new FormData(form);
