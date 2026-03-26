@@ -7,21 +7,48 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <style>
-    body{font-family:Inter,sans-serif;background:#050505;color:#f5f5f5}
-    .card{background:linear-gradient(180deg,#0b0b0b,#111);border:1px solid #242424;border-radius:16px}
-    .btn{background:#f97316;color:#1a0d03;font-weight:800;padding:10px 16px;border-radius:999px}
-    .btn-ghost{border:1px solid #3a3a3a;color:#ddd;padding:10px 16px;border-radius:999px}
-    .field{width:100%;background:#090909;border:1px solid #2b2b2b;border-radius:12px;padding:10px 12px;color:#f5f5f5}
+    :root{--bg:#060606;--panel:#0f0f10;--panel-2:#141416;--line:#2a2a2e;--muted:#a3a3ad;--text:#f5f5f7;--brand:#f97316;--ok:#22c55e;--warn:#f59e0b}
+    *{box-sizing:border-box}
+    body{font-family:Inter,sans-serif;background:radial-gradient(1200px 500px at 20% -20%,#1d1309 0%,#060606 40%),var(--bg);color:var(--text)}
+    .glass{background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));border:1px solid var(--line);border-radius:18px}
+    .card{background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid var(--line);border-radius:16px}
+    .btn{background:var(--brand);color:#1b1007;font-weight:800;padding:10px 16px;border-radius:999px}
+    .btn:hover{filter:brightness(1.05)}
+    .btn-ghost{border:1px solid #3a3a3f;color:#ddd;padding:10px 14px;border-radius:999px}
+    .btn-ghost:hover{border-color:#63636a;background:rgba(255,255,255,.03)}
+    .field{width:100%;background:#0a0a0c;border:1px solid #2d2d33;border-radius:12px;padding:10px 12px;color:#f5f5f7}
+    .label{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.02em;text-transform:uppercase}
+    .pill{font-size:11px;padding:4px 10px;border-radius:999px;border:1px solid #3a3a3f;color:#d4d4da;background:#111114}
+    .status-ok{border-color:rgba(34,197,94,.4);color:#86efac;background:rgba(34,197,94,.08)}
+    .status-warn{border-color:rgba(245,158,11,.4);color:#fcd34d;background:rgba(245,158,11,.08)}
+    .status-muted{border-color:#404048;color:#d4d4da}
+    .panel{display:none}
+    .panel.active{display:block}
+    .side-link{display:flex;justify-content:space-between;align-items:center;width:100%;padding:10px 12px;border:1px solid #35353d;border-radius:12px;color:#d4d4da;background:#0d0d10;text-align:left}
+    .side-link.active{border-color:rgba(249,115,22,.55);background:rgba(249,115,22,.09);color:#fff}
   </style>
 </head>
 <body>
-  <main class="max-w-4xl mx-auto p-6">
-    <h1 class="text-3xl font-black mb-4">Ventus Member Portal</h1>
+  <main class="max-w-7xl mx-auto p-4 md:p-6">
+    <section class="glass p-5 md:p-6 mb-5">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+          <p class="label">Client Area</p>
+          <h1 class="text-2xl md:text-3xl font-black">Ventus Client Workspace</h1>
+          <p class="text-sm text-zinc-400 mt-1">Track progress, approve deliverables, and get support in one place.</p>
+        </div>
+        <div class="flex gap-2 text-xs">
+          <span id="portalStatusBadge" class="pill status-muted">Not signed in</span>
+          <span class="pill">Secure Member Access</span>
+        </div>
+      </div>
+    </section>
 
     <section id="authCard" class="card p-6 mb-6">
-      <h2 class="text-xl font-bold mb-3">Login</h2>
+      <h2 class="text-xl font-bold mb-1">Member Login</h2>
+      <p class="text-sm text-zinc-400 mb-4">Use your application email and password.</p>
       <div class="grid md:grid-cols-2 gap-3">
         <input id="email" class="field" type="email" placeholder="Email"/>
         <input id="password" class="field" type="password" placeholder="Password"/>
@@ -32,81 +59,118 @@
       <p id="authMsg" class="text-sm mt-2 text-zinc-400"></p>
     </section>
 
-    <section id="dashboard" class="hidden space-y-4">
-      <div class="card p-6">
-        <h2 class="text-xl font-bold mb-2">Account</h2>
-        <p id="userEmail" class="text-zinc-300"></p>
-        <button id="logoutBtn" class="btn-ghost mt-3">Logout</button>
-      </div>
-
-      <div class="card p-6">
-        <h2 class="text-xl font-bold mb-2">Membership Status</h2>
-        <p id="membershipLine" class="text-zinc-300"></p>
-        <p id="creditLine" class="text-zinc-300 mt-1"></p>
-        <button id="activateBtn" class="btn mt-3">Activate Membership ($500)</button>
-      </div>
-
-      <div class="card p-6">
-        <h2 class="text-xl font-bold mb-2">Verification & Underwriting</h2>
-        <p id="verificationLine" class="text-zinc-300"></p>
-        <p id="underwritingLine" class="text-zinc-300 mt-1"></p>
-
-        <p class="text-sm text-zinc-400 mt-3">To help us verify your business faster, you can share a few optional support items below.</p>
-        <div class="mt-4 text-sm text-zinc-300 space-y-2">
-          <label class="block"><input id="einLetter" type="checkbox"/> EIN confirmation letter available</label>
-          <label class="block"><input id="formationDoc" type="checkbox"/> Formation document available</label>
-          <label class="block"><input id="bankProof" type="checkbox"/> Business bank proof available</label>
-          <textarea id="evidenceNotes" class="field" placeholder="Anything you'd like our review team to know (optional)"></textarea>
-          <div>
-            <label class="block mb-1">Upload supporting document (optional)</label>
-            <input id="evidenceDocument" type="file" class="field" accept=".pdf,.png,.jpg,.jpeg,.webp,.doc,.docx" />
-            <p class="text-xs text-zinc-500 mt-1">Accepted: PDF, image, or Word doc (max 10MB).</p>
+    <section id="dashboard" class="hidden">
+      <div class="grid lg:grid-cols-12 gap-4">
+        <aside class="lg:col-span-3 space-y-4">
+          <div class="card p-4">
+            <p class="label mb-2">Account</p>
+            <p id="userEmail" class="text-sm text-zinc-300 break-all"></p>
+            <button id="logoutBtn" class="btn-ghost mt-3 w-full">Logout</button>
           </div>
-          <div id="evidenceDocsList" class="text-xs text-zinc-400"></div>
-        </div>
 
-        <div class="mt-3 flex gap-2">
-          <button id="saveEvidenceBtn" class="btn-ghost">Upload Documents</button>
-          <button id="verifyBtn" class="btn-ghost">Run Verification Check</button>
-        </div>
-      </div>
+          <div class="card p-4 space-y-2">
+            <button class="side-link active" data-target="overviewPanel">Overview <span class="text-xs text-zinc-500">Home</span></button>
+            <button class="side-link" data-target="verificationPanel">Verification <span class="text-xs text-zinc-500">Compliance</span></button>
+            <button class="side-link" data-target="deliverablesPanel">Deliverables <span class="text-xs text-zinc-500">Approvals</span></button>
+            <button class="side-link" data-target="supportPanel">Support <span class="text-xs text-zinc-500">Help</span></button>
+            <button class="side-link" data-target="billingPanel">Billing & Add-ons <span class="text-xs text-zinc-500">Payments</span></button>
+          </div>
+        </aside>
 
-      <div class="card p-6">
-        <h2 class="text-xl font-bold mb-2">Project Workspace</h2>
-        <p id="projectSummary" class="text-zinc-300 text-sm">Loading workspace...</p>
-        <div id="nextActions" class="mt-3 space-y-2"></div>
-      </div>
+        <section class="lg:col-span-9 space-y-4">
+          <div class="grid md:grid-cols-4 gap-3">
+            <div class="card p-4"><p class="label">Project Status</p><p id="summaryStatus" class="mt-2 font-semibold">-</p></div>
+            <div class="card p-4"><p class="label">Open Actions</p><p id="summaryActions" class="mt-2 font-semibold">0</p></div>
+            <div class="card p-4"><p class="label">Pending Approvals</p><p id="summaryApprovals" class="mt-2 font-semibold">0</p></div>
+            <div class="card p-4"><p class="label">Support Threads</p><p id="summaryThreads" class="mt-2 font-semibold">0</p></div>
+          </div>
 
-      <div class="card p-6">
-        <h2 class="text-xl font-bold mb-2">Timeline & Milestones</h2>
-        <div id="milestoneList" class="space-y-2 text-sm text-zinc-300"></div>
-      </div>
+          <div id="overviewPanel" class="panel active space-y-4">
+            <div class="card p-5">
+              <h2 class="text-xl font-bold mb-2">Project Workspace</h2>
+              <p id="projectSummary" class="text-zinc-300 text-sm">Loading workspace...</p>
+              <div id="nextActions" class="mt-4 space-y-2"></div>
+            </div>
+            <div class="card p-5">
+              <h3 class="text-lg font-bold mb-2">Timeline & Milestones</h3>
+              <div id="milestoneList" class="space-y-2 text-sm text-zinc-300"></div>
+            </div>
+          </div>
 
-      <div class="card p-6">
-        <h2 class="text-xl font-bold mb-2">Deliverables</h2>
-        <div id="deliverablesList" class="space-y-2 text-sm text-zinc-300"></div>
-      </div>
+          <div id="verificationPanel" class="panel">
+            <div class="card p-5 space-y-4">
+              <div>
+                <h2 class="text-xl font-bold mb-1">Verification & Underwriting</h2>
+                <p id="verificationLine" class="text-zinc-300 text-sm"></p>
+                <p id="underwritingLine" class="text-zinc-300 text-sm mt-1"></p>
+              </div>
 
-      <div class="card p-6">
-        <h2 class="text-xl font-bold mb-2">Support Inbox</h2>
-        <div class="grid md:grid-cols-3 gap-2 mb-3">
-          <input id="supportSubject" class="field" placeholder="Subject"/>
-          <select id="supportPriority" class="field"><option value="normal">Normal</option><option value="high">High</option><option value="low">Low</option></select>
-          <button id="newThreadBtn" class="btn-ghost">Open Support Thread</button>
-        </div>
-        <textarea id="supportMessage" class="field mb-2" placeholder="Describe the issue or request"></textarea>
-        <div id="supportThreads" class="space-y-2 text-sm text-zinc-300"></div>
-      </div>
+              <div class="grid md:grid-cols-2 gap-4">
+                <div class="space-y-2 text-sm text-zinc-300">
+                  <label class="block"><input id="einLetter" type="checkbox"/> EIN confirmation letter available</label>
+                  <label class="block"><input id="formationDoc" type="checkbox"/> Formation document available</label>
+                  <label class="block"><input id="bankProof" type="checkbox"/> Business bank proof available</label>
+                  <textarea id="evidenceNotes" class="field" placeholder="Anything you'd like our review team to know (optional)"></textarea>
+                </div>
+                <div>
+                  <label class="label">Upload supporting document</label>
+                  <input id="evidenceDocument" type="file" class="field mt-2" accept=".pdf,.png,.jpg,.jpeg,.webp,.doc,.docx" />
+                  <p class="text-xs text-zinc-500 mt-2">Accepted: PDF, image, Word docs (max 10MB).</p>
+                  <div id="evidenceDocsList" class="text-xs text-zinc-400 mt-2"></div>
+                </div>
+              </div>
 
-      <div class="card p-6">
-        <h2 class="text-xl font-bold mb-2">Add-ons</h2>
-        <p class="text-zinc-400 mb-3">Purchase add-ons from your member area.</p>
-        <div class="grid md:grid-cols-3 gap-2 text-sm text-zinc-200">
-          <button class="card p-3 text-left addon-btn" data-addon="social-posting-pack">Social Posting Pack<br/><span class="text-zinc-400">$300</span></button>
-          <button class="card p-3 text-left addon-btn" data-addon="local-seo-boost">Local SEO Boost<br/><span class="text-zinc-400">$400</span></button>
-          <button class="card p-3 text-left addon-btn" data-addon="landing-page-sprint">Landing Page Sprint<br/><span class="text-zinc-400">$500</span></button>
-        </div>
-        <p id="addonMsg" class="text-sm mt-3 text-zinc-400"></p>
+              <div class="flex gap-2 flex-wrap">
+                <button id="saveEvidenceBtn" class="btn-ghost">Upload Documents</button>
+                <button id="verifyBtn" class="btn-ghost">Run Verification Check</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="deliverablesPanel" class="panel">
+            <div class="card p-5">
+              <h2 class="text-xl font-bold mb-2">Deliverables</h2>
+              <p class="text-sm text-zinc-400 mb-3">Review files, approve, or request revisions.</p>
+              <div id="deliverablesList" class="space-y-2 text-sm text-zinc-300"></div>
+            </div>
+          </div>
+
+          <div id="supportPanel" class="panel space-y-4">
+            <div class="card p-5">
+              <h2 class="text-xl font-bold mb-2">Support Inbox</h2>
+              <div class="grid md:grid-cols-3 gap-2 mb-3">
+                <input id="supportSubject" class="field" placeholder="Subject"/>
+                <select id="supportPriority" class="field"><option value="normal">Normal</option><option value="high">High</option><option value="low">Low</option></select>
+                <button id="newThreadBtn" class="btn-ghost">Open Support Thread</button>
+              </div>
+              <textarea id="supportMessage" class="field mb-2" placeholder="Describe the issue or request"></textarea>
+            </div>
+            <div class="card p-5">
+              <h3 class="text-lg font-bold mb-2">Recent Threads</h3>
+              <div id="supportThreads" class="space-y-2 text-sm text-zinc-300"></div>
+            </div>
+          </div>
+
+          <div id="billingPanel" class="panel space-y-4">
+            <div class="card p-5">
+              <h2 class="text-xl font-bold mb-2">Membership Status</h2>
+              <p id="membershipLine" class="text-zinc-300 text-sm"></p>
+              <p id="creditLine" class="text-zinc-300 text-sm mt-1"></p>
+              <button id="activateBtn" class="btn mt-3">Activate Membership ($500)</button>
+            </div>
+            <div class="card p-5">
+              <h2 class="text-xl font-bold mb-2">Add-ons</h2>
+              <p class="text-zinc-400 mb-3 text-sm">Purchase add-ons from your member area.</p>
+              <div class="grid md:grid-cols-3 gap-2 text-sm text-zinc-200">
+                <button class="card p-3 text-left addon-btn" data-addon="social-posting-pack">Social Posting Pack<br/><span class="text-zinc-400">$300</span></button>
+                <button class="card p-3 text-left addon-btn" data-addon="local-seo-boost">Local SEO Boost<br/><span class="text-zinc-400">$400</span></button>
+                <button class="card p-3 text-left addon-btn" data-addon="landing-page-sprint">Landing Page Sprint<br/><span class="text-zinc-400">$500</span></button>
+              </div>
+            </div>
+          </div>
+
+          <p id="addonMsg" class="text-sm mt-1 text-zinc-400"></p>
+        </section>
       </div>
     </section>
   </main>
@@ -121,6 +185,25 @@
       return String(input || '').replace(/[&<>"']/g, (m) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
     }
 
+    function setPortalStatus(text, tone = 'muted') {
+      const el = document.getElementById('portalStatusBadge');
+      el.textContent = text;
+      el.className = 'pill ' + (tone === 'ok' ? 'status-ok' : tone === 'warn' ? 'status-warn' : 'status-muted');
+    }
+
+    function bindSidebar() {
+      document.querySelectorAll('.side-link').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.side-link').forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          const target = btn.getAttribute('data-target');
+          document.querySelectorAll('.panel').forEach((p) => p.classList.remove('active'));
+          const panel = document.getElementById(target);
+          if (panel) panel.classList.add('active');
+        });
+      });
+    }
+
     async function loadWorkspace() {
       const res = await fetch('/api/member/workspace');
       const data = await res.json().catch(() => ({}));
@@ -128,22 +211,25 @@
 
       const p = data.project || {};
       const workflow = p.workflow || {};
+      const status = (workflow.status || 'new').toLowerCase();
       document.getElementById('projectSummary').textContent = `Status: ${workflow.status || 'new'} | Assignee: ${workflow.assignee || 'team'} | Last update: ${workflow.updated_at || 'n/a'}`;
+      setPortalStatus(status === 'approved' || status === 'activated' ? 'In good standing' : 'Action needed', status === 'approved' || status === 'activated' ? 'ok' : 'warn');
 
       const nextEl = document.getElementById('nextActions');
       const actions = p.nextActions || [];
       nextEl.innerHTML = actions.length
-        ? actions.map((a) => `<div class="card p-2"><b>${esc(a.type || 'action')}</b>: ${esc(a.label || '')}${a.dueDate ? `<div class='text-zinc-500'>Due: ${esc(a.dueDate)}</div>` : ''}</div>`).join('')
+        ? actions.map((a) => `<div class="card p-3"><div class='flex items-start justify-between gap-2'><div><div class='text-xs text-zinc-500 uppercase'>${esc(a.type || 'action')}</div><div class='font-semibold'>${esc(a.label || '')}</div></div>${a.dueDate ? `<span class='pill status-warn'>Due ${esc(a.dueDate)}</span>` : ''}</div></div>`).join('')
         : '<div class="text-zinc-500 text-sm">No pending actions right now.</div>';
 
       const milestones = p.milestones || [];
       document.getElementById('milestoneList').innerHTML = milestones.length
-        ? milestones.map((m) => `<div class="card p-2"><div><b>${esc(m.title)}</b></div><div class="text-zinc-500">${esc(m.status || 'pending')}${m.due_date ? ` · due ${esc(m.due_date)}` : ''}${m.completed_at ? ` · completed ${esc(m.completed_at)}` : ''}</div></div>`).join('')
+        ? milestones.map((m) => `<div class="card p-3"><div class='flex items-center justify-between gap-2'><div><div class='font-semibold'>${esc(m.title)}</div><div class='text-zinc-500 text-xs'>${m.due_date ? `Due ${esc(m.due_date)} · ` : ''}${m.completed_at ? `Completed ${esc(m.completed_at)}` : 'In progress'}</div></div><span class='pill ${String(m.status).toLowerCase()==='completed'?'status-ok':'status-muted'}'>${esc(m.status || 'pending')}</span></div></div>`).join('')
         : '<div class="text-zinc-500">No milestones posted yet.</div>';
 
       const deliverables = p.deliverables || [];
+      const pendingApprovals = deliverables.filter((d) => String(d.status || '').toLowerCase() === 'pending' && Number(d.requires_approval) === 1).length;
       document.getElementById('deliverablesList').innerHTML = deliverables.length
-        ? deliverables.map((d) => `<div class="card p-2"><div><b>${esc(d.title)}</b> <span class='text-zinc-500'>(${esc(d.status || 'pending')})</span></div>${d.description ? `<div class='text-zinc-400'>${esc(d.description)}</div>` : ''}<div class='mt-2 flex gap-2 flex-wrap'>${d.file_url ? `<a class='btn-ghost' href='${esc(d.file_url)}' target='_blank' rel='noopener'>Open File</a>` : ''}${String(d.status || '').toLowerCase() === 'pending' ? `<button class='btn-ghost deliverable-approve' data-id='${d.id}'>Approve</button><button class='btn-ghost deliverable-revision' data-id='${d.id}'>Request Revision</button>` : ''}</div></div>`).join('')
+        ? deliverables.map((d) => `<div class="card p-3"><div class='flex items-center justify-between gap-2'><div><div class='font-semibold'>${esc(d.title)}</div><div class='text-zinc-500 text-xs'>${d.description ? esc(d.description) : 'No description'}</div></div><span class='pill ${String(d.status).toLowerCase()==='approved'?'status-ok':String(d.status).toLowerCase()==='revision_requested'?'status-warn':'status-muted'}'>${esc(d.status || 'pending')}</span></div><div class='mt-3 flex gap-2 flex-wrap'>${d.file_url ? `<a class='btn-ghost' href='${esc(d.file_url)}' target='_blank' rel='noopener'>Open File</a>` : ''}${String(d.status || '').toLowerCase() === 'pending' ? `<button class='btn-ghost deliverable-approve' data-id='${d.id}'>Approve</button><button class='btn-ghost deliverable-revision' data-id='${d.id}'>Request Revision</button>` : ''}</div></div>`).join('')
         : '<div class="text-zinc-500">No deliverables yet.</div>';
 
       document.querySelectorAll('.deliverable-approve').forEach((btn) => {
@@ -174,8 +260,13 @@
 
       const threads = p.supportThreads || [];
       document.getElementById('supportThreads').innerHTML = threads.length
-        ? threads.map((t) => `<div class='card p-2'><div><b>${esc(t.subject)}</b> <span class='text-zinc-500'>(${esc(t.status || 'open')}, ${esc(t.priority || 'normal')})</span></div><div class='text-zinc-500'>${esc(t.last_message || '')}</div><div class='text-xs text-zinc-600'>${esc(t.last_message_at || t.updated_at || '')}</div></div>`).join('')
+        ? threads.map((t) => `<div class='card p-3'><div class='flex items-center justify-between gap-2'><div class='font-semibold'>${esc(t.subject)}</div><span class='pill ${String(t.status).toLowerCase()==='resolved'?'status-ok':'status-muted'}'>${esc(t.status || 'open')} · ${esc(t.priority || 'normal')}</span></div><div class='text-zinc-500 text-sm mt-1'>${esc(t.last_message || '')}</div><div class='text-xs text-zinc-600 mt-1'>${esc(t.last_message_at || t.updated_at || '')}</div></div>`).join('')
         : '<div class="text-zinc-500">No support threads yet.</div>';
+
+      document.getElementById('summaryStatus').textContent = workflow.status || 'new';
+      document.getElementById('summaryActions').textContent = String(actions.length);
+      document.getElementById('summaryApprovals').textContent = String(pendingApprovals);
+      document.getElementById('summaryThreads').textContent = String(threads.length);
     }
 
     async function refresh() {
@@ -183,6 +274,7 @@
       if (!res.ok) {
         authCard.classList.remove('hidden');
         dashboard.classList.add('hidden');
+        setPortalStatus('Not signed in', 'muted');
         return;
       }
       const data = await res.json();
@@ -345,6 +437,7 @@
       });
     });
 
+    bindSidebar();
     refresh();
   </script>
 </body>
