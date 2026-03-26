@@ -549,9 +549,26 @@ async function ensureSupabaseProfile(userId, email, role = 'member', active = tr
   if (!supabaseEnabled) return;
   const normalizedEmail = (email || '').toLowerCase();
 
-  const { error } = await supabaseAdmin
+  let payload = { id: userId, email: normalizedEmail, role, active };
+  let { error } = await supabaseAdmin
     .from('profiles')
-    .upsert({ id: userId, email: normalizedEmail, role, active }, { onConflict: 'id' });
+    .upsert(payload, { onConflict: 'id' });
+
+  if (error) {
+    const message = String(error.message || '').toLowerCase();
+    if (message.includes("could not find the 'active' column")) {
+      payload = { id: userId, email: normalizedEmail, role };
+      ({ error } = await supabaseAdmin.from('profiles').upsert(payload, { onConflict: 'id' }));
+    }
+  }
+
+  if (error) {
+    const message = String(error.message || '').toLowerCase();
+    if (message.includes("could not find the 'role' column")) {
+      payload = { id: userId, email: normalizedEmail };
+      ({ error } = await supabaseAdmin.from('profiles').upsert(payload, { onConflict: 'id' }));
+    }
+  }
 
   if (!error) return;
 
@@ -643,13 +660,15 @@ async function getAuthedAdmin(req) {
 
     const { data: profile } = await supabaseAdmin
       .from('profiles')
-      .select('role,active,email')
+      .select('*')
       .eq('id', authData.user.id)
       .maybeSingle();
 
-    if (!profile?.active) return null;
-    if (!['admin', 'owner'].includes(profile.role)) return null;
-    return { adminUserId: authData.user.id, email: profile.email || authData.user.email || '', role: profile.role };
+    const active = profile && Object.prototype.hasOwnProperty.call(profile, 'active') ? !!profile.active : true;
+    const role = profile?.role || 'member';
+    if (!active) return null;
+    if (!['admin', 'owner'].includes(role)) return null;
+    return { adminUserId: authData.user.id, email: profile?.email || authData.user.email || '', role };
   }
 
   const session = await dbGet(
@@ -1616,11 +1635,13 @@ app.post('/api/admin/login', async (req, res) => {
 
       const { data: profile } = await supabaseAdmin
         .from('profiles')
-        .select('role,active')
+        .select('*')
         .eq('id', data.user.id)
         .maybeSingle();
 
-      if (!profile?.active || !['admin', 'owner'].includes(profile?.role)) {
+      const active = profile && Object.prototype.hasOwnProperty.call(profile, 'active') ? !!profile.active : true;
+      const role = profile?.role || 'member';
+      if (!active || !['admin', 'owner'].includes(role)) {
         return res.status(403).json({ ok: false, error: 'Forbidden' });
       }
 
@@ -1684,9 +1705,13 @@ app.post('/api/admin/bootstrap', async (req, res) => {
         return res.json({ ok: true, reset: true });
       }
 
-      const anyOwner = await supabaseAdmin.from('profiles').select('id,email').in('role', ['owner', 'admin']).limit(1);
+      let anyOwner = { data: [] };
+      const ownerQuery = await supabaseAdmin.from('profiles').select('*').limit(200);
+      if (!ownerQuery.error) {
+        anyOwner.data = (ownerQuery.data || []).filter((p) => ['owner', 'admin'].includes(p.role || ''));
+      }
       if (anyOwner.data && anyOwner.data.length) {
-        return res.status(409).json({ ok: false, error: `Admin exists (${anyOwner.data[0].email}). Use that email to reset.` });
+        return res.status(409).json({ ok: false, error: `Admin exists (${anyOwner.data[0].email || 'existing admin'}). Use that email to reset.` });
       }
 
       const created = await supabaseAdmin.auth.admin.createUser({ email, password, email_confirm: true });
