@@ -2187,10 +2187,22 @@ app.get('/api/admin/applications', async (req, res) => {
       const underwritingByApp = new Map();
       for (const u of (underwriting || [])) if (!underwritingByApp.has(u.application_id)) underwritingByApp.set(u.application_id, u);
 
+      const workflowRows = await new Promise((resolve, reject) => {
+        db.all(
+          `SELECT application_id, status, assignee
+           FROM application_workflow
+           WHERE application_id IN (${appIds.length ? appIds.map(() => '?').join(',') : '-1'})`,
+          appIds.length ? appIds : [],
+          (err, rows) => (err ? reject(err) : resolve(rows || []))
+        );
+      });
+      const workflowByApp = new Map((workflowRows || []).map((w) => [Number(w.application_id), w]));
+
       const rows = (apps || []).map((sa) => {
         const bm = membershipByApp.get(sa.id) || {};
         const vc = verificationByApp.get(sa.id) || {};
         const ud = underwritingByApp.get(sa.id) || {};
+        const wf = workflowByApp.get(Number(sa.id)) || {};
         return {
           application_id: sa.id,
           business_legal_name: sa.business_legal_name,
@@ -2206,8 +2218,8 @@ app.get('/api/admin/applications', async (req, res) => {
           verification_score: vc.score || 0,
           underwriting_decision: ud.decision || null,
           underwriting_limit: ud.approved_limit || 0,
-          workflow_status: 'new',
-          workflow_assignee: 'unassigned',
+          workflow_status: wf.status || 'new',
+          workflow_assignee: wf.assignee || 'unassigned',
           notes_count: 0,
           tasks_count: 0
         };
@@ -2260,6 +2272,8 @@ app.post('/api/admin/application/status', async (req, res) => {
       return res.status(400).json({ ok: false, error: 'Invalid status payload' });
     }
 
+    let workflowUserId = null;
+
     if (supabaseEnabled) {
       const { data: membership, error: mErr } = await supabaseAdmin
         .from('business_memberships')
@@ -2269,6 +2283,8 @@ app.post('/api/admin/application/status', async (req, res) => {
         .limit(1)
         .maybeSingle();
       if (mErr) throw mErr;
+
+      workflowUserId = membership?.user_id || null;
 
       if (membership) {
         const patch = {};
@@ -2285,17 +2301,17 @@ app.post('/api/admin/application/status', async (req, res) => {
           if (uErr) throw uErr;
         }
       }
-
-      return res.json({ ok: true });
+    } else {
+      const row = await dbGet('SELECT user_id FROM business_memberships WHERE application_id = ? ORDER BY id DESC LIMIT 1', [applicationId]);
+      workflowUserId = row?.user_id || null;
     }
 
-    const row = await dbGet('SELECT user_id FROM business_memberships WHERE application_id = ? ORDER BY id DESC LIMIT 1', [applicationId]);
     await dbRun(
       `INSERT INTO application_workflow (application_id, user_id, status, assignee, updated_at)
        VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
        ON CONFLICT(application_id)
        DO UPDATE SET status=excluded.status, assignee=excluded.assignee, updated_at=CURRENT_TIMESTAMP`,
-      [applicationId, row?.user_id || null, status, assignee]
+      [applicationId, workflowUserId, status, assignee]
     );
 
     await dbRun(
