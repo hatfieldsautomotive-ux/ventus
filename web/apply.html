@@ -36,6 +36,7 @@
           <h2 class="font-bold mb-3">Business Information</h2>
           <input class="field" name="businessLegalName" placeholder="Business Legal Name" required/>
           <input class="field" name="dba" placeholder="DBA (optional)"/>
+          <label style="font-size:12px;color:var(--muted);margin-top:8px">EIN (required to submit)</label>
           <input class="field" name="ein" placeholder="EIN (XX-XXXXXXX)" required pattern="^\d{2}-?\d{7}$" title="Enter a valid EIN (XX-XXXXXXX or XXXXXXXXX)"/>
           <select class="field" name="entityType">
             <option value="">Entity Type</option><option>LLC</option><option>Corporation</option><option>Sole Proprietor</option><option>Partnership</option>
@@ -80,6 +81,7 @@
           <p id="msg" class="text-sm mt-3" style="color:var(--muted)"></p>
         </section>
 
+        <p id="formError" class="text-sm" style="color:#fca5a5;display:none"></p>
         <div class="flex gap-2 pt-3">
           <button type="button" id="prevBtn" class="btn-ghost">Back</button>
           <button type="button" id="nextBtn" class="btn">Continue</button>
@@ -98,6 +100,7 @@
     const submitBtn = document.getElementById('submitBtn');
     const form = document.getElementById('applyForm');
     const msg = document.getElementById('msg');
+    const formError = document.getElementById('formError');
     const params = new URLSearchParams(window.location.search);
     const onboardingToken = params.get('token');
     let current = 0;
@@ -113,33 +116,68 @@
       submitBtn.style.display = last ? 'inline-block' : 'none';
     }
 
-    function validateCurrentStep() {
-      const activeStep = steps[current];
-      const controls = [...activeStep.querySelectorAll('input, select, textarea')];
+    function showFormError(text) {
+      if (!text) {
+        formError.style.display = 'none';
+        formError.textContent = '';
+        return;
+      }
+      formError.textContent = text;
+      formError.style.display = 'block';
+    }
+
+    function controlLabel(el) {
+      if (el.name === 'ein') return 'EIN';
+      return el.placeholder || el.name || 'This field';
+    }
+
+    function validateStep(stepIndex, focus = true) {
+      const step = steps[stepIndex];
+      const controls = [...step.querySelectorAll('input, select, textarea')];
       for (const el of controls) {
         if (el.disabled) continue;
         if (!el.checkValidity()) {
-          el.reportValidity();
+          const label = controlLabel(el);
+          showFormError(`Missing or invalid: ${label}.`);
+          if (focus) {
+            current = stepIndex;
+            render();
+            requestAnimationFrame(() => {
+              el.focus();
+              el.reportValidity();
+            });
+          }
           return false;
         }
       }
       return true;
     }
 
+    function validateCurrentStep() {
+      return validateStep(current, true);
+    }
+
+    function validateAllSteps() {
+      for (let i = 0; i < steps.length; i++) {
+        if (!validateStep(i, true)) return false;
+      }
+      return true;
+    }
+
     nextBtn.addEventListener('click', () => {
+      showFormError('');
       if (!validateCurrentStep()) return;
       if (current < steps.length - 1) { current++; render(); }
     });
-    prevBtn.addEventListener('click', () => { if (current > 0) { current--; render(); } });
+    prevBtn.addEventListener('click', () => {
+      showFormError('');
+      if (current > 0) { current--; render(); }
+    });
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      if (!validateCurrentStep()) return;
-      if (current < steps.length - 1) {
-        current++;
-        render();
-        return;
-      }
+      showFormError('');
+      if (!validateAllSteps()) return;
       msg.textContent = 'Submitting application...';
 
       const data = new FormData(form);
@@ -148,14 +186,20 @@
       const passwordConfirm = data.get('passwordConfirm');
 
       if (password !== passwordConfirm) {
-        msg.textContent = 'Passwords do not match.';
+        showFormError('Passwords do not match.');
+        msg.textContent = '';
         return;
       }
 
       const einRaw = String(data.get('ein') || '').trim();
       const einDigits = einRaw.replace(/\D/g, '');
       if (einDigits.length !== 9) {
-        msg.textContent = 'Please enter a valid EIN (XX-XXXXXXX).';
+        showFormError('Please enter a valid EIN (XX-XXXXXXX).');
+        msg.textContent = '';
+        current = 0;
+        render();
+        const einInput = form.querySelector('input[name="ein"]');
+        einInput?.focus();
         return;
       }
 
@@ -191,7 +235,9 @@
           window.location.href = json.redirect || '/portal.html';
         }, 700);
       } catch (err) {
-        msg.textContent = err.message || 'Could not submit right now. Please try again.';
+        const text = err.message || 'Could not submit right now. Please try again.';
+        showFormError(text);
+        msg.textContent = text;
       }
     });
 
