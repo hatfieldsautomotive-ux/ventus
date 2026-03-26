@@ -564,12 +564,19 @@ async function ensureSupabaseProfile(userId, email, role = 'member', active = tr
       .maybeSingle();
 
     if (existing?.id && existing.id !== userId) {
-      const { error: rekeyErr } = await supabaseAdmin
+      // hard reconcile: remove stale profile row and recreate with correct auth user id
+      const { error: deleteErr } = await supabaseAdmin
         .from('profiles')
-        .update({ id: userId, role, active })
+        .delete()
         .eq('email', normalizedEmail);
-      if (!rekeyErr) return;
-      throw new Error(`Profile email conflict could not be reconciled: ${rekeyErr.message}`);
+      if (deleteErr) throw new Error(`Profile email conflict delete failed: ${deleteErr.message}`);
+
+      const { error: insertErr } = await supabaseAdmin
+        .from('profiles')
+        .insert({ id: userId, email: normalizedEmail, role, active });
+      if (!insertErr) return;
+
+      throw new Error(`Profile email conflict could not be reconciled: ${insertErr.message}`);
     }
   }
 
