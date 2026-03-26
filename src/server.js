@@ -987,8 +987,12 @@ app.post('/api/studio-application', async (req, res) => {
 
     return res.json({ ok: true, id: applicationId, redirect: '/portal.html' });
   } catch (error) {
-    console.error('[studio-application] submit failed', error.message);
-    return res.status(500).json({ ok: false, error: 'Could not submit application' });
+    const details = error?.message || error?.code || 'unknown_error';
+    console.error('[studio-application] submit failed', details, error?.stack || '');
+    const safeMessage = process.env.NODE_ENV === 'production'
+      ? `Could not submit application (${details})`
+      : `Could not submit application (${details})`;
+    return res.status(500).json({ ok: false, error: safeMessage });
   }
 });
 
@@ -2187,7 +2191,9 @@ app.get('/api/health', (req, res) => res.json({
   stripeConfigured: !!stripe,
   checkoutProducts: Object.keys(CHECKOUT_PRODUCTS).length,
   mappedPrices: Object.keys(STRIPE_PRICE_MAP || {}).length,
-  beehiivConfigured: !!beehiivApiKey
+  beehiivConfigured: !!beehiivApiKey,
+  supabaseEnabled,
+  supabaseUrlValid
 }));
 app.get('*', (req, res) => res.sendFile(path.join(WEB_DIR, 'index.html')));
 
