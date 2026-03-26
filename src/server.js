@@ -1857,6 +1857,35 @@ app.post('/api/admin/application/status', async (req, res) => {
       return res.status(400).json({ ok: false, error: 'Invalid status payload' });
     }
 
+    if (supabaseEnabled) {
+      const { data: membership, error: mErr } = await supabaseAdmin
+        .from('business_memberships')
+        .select('id,user_id,membership_status,credit_limit_status')
+        .eq('application_id', applicationId)
+        .order('id', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (mErr) throw mErr;
+
+      if (membership) {
+        const patch = {};
+        if (status === 'approved') {
+          patch.credit_limit_status = membership.credit_limit_status === 'declined' ? 'verification_pending' : membership.credit_limit_status;
+        } else if (status === 'declined') {
+          patch.credit_limit_status = 'declined';
+        } else if (status === 'activated') {
+          patch.membership_status = 'active';
+        }
+
+        if (Object.keys(patch).length) {
+          const { error: uErr } = await supabaseAdmin.from('business_memberships').update(patch).eq('id', membership.id);
+          if (uErr) throw uErr;
+        }
+      }
+
+      return res.json({ ok: true });
+    }
+
     const row = await dbGet('SELECT user_id FROM business_memberships WHERE application_id = ? ORDER BY id DESC LIMIT 1', [applicationId]);
     await dbRun(
       `INSERT INTO application_workflow (application_id, user_id, status, assignee, updated_at)
@@ -1874,7 +1903,61 @@ app.post('/api/admin/application/status', async (req, res) => {
 
     return res.json({ ok: true });
   } catch (error) {
-    return res.status(500).json({ ok: false, error: 'Could not update status' });
+    return res.status(500).json({ ok: false, error: `Could not update status (${error?.message || 'unknown'})` });
+  }
+});
+
+app.get('/api/admin/application/:id/detail', async (req, res) => {
+  try {
+    const admin = await requireAdmin(req, res);
+    if (!admin) return;
+    const applicationId = Number(req.params.id || 0);
+    if (!applicationId) return res.status(400).json({ ok: false, error: 'Invalid application id' });
+
+    if (supabaseEnabled) {
+      const { data: app, error: appErr } = await supabaseAdmin
+        .from('studio_applications')
+        .select('*')
+        .eq('id', applicationId)
+        .maybeSingle();
+      if (appErr) throw appErr;
+      if (!app) return res.status(404).json({ ok: false, error: 'Application not found' });
+
+      const { data: membership } = await supabaseAdmin
+        .from('business_memberships')
+        .select('*')
+        .eq('application_id', applicationId)
+        .order('id', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const { data: verification } = await supabaseAdmin
+        .from('verification_checks')
+        .select('*')
+        .eq('application_id', applicationId)
+        .order('id', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const { data: underwriting } = await supabaseAdmin
+        .from('underwriting_decisions')
+        .select('*')
+        .eq('application_id', applicationId)
+        .order('id', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      return res.json({ ok: true, application: app, membership: membership || null, verification: verification || null, underwriting: underwriting || null });
+    }
+
+    const app = await dbGet('SELECT * FROM studio_applications WHERE id = ?', [applicationId]);
+    if (!app) return res.status(404).json({ ok: false, error: 'Application not found' });
+    const membership = await dbGet('SELECT * FROM business_memberships WHERE application_id = ? ORDER BY id DESC LIMIT 1', [applicationId]);
+    const verification = await dbGet('SELECT * FROM verification_checks WHERE application_id = ? ORDER BY id DESC LIMIT 1', [applicationId]);
+    const underwriting = await dbGet('SELECT * FROM underwriting_decisions WHERE application_id = ? ORDER BY id DESC LIMIT 1', [applicationId]);
+    return res.json({ ok: true, application: app, membership: membership || null, verification: verification || null, underwriting: underwriting || null });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: `Could not load application detail (${error?.message || 'unknown'})` });
   }
 });
 
@@ -1883,6 +1966,11 @@ app.get('/api/admin/application/:id/notes', async (req, res) => {
     const admin = await requireAdmin(req, res);
     if (!admin) return;
     const applicationId = Number(req.params.id || 0);
+
+    if (supabaseEnabled) {
+      return res.json({ ok: true, notes: [] });
+    }
+
     const notes = await new Promise((resolve, reject) => {
       db.all(
         `SELECT n.id, n.note, n.created_at, a.email AS admin_email
@@ -1925,6 +2013,11 @@ app.get('/api/admin/application/:id/tasks', async (req, res) => {
     const admin = await requireAdmin(req, res);
     if (!admin) return;
     const applicationId = Number(req.params.id || 0);
+
+    if (supabaseEnabled) {
+      return res.json({ ok: true, tasks: [] });
+    }
+
     const tasks = await new Promise((resolve, reject) => {
       db.all(
         `SELECT id, title, status, assignee, due_date, created_at, updated_at
@@ -2095,6 +2188,11 @@ app.get('/api/admin/application/:id/questionnaires', async (req, res) => {
     const admin = await requireAdmin(req, res);
     if (!admin) return;
     const applicationId = Number(req.params.id || 0);
+
+    if (supabaseEnabled) {
+      return res.json({ ok: true, questionnaires: [] });
+    }
+
     const rows = await new Promise((resolve, reject) => {
       db.all(
         `SELECT q.id, q.template_key, q.title, q.status, q.token, q.created_at,
@@ -2186,7 +2284,7 @@ app.post('/api/admin/underwriting/decide', async (req, res) => {
     const admin = await requireAdmin(req, res);
     if (!admin) return;
 
-    const userId = Number(req.body?.userId || 0);
+    const userId = String(req.body?.userId || '').trim();
     const decision = String(req.body?.decision || '').trim();
     const approvedLimit = Number(req.body?.approvedLimit || 0);
     const reason = String(req.body?.reason || '').trim() || 'Manual underwriting decision';
@@ -2196,7 +2294,47 @@ app.post('/api/admin/underwriting/decide', async (req, res) => {
       return res.status(400).json({ ok: false, error: 'Invalid decision payload' });
     }
 
-    const membership = await dbGet('SELECT * FROM business_memberships WHERE user_id = ? ORDER BY id DESC LIMIT 1', [userId]);
+    if (supabaseEnabled) {
+      const { data: membership, error: mErr } = await supabaseAdmin
+        .from('business_memberships')
+        .select('*')
+        .eq('user_id', userId)
+        .order('id', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (mErr) throw mErr;
+      if (!membership) return res.status(404).json({ ok: false, error: 'Membership not found' });
+
+      const applicationId = membership.application_id || 0;
+
+      const { error: uErr } = await supabaseAdmin.from('underwriting_decisions').insert({
+        application_id: applicationId,
+        user_id: userId,
+        decision,
+        approved_limit: Math.max(0, approvedLimit),
+        reason,
+        reviewer
+      });
+      if (uErr) throw uErr;
+
+      if (decision === 'approved') {
+        const { error: patchErr } = await supabaseAdmin
+          .from('business_memberships')
+          .update({ approved_limit: Math.max(0, approvedLimit), active_limit: 0, credit_limit_status: 'approved_not_active' })
+          .eq('id', membership.id);
+        if (patchErr) throw patchErr;
+      } else if (decision === 'declined') {
+        const { error: patchErr } = await supabaseAdmin
+          .from('business_memberships')
+          .update({ approved_limit: 0, active_limit: 0, credit_limit_status: 'declined' })
+          .eq('id', membership.id);
+        if (patchErr) throw patchErr;
+      }
+
+      return res.json({ ok: true });
+    }
+
+    const membership = await dbGet('SELECT * FROM business_memberships WHERE user_id = ? ORDER BY id DESC LIMIT 1', [Number(userId)]);
     if (!membership) return res.status(404).json({ ok: false, error: 'Membership not found' });
 
     const applicationId = membership.application_id || 0;
@@ -2204,7 +2342,7 @@ app.post('/api/admin/underwriting/decide', async (req, res) => {
     await dbRun(
       `INSERT INTO underwriting_decisions (application_id, user_id, decision, approved_limit, reason, reviewer, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
-      [applicationId, userId, decision, Math.max(0, approvedLimit), reason, reviewer]
+      [applicationId, Number(userId), decision, Math.max(0, approvedLimit), reason, reviewer]
     );
 
     if (decision === 'approved') {
@@ -2237,7 +2375,7 @@ app.post('/api/admin/underwriting/decide', async (req, res) => {
     return res.json({ ok: true });
   } catch (error) {
     console.error('[underwriting] decision failed', error.message);
-    return res.status(500).json({ ok: false, error: 'Could not save decision' });
+    return res.status(500).json({ ok: false, error: `Could not save decision (${error?.message || 'unknown'})` });
   }
 });
 
