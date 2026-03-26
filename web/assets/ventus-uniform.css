@@ -1,0 +1,21 @@
+:root{
+  --vu-bg:#f8fafc;
+  --vu-surface:#ffffff;
+  --vu-surface-soft:#eef2ff;
+  --vu-line:#dbe3ef;
+  --vu-text:#0f172a;
+  --vu-muted:#475569;
+  --vu-accent:#3b82f6;
+  --vu-accent2:#6366f1;
+}
+html,body{background:var(--vu-bg)!important;color:var(--vu-text)!important}
+body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif!important}
+.card{background:var(--vu-surface)!important;border:1px solid var(--vu-line)!important;box-shadow:0 8px 24px rgba(15,23,42,.05)!important}
+.btn{background:linear-gradient(120deg,var(--vu-accent),var(--vu-accent2))!important;color:#fff!important;border:none!important}
+.btn-ghost{background:#fff!important;color:#1e293b!important;border:1px solid #c8d5e8!important}
+.field,input,select,textarea{background:#fff!important;color:#0f172a!important;border:1px solid #c8d5e8!important}
+p,li,small,.text-zinc-400,.text-zinc-500,.text-zinc-600,.text-neutral-400{color:var(--vu-muted)!important}
+.border-zinc-800,.border-zinc-700,.border-zinc-900{border-color:var(--vu-line)!important}
+header,footer{border-color:var(--vu-line)!important}
+a{color:inherit}
+a.btn,a.btn-ghost{color:inherit}
