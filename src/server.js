@@ -10,6 +10,7 @@ const { promisify } = require('util');
 
 const app = express();
 app.set('trust proxy', true);
+app.disable('x-powered-by');
 const PORT = process.env.PORT || 3460;
 const WEB_DIR = path.join(__dirname, '..', 'web');
 const PRIVATE_DOWNLOADS = path.join(__dirname, '..', 'private-downloads');
@@ -539,13 +540,82 @@ try {
 }
 
 app.use((req, res, next) => {
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  if (process.env.NODE_ENV === 'production') {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  }
+  return next();
+});
+
+app.use((req, res, next) => {
   if (req.path === '/api/stripe/webhook') return next();
-  return express.json()(req, res, next);
+  return express.json({ limit: '12mb' })(req, res, next);
 });
 app.use((req, res, next) => {
   if (req.path === '/api/stripe/webhook') return next();
-  return express.urlencoded({ extended: true })(req, res, next);
+  return express.urlencoded({ extended: true, limit: '2mb' })(req, res, next);
 });
+
+function createRateLimiter({ windowMs, max, keyFn, message }) {
+  const hits = new Map();
+  return (req, res, next) => {
+    const now = Date.now();
+    const key = keyFn ? keyFn(req) : req.ip;
+    const entry = hits.get(key) || { count: 0, resetAt: now + windowMs };
+    if (now > entry.resetAt) {
+      entry.count = 0;
+      entry.resetAt = now + windowMs;
+    }
+    entry.count += 1;
+    hits.set(key, entry);
+
+    if (entry.count > max) {
+      return res.status(429).json({ ok: false, error: message || 'Too many requests, please try again later.' });
+    }
+    return next();
+  };
+}
+
+const authRateLimit = createRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 15,
+  keyFn: (req) => `${req.ip}:${String(req.body?.email || 'anon').toLowerCase()}`,
+  message: 'Too many authentication attempts. Please wait and try again.'
+});
+
+app.use('/api/member/login', authRateLimit);
+app.use('/api/admin/login', authRateLimit);
+app.use('/api/studio-application', authRateLimit);
+app.use('/api/admin/bootstrap', authRateLimit);
+
+function isTrustedOrigin(req) {
+  const origin = String(req.headers.origin || '').trim();
+  if (!origin) return true;
+
+  const host = String(req.headers.host || '').trim();
+  const proto = String(req.headers['x-forwarded-proto'] || req.protocol || 'http').split(',')[0].trim();
+  const selfOrigin = host ? `${proto}://${host}` : '';
+  if (origin === selfOrigin) return true;
+
+  const allowed = String(process.env.ALLOWED_ORIGINS || '')
+    .split(',')
+    .map((v) => v.trim())
+    .filter(Boolean);
+  return allowed.includes(origin);
+}
+
+app.use('/api', (req, res, next) => {
+  if (req.path === '/stripe/webhook') return next();
+  if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) return next();
+  if (!isTrustedOrigin(req)) {
+    return res.status(403).json({ ok: false, error: 'Forbidden origin' });
+  }
+  return next();
+});
+
 app.use(express.static(WEB_DIR));
 
 const scryptAsync = promisify(crypto.scrypt);
@@ -615,12 +685,12 @@ function safeJsonParse(value, fallback = null) {
 
 function setAdminSessionCookie(res, token) {
   const secure = process.env.NODE_ENV === 'production';
-  res.setHeader('Set-Cookie', `ventus_admin_session=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000${secure ? '; Secure' : ''}`);
+  res.setHeader('Set-Cookie', `ventus_admin_session=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Strict; Max-Age=2592000${secure ? '; Secure' : ''}`);
 }
 
 function clearAdminSessionCookie(res) {
   const secure = process.env.NODE_ENV === 'production';
-  res.setHeader('Set-Cookie', `ventus_admin_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure ? '; Secure' : ''}`);
+  res.setHeader('Set-Cookie', `ventus_admin_session=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0${secure ? '; Secure' : ''}`);
 }
 
 function dbGet(sql, params = []) {
