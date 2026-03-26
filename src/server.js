@@ -13,6 +13,7 @@ app.set('trust proxy', true);
 const PORT = process.env.PORT || 3460;
 const WEB_DIR = path.join(__dirname, '..', 'web');
 const PRIVATE_DOWNLOADS = path.join(__dirname, '..', 'private-downloads');
+const VERIFICATION_EVIDENCE_DIR = path.join(PRIVATE_DOWNLOADS, 'verification-evidence');
 const DEFAULT_DB_PATH = path.join(__dirname, '..', 'data', 'downloads.db');
 const REQUESTED_DB_PATH = process.env.VENTUS_DB_PATH || process.env.DATABASE_PATH || DEFAULT_DB_PATH;
 
@@ -119,6 +120,7 @@ function backupDbOnBoot(dbPath) {
 backupDbOnBoot(DB_PATH);
 
 fs.mkdirSync(PRIVATE_DOWNLOADS, { recursive: true });
+fs.mkdirSync(VERIFICATION_EVIDENCE_DIR, { recursive: true });
 
 const db = new sqlite3.Database(DB_PATH);
 const MIGRATION_TABLES = [];
@@ -248,6 +250,17 @@ db.serialize(() => {
     evidence_notes TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+  runMigration(`CREATE TABLE IF NOT EXISTS verification_evidence_documents (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    evidence_id INTEGER NOT NULL,
+    application_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    original_name TEXT,
+    mime_type TEXT,
+    file_size INTEGER,
+    stored_path TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
   runMigration(`CREATE TABLE IF NOT EXISTS admin_users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -519,6 +532,28 @@ function clearSessionCookie(res) {
   const secure = process.env.NODE_ENV === 'production';
   res.setHeader('Set-Cookie', `ventus_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure ? '; Secure' : ''}`);
 }
+
+function sanitizeFilename(input, fallback = 'document') {
+  const cleaned = String(input || fallback)
+    .replace(/[^a-zA-Z0-9._-]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 120);
+  return cleaned || fallback;
+}
+
+function getFileExt(name = '') {
+  return path.extname(String(name || '')).toLowerCase();
+}
+
+const ALLOWED_EVIDENCE_EXTENSIONS = new Set(['.pdf', '.png', '.jpg', '.jpeg', '.webp', '.doc', '.docx']);
+const ALLOWED_EVIDENCE_MIME_TYPES = new Set([
+  'application/pdf',
+  'image/png',
+  'image/jpeg',
+  'image/webp',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+]);
 
 function setAdminSessionCookie(res, token) {
   const secure = process.env.NODE_ENV === 'production';
@@ -1351,6 +1386,17 @@ app.get('/api/member/me', async (req, res) => {
         .limit(1)
         .maybeSingle();
 
+      const evidenceDocuments = await new Promise((resolve, reject) => {
+        db.all(
+          `SELECT id, original_name, mime_type, file_size, created_at
+           FROM verification_evidence_documents
+           WHERE user_id = ?
+           ORDER BY id DESC LIMIT 5`,
+          [auth.userId],
+          (err, rows) => (err ? reject(err) : resolve(rows || []))
+        );
+      });
+
       return res.json({
         ok: true,
         user: { email: auth.email },
@@ -1358,6 +1404,7 @@ app.get('/api/member/me', async (req, res) => {
         addons: addons || [],
         verification: verification || null,
         evidence: evidence || null,
+        evidenceDocuments,
         underwriting: underwriting || null
       });
     }
@@ -1402,6 +1449,17 @@ app.get('/api/member/me', async (req, res) => {
       [auth.userId]
     );
 
+    const evidenceDocuments = await new Promise((resolve, reject) => {
+      db.all(
+        `SELECT id, original_name, mime_type, file_size, created_at
+         FROM verification_evidence_documents
+         WHERE user_id = ?
+         ORDER BY id DESC LIMIT 5`,
+        [auth.userId],
+        (err, rows) => (err ? reject(err) : resolve(rows || []))
+      );
+    });
+
     return res.json({
       ok: true,
       user: { email: auth.email },
@@ -1409,6 +1467,7 @@ app.get('/api/member/me', async (req, res) => {
       addons,
       verification: verification || null,
       evidence: evidence || null,
+      evidenceDocuments,
       underwriting: underwriting || null
     });
   } catch (error) {
@@ -1505,7 +1564,7 @@ app.post('/api/member/verification/evidence', async (req, res) => {
     const bankProof = payload.bankProofProvided ? 1 : 0;
     const notes = String(payload.evidenceNotes || '').trim();
 
-    await dbRun(
+    const evidenceInsert = await dbRun(
       `INSERT INTO verification_evidence (
         application_id, user_id, ein_letter_provided, formation_doc_provided,
         bank_proof_provided, evidence_notes, updated_at
@@ -1513,10 +1572,55 @@ app.post('/api/member/verification/evidence', async (req, res) => {
       [appRow.id, auth.userId, einLetter, formationDoc, bankProof, notes]
     );
 
+    const document = payload.document || null;
+    if (document?.base64) {
+      const maxBytes = 10 * 1024 * 1024;
+      const docBuffer = Buffer.from(String(document.base64), 'base64');
+      if (!docBuffer.length) {
+        return res.status(400).json({ ok: false, error: 'Uploaded document is empty' });
+      }
+      if (docBuffer.length > maxBytes) {
+        return res.status(400).json({ ok: false, error: 'Document too large (max 10MB)' });
+      }
+
+      const originalNameRaw = String(document.name || 'evidence-document');
+      const originalName = sanitizeFilename(originalNameRaw || 'evidence-document');
+      const ext = getFileExt(originalName);
+      const mimeType = String(document.type || '').toLowerCase();
+
+      if (!ALLOWED_EVIDENCE_EXTENSIONS.has(ext)) {
+        return res.status(400).json({ ok: false, error: 'Unsupported file type. Allowed: PDF, PNG, JPG, WEBP, DOC, DOCX' });
+      }
+      if (mimeType && !ALLOWED_EVIDENCE_MIME_TYPES.has(mimeType)) {
+        return res.status(400).json({ ok: false, error: 'Unsupported MIME type for uploaded document' });
+      }
+
+      const safeBase = sanitizeFilename(path.basename(originalName, ext), 'evidence-document');
+      const storedName = `${Date.now()}-${auth.userId}-${safeBase}${ext.slice(0, 12)}`;
+      const storedPath = path.join(VERIFICATION_EVIDENCE_DIR, storedName);
+
+      fs.writeFileSync(storedPath, docBuffer);
+
+      await dbRun(
+        `INSERT INTO verification_evidence_documents (
+          evidence_id, application_id, user_id, original_name, mime_type, file_size, stored_path
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [
+          evidenceInsert.lastID,
+          appRow.id,
+          auth.userId,
+          String(document.name || originalName),
+          String(document.type || 'application/octet-stream'),
+          docBuffer.length,
+          storedPath
+        ]
+      );
+    }
+
     return res.json({ ok: true });
   } catch (error) {
     console.error('[verification] evidence save failed', error.message);
-    return res.status(500).json({ ok: false, error: 'Could not save evidence' });
+    return res.status(500).json({ ok: false, error: 'Could not upload documents' });
   }
 });
 
@@ -1947,7 +2051,18 @@ app.get('/api/admin/application/:id/detail', async (req, res) => {
         .limit(1)
         .maybeSingle();
 
-      return res.json({ ok: true, application: app, membership: membership || null, verification: verification || null, underwriting: underwriting || null });
+      const evidenceDocuments = await new Promise((resolve, reject) => {
+        db.all(
+          `SELECT id, original_name, mime_type, file_size, created_at
+           FROM verification_evidence_documents
+           WHERE application_id = ?
+           ORDER BY id DESC LIMIT 20`,
+          [applicationId],
+          (err, rows) => (err ? reject(err) : resolve(rows || []))
+        );
+      });
+
+      return res.json({ ok: true, application: app, membership: membership || null, verification: verification || null, underwriting: underwriting || null, evidenceDocuments });
     }
 
     const app = await dbGet('SELECT * FROM studio_applications WHERE id = ?', [applicationId]);
@@ -1955,9 +2070,47 @@ app.get('/api/admin/application/:id/detail', async (req, res) => {
     const membership = await dbGet('SELECT * FROM business_memberships WHERE application_id = ? ORDER BY id DESC LIMIT 1', [applicationId]);
     const verification = await dbGet('SELECT * FROM verification_checks WHERE application_id = ? ORDER BY id DESC LIMIT 1', [applicationId]);
     const underwriting = await dbGet('SELECT * FROM underwriting_decisions WHERE application_id = ? ORDER BY id DESC LIMIT 1', [applicationId]);
-    return res.json({ ok: true, application: app, membership: membership || null, verification: verification || null, underwriting: underwriting || null });
+    const evidenceDocuments = await new Promise((resolve, reject) => {
+      db.all(
+        `SELECT id, original_name, mime_type, file_size, created_at
+         FROM verification_evidence_documents
+         WHERE application_id = ?
+         ORDER BY id DESC LIMIT 20`,
+        [applicationId],
+        (err, rows) => (err ? reject(err) : resolve(rows || []))
+      );
+    });
+    return res.json({ ok: true, application: app, membership: membership || null, verification: verification || null, underwriting: underwriting || null, evidenceDocuments });
   } catch (error) {
     return res.status(500).json({ ok: false, error: `Could not load application detail (${error?.message || 'unknown'})` });
+  }
+});
+
+app.get('/api/admin/evidence-document/:id/download', async (req, res) => {
+  try {
+    const admin = await requireAdmin(req, res);
+    if (!admin) return;
+
+    const docId = Number(req.params.id || 0);
+    if (!docId) return res.status(400).json({ ok: false, error: 'Invalid document id' });
+
+    const doc = await dbGet(
+      `SELECT id, original_name, mime_type, stored_path
+       FROM verification_evidence_documents
+       WHERE id = ?`,
+      [docId]
+    );
+
+    if (!doc || !doc.stored_path || !fs.existsSync(doc.stored_path)) {
+      return res.status(404).json({ ok: false, error: 'Document not found' });
+    }
+
+    const filename = sanitizeFilename(doc.original_name || `evidence-${doc.id}`);
+    if (doc.mime_type) res.setHeader('Content-Type', doc.mime_type);
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    return res.sendFile(path.resolve(doc.stored_path));
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: `Could not download document (${error?.message || 'unknown'})` });
   }
 });
 

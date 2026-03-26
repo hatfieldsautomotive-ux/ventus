@@ -57,10 +57,16 @@
           <label class="block"><input id="formationDoc" type="checkbox"/> Formation document available</label>
           <label class="block"><input id="bankProof" type="checkbox"/> Business bank proof available</label>
           <textarea id="evidenceNotes" class="field" placeholder="Anything you'd like our review team to know (optional)"></textarea>
+          <div>
+            <label class="block mb-1">Upload supporting document (optional)</label>
+            <input id="evidenceDocument" type="file" class="field" accept=".pdf,.png,.jpg,.jpeg,.webp,.doc,.docx" />
+            <p class="text-xs text-zinc-500 mt-1">Accepted: PDF, image, or Word doc (max 10MB).</p>
+          </div>
+          <div id="evidenceDocsList" class="text-xs text-zinc-400"></div>
         </div>
 
         <div class="mt-3 flex gap-2">
-          <button id="saveEvidenceBtn" class="btn-ghost">Save Evidence</button>
+          <button id="saveEvidenceBtn" class="btn-ghost">Upload Documents</button>
           <button id="verifyBtn" class="btn-ghost">Run Verification Check</button>
         </div>
       </div>
@@ -108,6 +114,12 @@
       document.getElementById('formationDoc').checked = !!e.formation_doc_provided;
       document.getElementById('bankProof').checked = !!e.bank_proof_provided;
       document.getElementById('evidenceNotes').value = e.evidence_notes || '';
+
+      const docs = data.evidenceDocuments || [];
+      const docsEl = document.getElementById('evidenceDocsList');
+      docsEl.innerHTML = docs.length
+        ? `Recent uploads: ${docs.map((d) => `${d.original_name} (${Math.round((d.file_size || 0) / 1024)} KB)`).join(' · ')}`
+        : 'No supporting documents uploaded yet.';
     }
 
     document.getElementById('loginBtn').addEventListener('click', async () => {
@@ -144,13 +156,36 @@
     });
 
     document.getElementById('saveEvidenceBtn').addEventListener('click', async () => {
-      addonMsg.textContent = 'Saving evidence...';
+      addonMsg.textContent = 'Uploading documents...';
+
+      const fileInput = document.getElementById('evidenceDocument');
+      const selectedFile = fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
+
       const payload = {
         einLetterProvided: document.getElementById('einLetter').checked,
         formationDocProvided: document.getElementById('formationDoc').checked,
         bankProofProvided: document.getElementById('bankProof').checked,
         evidenceNotes: document.getElementById('evidenceNotes').value
       };
+
+      if (selectedFile) {
+        const toBase64 = (file) => new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const raw = String(reader.result || '');
+            resolve(raw.includes(',') ? raw.split(',')[1] : raw);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+
+        payload.document = {
+          name: selectedFile.name,
+          type: selectedFile.type,
+          base64: await toBase64(selectedFile)
+        };
+      }
+
       const res = await fetch('/api/member/verification/evidence', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -158,10 +193,11 @@
       });
       const json = await res.json();
       if (!res.ok || !json.ok) {
-        addonMsg.textContent = json.error || 'Could not save evidence.';
+        addonMsg.textContent = json.error || 'Could not upload documents.';
         return;
       }
-      addonMsg.textContent = 'Evidence saved.';
+      addonMsg.textContent = selectedFile ? 'Document uploaded and details saved.' : 'Details saved.';
+      fileInput.value = '';
       refresh();
     });
 
