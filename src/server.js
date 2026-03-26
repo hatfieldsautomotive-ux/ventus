@@ -547,9 +547,33 @@ function dbRun(sql, params = []) {
 
 async function ensureSupabaseProfile(userId, email, role = 'member', active = true) {
   if (!supabaseEnabled) return;
-  await supabaseAdmin
+  const normalizedEmail = (email || '').toLowerCase();
+
+  const { error } = await supabaseAdmin
     .from('profiles')
-    .upsert({ id: userId, email: (email || '').toLowerCase(), role, active }, { onConflict: 'id' });
+    .upsert({ id: userId, email: normalizedEmail, role, active }, { onConflict: 'id' });
+
+  if (!error) return;
+
+  const msg = String(error.message || '').toLowerCase();
+  if (msg.includes('profiles_email_key') || msg.includes('duplicate key value')) {
+    const { data: existing } = await supabaseAdmin
+      .from('profiles')
+      .select('id,email')
+      .eq('email', normalizedEmail)
+      .maybeSingle();
+
+    if (existing?.id && existing.id !== userId) {
+      const { error: rekeyErr } = await supabaseAdmin
+        .from('profiles')
+        .update({ id: userId, role, active })
+        .eq('email', normalizedEmail);
+      if (!rekeyErr) return;
+      throw new Error(`Profile email conflict could not be reconciled: ${rekeyErr.message}`);
+    }
+  }
+
+  throw new Error(`Could not ensure profile: ${error.message}`);
 }
 
 async function ensureSupabaseUser(email, password) {
