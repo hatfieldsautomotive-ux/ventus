@@ -72,6 +72,33 @@
       </div>
 
       <div class="card p-6">
+        <h2 class="text-xl font-bold mb-2">Project Workspace</h2>
+        <p id="projectSummary" class="text-zinc-300 text-sm">Loading workspace...</p>
+        <div id="nextActions" class="mt-3 space-y-2"></div>
+      </div>
+
+      <div class="card p-6">
+        <h2 class="text-xl font-bold mb-2">Timeline & Milestones</h2>
+        <div id="milestoneList" class="space-y-2 text-sm text-zinc-300"></div>
+      </div>
+
+      <div class="card p-6">
+        <h2 class="text-xl font-bold mb-2">Deliverables</h2>
+        <div id="deliverablesList" class="space-y-2 text-sm text-zinc-300"></div>
+      </div>
+
+      <div class="card p-6">
+        <h2 class="text-xl font-bold mb-2">Support Inbox</h2>
+        <div class="grid md:grid-cols-3 gap-2 mb-3">
+          <input id="supportSubject" class="field" placeholder="Subject"/>
+          <select id="supportPriority" class="field"><option value="normal">Normal</option><option value="high">High</option><option value="low">Low</option></select>
+          <button id="newThreadBtn" class="btn-ghost">Open Support Thread</button>
+        </div>
+        <textarea id="supportMessage" class="field mb-2" placeholder="Describe the issue or request"></textarea>
+        <div id="supportThreads" class="space-y-2 text-sm text-zinc-300"></div>
+      </div>
+
+      <div class="card p-6">
         <h2 class="text-xl font-bold mb-2">Add-ons</h2>
         <p class="text-zinc-400 mb-3">Purchase add-ons from your member area.</p>
         <div class="grid md:grid-cols-3 gap-2 text-sm text-zinc-200">
@@ -89,6 +116,67 @@
     const dashboard = document.getElementById('dashboard');
     const authMsg = document.getElementById('authMsg');
     const addonMsg = document.getElementById('addonMsg');
+
+    function esc(input='') {
+      return String(input || '').replace(/[&<>"']/g, (m) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+    }
+
+    async function loadWorkspace() {
+      const res = await fetch('/api/member/workspace');
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) return;
+
+      const p = data.project || {};
+      const workflow = p.workflow || {};
+      document.getElementById('projectSummary').textContent = `Status: ${workflow.status || 'new'} | Assignee: ${workflow.assignee || 'team'} | Last update: ${workflow.updated_at || 'n/a'}`;
+
+      const nextEl = document.getElementById('nextActions');
+      const actions = p.nextActions || [];
+      nextEl.innerHTML = actions.length
+        ? actions.map((a) => `<div class="card p-2"><b>${esc(a.type || 'action')}</b>: ${esc(a.label || '')}${a.dueDate ? `<div class='text-zinc-500'>Due: ${esc(a.dueDate)}</div>` : ''}</div>`).join('')
+        : '<div class="text-zinc-500 text-sm">No pending actions right now.</div>';
+
+      const milestones = p.milestones || [];
+      document.getElementById('milestoneList').innerHTML = milestones.length
+        ? milestones.map((m) => `<div class="card p-2"><div><b>${esc(m.title)}</b></div><div class="text-zinc-500">${esc(m.status || 'pending')}${m.due_date ? ` · due ${esc(m.due_date)}` : ''}${m.completed_at ? ` · completed ${esc(m.completed_at)}` : ''}</div></div>`).join('')
+        : '<div class="text-zinc-500">No milestones posted yet.</div>';
+
+      const deliverables = p.deliverables || [];
+      document.getElementById('deliverablesList').innerHTML = deliverables.length
+        ? deliverables.map((d) => `<div class="card p-2"><div><b>${esc(d.title)}</b> <span class='text-zinc-500'>(${esc(d.status || 'pending')})</span></div>${d.description ? `<div class='text-zinc-400'>${esc(d.description)}</div>` : ''}<div class='mt-2 flex gap-2 flex-wrap'>${d.file_url ? `<a class='btn-ghost' href='${esc(d.file_url)}' target='_blank' rel='noopener'>Open File</a>` : ''}${String(d.status || '').toLowerCase() === 'pending' ? `<button class='btn-ghost deliverable-approve' data-id='${d.id}'>Approve</button><button class='btn-ghost deliverable-revision' data-id='${d.id}'>Request Revision</button>` : ''}</div></div>`).join('')
+        : '<div class="text-zinc-500">No deliverables yet.</div>';
+
+      document.querySelectorAll('.deliverable-approve').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-id');
+          const rr = await fetch(`/api/member/deliverable/${id}/approve`, { method: 'POST' });
+          const jj = await rr.json().catch(() => ({}));
+          addonMsg.textContent = (!rr.ok || !jj.ok) ? (jj.error || 'Could not approve deliverable.') : 'Deliverable approved.';
+          refresh();
+        });
+      });
+
+      document.querySelectorAll('.deliverable-revision').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-id');
+          const feedback = prompt('What changes are needed?');
+          if (!feedback) return;
+          const rr = await fetch(`/api/member/deliverable/${id}/revision`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ feedback })
+          });
+          const jj = await rr.json().catch(() => ({}));
+          addonMsg.textContent = (!rr.ok || !jj.ok) ? (jj.error || 'Could not submit revision request.') : 'Revision request sent.';
+          refresh();
+        });
+      });
+
+      const threads = p.supportThreads || [];
+      document.getElementById('supportThreads').innerHTML = threads.length
+        ? threads.map((t) => `<div class='card p-2'><div><b>${esc(t.subject)}</b> <span class='text-zinc-500'>(${esc(t.status || 'open')}, ${esc(t.priority || 'normal')})</span></div><div class='text-zinc-500'>${esc(t.last_message || '')}</div><div class='text-xs text-zinc-600'>${esc(t.last_message_at || t.updated_at || '')}</div></div>`).join('')
+        : '<div class="text-zinc-500">No support threads yet.</div>';
+    }
 
     async function refresh() {
       const res = await fetch('/api/member/me');
@@ -120,6 +208,8 @@
       docsEl.innerHTML = docs.length
         ? `Recent uploads: ${docs.map((d) => `${d.original_name} (${Math.round((d.file_size || 0) / 1024)} KB)`).join(' · ')}`
         : 'No supporting documents uploaded yet.';
+
+      await loadWorkspace();
     }
 
     document.getElementById('loginBtn').addEventListener('click', async () => {
@@ -210,6 +300,30 @@
         return;
       }
       addonMsg.textContent = `Verification complete: ${json.status} (score ${json.score}), underwriting: ${json.decision}.`;
+      refresh();
+    });
+
+    document.getElementById('newThreadBtn').addEventListener('click', async () => {
+      const subject = document.getElementById('supportSubject').value.trim();
+      const priority = document.getElementById('supportPriority').value;
+      const message = document.getElementById('supportMessage').value.trim();
+      if (!subject || !message) {
+        addonMsg.textContent = 'Support subject and message are required.';
+        return;
+      }
+      const res = await fetch('/api/member/support/thread', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subject, priority, message })
+      });
+      const json = await res.json();
+      if (!res.ok || !json.ok) {
+        addonMsg.textContent = json.error || 'Could not create support thread.';
+        return;
+      }
+      addonMsg.textContent = 'Support thread opened. Our team will reply soon.';
+      document.getElementById('supportSubject').value = '';
+      document.getElementById('supportMessage').value = '';
       refresh();
     });
 

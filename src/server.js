@@ -314,6 +314,56 @@ db.serialize(() => {
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
+  runMigration(`CREATE TABLE IF NOT EXISTS project_milestones (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    application_id INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',
+    due_date TEXT,
+    completed_at DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+  runMigration(`CREATE TABLE IF NOT EXISTS client_deliverables (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    application_id INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT,
+    file_url TEXT,
+    status TEXT NOT NULL DEFAULT 'pending',
+    due_date TEXT,
+    requires_approval INTEGER DEFAULT 1,
+    approved_at DATETIME,
+    approved_by_user_id INTEGER,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+  runMigration(`CREATE TABLE IF NOT EXISTS client_deliverable_feedback (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    deliverable_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    feedback TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+  runMigration(`CREATE TABLE IF NOT EXISTS support_threads (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    application_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    subject TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'open',
+    priority TEXT NOT NULL DEFAULT 'normal',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+  runMigration(`CREATE TABLE IF NOT EXISTS support_messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    thread_id INTEGER NOT NULL,
+    author_type TEXT NOT NULL,
+    admin_user_id INTEGER,
+    user_id INTEGER,
+    message TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
   runMigration(`CREATE TABLE IF NOT EXISTS project_questionnaires (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     application_id INTEGER NOT NULL,
@@ -554,6 +604,14 @@ const ALLOWED_EVIDENCE_MIME_TYPES = new Set([
   'application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
 ]);
+
+function safeJsonParse(value, fallback = null) {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return fallback;
+  }
+}
 
 function setAdminSessionCookie(res, token) {
   const secure = process.env.NODE_ENV === 'production';
@@ -1472,6 +1530,247 @@ app.get('/api/member/me', async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({ ok: false, error: 'Could not load profile' });
+  }
+});
+
+app.get('/api/member/workspace', async (req, res) => {
+  try {
+    const auth = await getAuthedUser(req);
+    if (!auth) return res.status(401).json({ ok: false, error: 'Not authenticated' });
+
+    const appRow = await dbGet(
+      `SELECT id, business_legal_name FROM studio_applications WHERE email = ? ORDER BY id DESC LIMIT 1`,
+      [auth.email]
+    );
+    if (!appRow) return res.status(404).json({ ok: false, error: 'Application not found' });
+
+    const workflow = await dbGet(
+      `SELECT status, assignee, updated_at FROM application_workflow WHERE application_id = ? LIMIT 1`,
+      [appRow.id]
+    );
+
+    const milestones = await new Promise((resolve, reject) => {
+      db.all(
+        `SELECT id, title, status, due_date, completed_at, created_at
+         FROM project_milestones
+         WHERE application_id = ?
+         ORDER BY COALESCE(due_date, created_at) ASC, id ASC
+         LIMIT 25`,
+        [appRow.id],
+        (err, rows) => (err ? reject(err) : resolve(rows || []))
+      );
+    });
+
+    const tasks = await new Promise((resolve, reject) => {
+      db.all(
+        `SELECT id, title, status, assignee, due_date, created_at, updated_at
+         FROM project_tasks
+         WHERE application_id = ?
+         ORDER BY CASE status WHEN 'todo' THEN 0 WHEN 'in-progress' THEN 1 WHEN 'blocked' THEN 2 ELSE 3 END, COALESCE(due_date, created_at) ASC
+         LIMIT 50`,
+        [appRow.id],
+        (err, rows) => (err ? reject(err) : resolve(rows || []))
+      );
+    });
+
+    const deliverables = await new Promise((resolve, reject) => {
+      db.all(
+        `SELECT id, title, description, file_url, status, due_date, requires_approval, approved_at, created_at
+         FROM client_deliverables
+         WHERE application_id = ?
+         ORDER BY id DESC
+         LIMIT 30`,
+        [appRow.id],
+        (err, rows) => (err ? reject(err) : resolve(rows || []))
+      );
+    });
+
+    const threads = await new Promise((resolve, reject) => {
+      db.all(
+        `SELECT st.id, st.subject, st.status, st.priority, st.created_at, st.updated_at,
+                (SELECT sm.message FROM support_messages sm WHERE sm.thread_id = st.id ORDER BY sm.id DESC LIMIT 1) AS last_message,
+                (SELECT sm.created_at FROM support_messages sm WHERE sm.thread_id = st.id ORDER BY sm.id DESC LIMIT 1) AS last_message_at
+         FROM support_threads st
+         WHERE st.application_id = ? AND st.user_id = ?
+         ORDER BY st.updated_at DESC, st.id DESC
+         LIMIT 20`,
+        [appRow.id, auth.userId],
+        (err, rows) => (err ? reject(err) : resolve(rows || []))
+      );
+    });
+
+    const nextActions = [
+      ...tasks.filter((t) => ['todo', 'in-progress', 'blocked'].includes(String(t.status || '').toLowerCase())).slice(0, 3).map((t) => ({
+        type: 'task',
+        label: t.title,
+        dueDate: t.due_date || null
+      })),
+      ...deliverables.filter((d) => String(d.status || '').toLowerCase() === 'pending' && !!d.requires_approval).slice(0, 2).map((d) => ({
+        type: 'approval',
+        label: `Review deliverable: ${d.title}`,
+        dueDate: d.due_date || null
+      }))
+    ].slice(0, 5);
+
+    return res.json({
+      ok: true,
+      project: {
+        applicationId: appRow.id,
+        businessName: appRow.business_legal_name || null,
+        workflow: workflow || { status: 'new', assignee: null, updated_at: null },
+        milestones,
+        tasks,
+        deliverables,
+        supportThreads: threads,
+        nextActions
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: `Could not load workspace (${error?.message || 'unknown'})` });
+  }
+});
+
+app.post('/api/member/deliverable/:id/approve', async (req, res) => {
+  try {
+    const auth = await getAuthedUser(req);
+    if (!auth) return res.status(401).json({ ok: false, error: 'Not authenticated' });
+
+    const deliverableId = Number(req.params.id || 0);
+    if (!deliverableId) return res.status(400).json({ ok: false, error: 'Invalid deliverable id' });
+
+    const appRow = await dbGet(`SELECT id FROM studio_applications WHERE email = ? ORDER BY id DESC LIMIT 1`, [auth.email]);
+    if (!appRow) return res.status(404).json({ ok: false, error: 'Application not found' });
+
+    const row = await dbGet('SELECT id FROM client_deliverables WHERE id = ? AND application_id = ?', [deliverableId, appRow.id]);
+    if (!row) return res.status(404).json({ ok: false, error: 'Deliverable not found' });
+
+    await dbRun(
+      `UPDATE client_deliverables
+       SET status = 'approved', approved_at = CURRENT_TIMESTAMP, approved_by_user_id = ?, updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [auth.userId, deliverableId]
+    );
+
+    return res.json({ ok: true });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: `Could not approve deliverable (${error?.message || 'unknown'})` });
+  }
+});
+
+app.post('/api/member/deliverable/:id/revision', async (req, res) => {
+  try {
+    const auth = await getAuthedUser(req);
+    if (!auth) return res.status(401).json({ ok: false, error: 'Not authenticated' });
+
+    const deliverableId = Number(req.params.id || 0);
+    const feedback = String(req.body?.feedback || '').trim();
+    if (!deliverableId) return res.status(400).json({ ok: false, error: 'Invalid deliverable id' });
+    if (!feedback) return res.status(400).json({ ok: false, error: 'Feedback is required' });
+
+    const appRow = await dbGet(`SELECT id FROM studio_applications WHERE email = ? ORDER BY id DESC LIMIT 1`, [auth.email]);
+    if (!appRow) return res.status(404).json({ ok: false, error: 'Application not found' });
+
+    const row = await dbGet('SELECT id FROM client_deliverables WHERE id = ? AND application_id = ?', [deliverableId, appRow.id]);
+    if (!row) return res.status(404).json({ ok: false, error: 'Deliverable not found' });
+
+    await dbRun(`INSERT INTO client_deliverable_feedback (deliverable_id, user_id, feedback) VALUES (?, ?, ?)`, [deliverableId, auth.userId, feedback]);
+    await dbRun(`UPDATE client_deliverables SET status = 'revision_requested', updated_at = CURRENT_TIMESTAMP WHERE id = ?`, [deliverableId]);
+
+    return res.json({ ok: true });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: `Could not submit revision request (${error?.message || 'unknown'})` });
+  }
+});
+
+app.post('/api/member/support/thread', async (req, res) => {
+  try {
+    const auth = await getAuthedUser(req);
+    if (!auth) return res.status(401).json({ ok: false, error: 'Not authenticated' });
+
+    const subject = String(req.body?.subject || '').trim();
+    const message = String(req.body?.message || '').trim();
+    const priority = ['low', 'normal', 'high'].includes(String(req.body?.priority || '').toLowerCase())
+      ? String(req.body.priority).toLowerCase()
+      : 'normal';
+
+    if (!subject) return res.status(400).json({ ok: false, error: 'Subject is required' });
+    if (!message) return res.status(400).json({ ok: false, error: 'Message is required' });
+
+    const appRow = await dbGet(`SELECT id FROM studio_applications WHERE email = ? ORDER BY id DESC LIMIT 1`, [auth.email]);
+    if (!appRow) return res.status(404).json({ ok: false, error: 'Application not found' });
+
+    const thread = await dbRun(
+      `INSERT INTO support_threads (application_id, user_id, subject, status, priority, updated_at)
+       VALUES (?, ?, ?, 'open', ?, CURRENT_TIMESTAMP)`,
+      [appRow.id, auth.userId, subject, priority]
+    );
+
+    await dbRun(
+      `INSERT INTO support_messages (thread_id, author_type, user_id, message)
+       VALUES (?, 'member', ?, ?)`,
+      [thread.lastID, auth.userId, message]
+    );
+
+    return res.json({ ok: true, threadId: thread.lastID });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: `Could not create support thread (${error?.message || 'unknown'})` });
+  }
+});
+
+app.post('/api/member/support/thread/:id/message', async (req, res) => {
+  try {
+    const auth = await getAuthedUser(req);
+    if (!auth) return res.status(401).json({ ok: false, error: 'Not authenticated' });
+
+    const threadId = Number(req.params.id || 0);
+    const message = String(req.body?.message || '').trim();
+    if (!threadId) return res.status(400).json({ ok: false, error: 'Invalid thread id' });
+    if (!message) return res.status(400).json({ ok: false, error: 'Message is required' });
+
+    const thread = await dbGet('SELECT id, user_id FROM support_threads WHERE id = ?', [threadId]);
+    if (!thread || Number(thread.user_id) !== Number(auth.userId)) {
+      return res.status(404).json({ ok: false, error: 'Support thread not found' });
+    }
+
+    await dbRun(
+      `INSERT INTO support_messages (thread_id, author_type, user_id, message)
+       VALUES (?, 'member', ?, ?)`,
+      [threadId, auth.userId, message]
+    );
+
+    await dbRun('UPDATE support_threads SET updated_at = CURRENT_TIMESTAMP WHERE id = ?', [threadId]);
+    return res.json({ ok: true });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: `Could not send message (${error?.message || 'unknown'})` });
+  }
+});
+
+app.get('/api/member/support/thread/:id', async (req, res) => {
+  try {
+    const auth = await getAuthedUser(req);
+    if (!auth) return res.status(401).json({ ok: false, error: 'Not authenticated' });
+
+    const threadId = Number(req.params.id || 0);
+    if (!threadId) return res.status(400).json({ ok: false, error: 'Invalid thread id' });
+
+    const thread = await dbGet('SELECT * FROM support_threads WHERE id = ? AND user_id = ?', [threadId, auth.userId]);
+    if (!thread) return res.status(404).json({ ok: false, error: 'Support thread not found' });
+
+    const messages = await new Promise((resolve, reject) => {
+      db.all(
+        `SELECT id, author_type, message, created_at
+         FROM support_messages
+         WHERE thread_id = ?
+         ORDER BY id ASC
+         LIMIT 200`,
+        [threadId],
+        (err, rows) => (err ? reject(err) : resolve(rows || []))
+      );
+    });
+
+    return res.json({ ok: true, thread, messages });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: `Could not load support thread (${error?.message || 'unknown'})` });
   }
 });
 
