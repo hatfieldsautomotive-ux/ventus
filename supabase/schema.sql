@@ -108,14 +108,29 @@ alter table public.verification_evidence enable row level security;
 alter table public.addon_purchases enable row level security;
 
 -- Members can read/write their own profile and related records.
-create policy if not exists profiles_self on public.profiles for select using (auth.uid() = id);
-create policy if not exists profiles_self_update on public.profiles for update using (auth.uid() = id);
+drop policy if exists profiles_self on public.profiles;
+create policy profiles_self on public.profiles for select using (auth.uid() = id);
 
-create policy if not exists apps_self on public.studio_applications for select using (auth.uid() = user_id);
-create policy if not exists apps_self_insert on public.studio_applications for insert with check (auth.uid() = user_id);
+drop policy if exists profiles_self_update on public.profiles;
+create policy profiles_self_update on public.profiles for update using (auth.uid() = id);
 
-create policy if not exists memberships_self on public.business_memberships for select using (auth.uid() = user_id);
-create policy if not exists verifications_self on public.verification_checks for select using (auth.uid() = user_id);
-create policy if not exists underwriting_self on public.underwriting_decisions for select using (auth.uid() = user_id);
-create policy if not exists evidence_self_rw on public.verification_evidence for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
-create policy if not exists addons_self on public.addon_purchases for select using (auth.uid() = user_id);
+drop policy if exists apps_self on public.studio_applications;
+create policy apps_self on public.studio_applications for select using (auth.uid() = user_id);
+
+drop policy if exists apps_self_insert on public.studio_applications;
+create policy apps_self_insert on public.studio_applications for insert with check (auth.uid() = user_id);
+
+drop policy if exists memberships_self on public.business_memberships;
+create policy memberships_self on public.business_memberships for select using (auth.uid() = user_id);
+
+drop policy if exists verifications_self on public.verification_checks;
+create policy verifications_self on public.verification_checks for select using (auth.uid() = user_id);
+
+drop policy if exists underwriting_self on public.underwriting_decisions;
+create policy underwriting_self on public.underwriting_decisions for select using (auth.uid() = user_id);
+
+drop policy if exists evidence_self_rw on public.verification_evidence;
+create policy evidence_self_rw on public.verification_evidence for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists addons_self on public.addon_purchases;
+create policy addons_self on public.addon_purchases for select using (auth.uid() = user_id);
